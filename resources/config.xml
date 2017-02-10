@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Grabber>
+	<name>Kinect</name>
+	<calibrationFile>KinectModel.xml</calibrationFile>
+</Grabber>
+
+<Visualizer>
+	<name>Visualizer</name>
+	<parametersFile>visualizerConfig.xml</parametersFile>
+</Visualizer>
+
+<MapLib>
+	<name>Octomap</name>
+	<configFile>octomapConfig.xml</configFile>
+</MapLib>
+
+<TestSource>
+	<path>/home/pgomola/Dokumenty/testSource/living_room_traj0_loop_rgb-d</path>
+	<fileName>scene_00_</fileName>
+</TestSource>
