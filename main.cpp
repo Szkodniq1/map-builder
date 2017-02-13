@@ -8,6 +8,8 @@
 
 #include <iostream>
 
+#include "octothread.h"
+
 using namespace std;
 using namespace pcl;
 using namespace octomap;
@@ -18,7 +20,8 @@ boost::shared_ptr<visualization::CloudViewer> viewer;                 // Point c
 Grabber* openniGrabber;                                               // OpenNI grabber that takes data from the device.
 unsigned int filesSaved = 0;                                          // For the numbering of the clouds saved to disk.
 bool saveCloud(false), noColor(false);                                // Program control.
-OcTree tree (0.1);
+OcTree tree (0.01);
+OctoThread* thread = new OctoThread();
 
 void
 printUsage(const char* programName)
@@ -40,6 +43,12 @@ grabberCallback(const PointCloud<PointXYZRGBA>::ConstPtr& cloud)
     if (! viewer->wasStopped())
         viewer->showCloud(cloud);
 
+    if(!thread->isRunning()) {
+        thread->setPointCloudData(cloud->points, cloud->sensor_origin_);
+        thread->start();
+    }
+
+
     if (saveCloud)
     {
         stringstream stream;
@@ -51,7 +60,8 @@ grabberCallback(const PointCloud<PointXYZRGBA>::ConstPtr& cloud)
             cout << "Saved " << filename << "." << endl;
         }
         else PCL_ERROR("Problem saving %s.\n", filename.c_str());
-
+        stream <<"tree"<<filesSaved<<".bt";
+        tree.writeBinary(stream.str());
         saveCloud = false;
     }
 }
@@ -79,7 +89,7 @@ createViewer()
 int
 main(int argc, char** argv)
 {
-
+    thread->setTree(&tree);
     if (console::find_argument(argc, argv, "-h") >= 0)
     {
         printUsage(argv[0]);
