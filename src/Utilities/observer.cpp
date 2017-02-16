@@ -12,11 +12,11 @@ void Subject::detach(Observer *observer){
     list.erase(std::remove(list.begin(), list.end(), observer), list.end());
 }
 
-void Subject::notify(const Mat34& newPose){
+void Subject::notify(const mapping::PointCloud& newCloud){
     for(vector<Observer*>::const_iterator iter = list.begin(); iter != list.end(); ++iter)
     {
         if(*iter != 0) {
-            (*iter)->update(newPose);
+            (*iter)->update(newCloud);
         }
     }
 }
