@@ -3,6 +3,12 @@ cmake_minimum_required(VERSION 2.8.4)
 project(map-builder)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wconversion -std=c++11 -pthread")
 
+###############################################################################
+#
+#  MAPPING directories settings
+#
+###############################################################################
+
 # Folders
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -38,47 +44,42 @@ if(MSVC)
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
 endif()
 
-#tinyXML2
+###############################################################################
+#
+#  MAPPING external libraries
+#
+###############################################################################
+
+# tinyXML2
 add_library(tinyxml2 STATIC ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/tinyXML/tinyxml2.h ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/tinyXML/tinyxml2.cpp)
 
-#Eigen
+# Eigen
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
-
-#PCL
-#find_package(PCL REQUIRED common io visualization)
-#include_directories(${PCL_INCLUDE_DIRS})
-#link_directories(${PCL_LIBRARY_DIRS})
-#add_definitions(${PCL_DEFINITIONS})
 
 # OpenCV
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-#octomap
+# octomap
 find_package(octomap REQUIRED)
 include_directories(${OCTOMAP_INCLUDE_DIRS})
 link_libraries(${OCTOMAP_LIBRARIES})
 
-#VTK
-#find_package (VTK REQUIRED)
-#include_directories(${VTK_INCLUDE_DIRS})
-#set  (VTK_LIBRARIES   vtkRendering vtkGraphics vtkHybrid QVTK)
-
-#BOOST
+# BOOST
 find_package(Boost COMPONENTS system)
 
-    #QGLViewer library
-    set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
-    FIND_PACKAGE(OpenGL)
-    include_directories(${OPENGL_INCLUDE_DIR})
-    link_directories(${OPENGL_LIBRARY})
+# OpenGL
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
+FIND_PACKAGE(OpenGL)
+include_directories(${OPENGL_INCLUDE_DIR})
+link_directories(${OPENGL_LIBRARY})
 
-    #QGLViewer library
-    FIND_PACKAGE(QGLViewer)
-    include_directories(${QGLVIEWER_INCLUDE_DIR})
-    include_directories(${QT_INCLUDES})
-    link_directories(${QGLVIEWER_LIBRARY})
+# QGLViewer
+FIND_PACKAGE(QGLViewer)
+include_directories(${QGLVIEWER_INCLUDE_DIR})
+include_directories(${QT_INCLUDES})
+link_directories(${QGLVIEWER_LIBRARY})
 
 add_definitions(-DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT)
 
@@ -158,24 +159,7 @@ add_definitions(-DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT)
 #        INSTALL(FILES ${VISUALIZER_HEADERS} DESTINATION include/walkers/Visualizer/)
 #endif(BUILD_SIMULATOR AND BUILD_VISUALIZER)
 
-#Qt
-#QT5_WRAP_CPP(MOC_SRC_H
-#    include/octothread.h
-#    include/Defs/defs.h
-#    include/Grabber/grabber.h
-#    include/Grabber/kinect_grabber.h
-#    include/Utilities/observer.h
-#    include/Map/map.h
-#    include/Map/octomap.h
-#    include/Point/point.h
-#    include/Point/octopoint.h)
-
 include_directories(include ${CMAKE_CURRENT_BINARY_DIR})
-#file(GLOB_RECURSE HEADER_FILES include *.h)
-#file(GLOB SOURCES main.cpp "src/*.cpp" "src/Grabber/*.cpp" "src/Utilities/*.cpp" "src/Map/*.cpp" "src/Point/*.cpp")
-
-#add_executable(map-builder ${SOURCES} ${HEADER_FILES} ${MOC_SRC_H})
-#target_link_libraries(map-builder tinyxml2 ${EIGEN3_INCLUDE_DIR} ${PCL_LIBRARIES} ${OpenCV_LIBS} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY})
 
 ###############################################################################
 #
