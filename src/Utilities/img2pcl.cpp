@@ -65,6 +65,21 @@ void getPoint(unsigned int u, unsigned int v, float_type depth, Eigen::Vector3d&
 }
 }
 
+void octopointToPointcloud(octomap::Pointcloud& fromCloud, mapping::PointCloud toCloud) {
+    octomap::point3d fromPoint;
+    for(int  i = 0; i<fromCloud.size(); i++ ) {
+        fromPoint = fromCloud.getPoint(i);
+        mapping::Point3D toPoint = mapping::Point3D(fromPoint.x(), fromPoint.y(), fromPoint.z());
+        toCloud.push_back(toPoint);
+    }
+}
+
+void pointcloudToOctopoint(mapping::PointCloud& fromCloud, octomap::Pointcloud& toCloud) {
+    for(mapping::Point3D point : fromCloud) {
+        toCloud.push_back(point.position.x(), point.position.y(), point.position.z());
+    }
+}
+
 /*
 void getPoint(unsigned int u, unsigned int v, float_type depth, Eigen::Vector3d& point3D){
     Eigen::Vector3d point(u, v, 1);

@@ -7,7 +7,6 @@
 /// A single instance of Octomap
 OctoMap::Ptr octoMap;
 
-
 OctoMap::OctoMap(void){
     std::cout << "OctoMap created\n";
     for (int i=0;i<20;i++){
@@ -19,7 +18,7 @@ OctoMap::OctoMap(void){
 }
 
 /// Insert point cloud into map
-void OctoMap::insertCloud(void){
+void OctoMap::insertCloud(octomap::Pointcloud& pcl){
     notify(cloud);
 }
 

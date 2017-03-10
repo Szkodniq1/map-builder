@@ -42,8 +42,9 @@ int main(int argc, char** argv) {
     visu.show();
     map->attachVisualizer(&visu);
 
+    octomap::Pointcloud pcl = octomap::Pointcloud();
 
-    map->insertCloud();
+    map->insertCloud(pcl);
 
     application.exec();
 

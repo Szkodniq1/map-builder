@@ -8,6 +8,7 @@
 #define OCTOMAP_H_INCLUDED
 
 #include "map.h"
+#include "octomap/Pointcloud.h"
 #include "../../3rdParty/tinyXML/tinyxml2.h"
 #include "Utilities/observer.h"
 #include <iostream>
@@ -30,7 +31,7 @@ public:
     const std::string& getName() const {return name;}
 
     /// Insert point cloud into map
-    void insertCloud(void);
+    void insertCloud(octomap::Pointcloud& pcl);
 
     /// save map in file
     void saveMap();

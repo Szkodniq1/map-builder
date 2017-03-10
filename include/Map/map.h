@@ -8,6 +8,7 @@
 #define _MAP_H_
 
 #include "../Defs/defs.h"
+#include "octomap/Pointcloud.h"
 #include "Visualizer/Qvisualizer.h"
 #include <iostream>
 #include <string>
@@ -37,7 +38,7 @@ namespace mapping {
         virtual const std::string& getName() const = 0;
 
         /// Insert point cloud into map
-        virtual void insertCloud(void) = 0;
+        virtual void insertCloud(octomap::Pointcloud& pcl) = 0;
 
         /// save map in file
         virtual void saveMap() = 0;
