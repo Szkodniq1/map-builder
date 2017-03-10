@@ -1,9 +1,7 @@
+# Qt cache
 CMakeLists.txt.user
-/CMakeLists.txt.user
-*.txt.user
-*.user
-/*.txt.user
-/*.user
+CMakeLists.txt.user.*
+#Build
 /build/
 /build/bin/
 
