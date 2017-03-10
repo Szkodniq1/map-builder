@@ -3,7 +3,6 @@
 
 #include <iostream>
 
-#include "octothread.h"
 #include "Map/octomap.h"
 #include "Visualizer/Qvisualizer.h"
 #include <GL/glut.h>
