@@ -5,7 +5,7 @@
     <backgroundColor red="0" blue="0" green="0"/>
   </State>
   <Display axisIsDrawn="false" gridIsDrawn="false" FPSIsDisplayed="false" cameraIsEdited="false"/>
-  <Geometry fullScreen="false" width="600" posX="966" height="400" posY="471"/>
+  <Geometry fullScreen="false" width="600" posX="1310" height="400" posY="642"/>
   <Camera>
     <Parameters fieldOfView="0.785398" sceneRadius="1" Type="PERSPECTIVE" zNearCoefficient="1e-05" orthoCoef="0.414214" zClippingCoefficient="100">
       <SceneCenter x="0" y="0" z="0"/>
