@@ -1,6 +1,9 @@
 CMakeLists.txt.user
-
+/CMakeLists.txt.user
 *.txt.user
 *.user
+/*.txt.user
+/*.user
 /build/
 /build/bin/
+
