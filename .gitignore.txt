@@ -4,4 +4,4 @@ CMakeLists.txt.user.*
 #Build
 /build/
 /build/bin/
-
+/img/
