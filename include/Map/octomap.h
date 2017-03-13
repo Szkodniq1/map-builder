@@ -9,6 +9,8 @@
 
 #include "map.h"
 #include "octomap/Pointcloud.h"
+#include <octomap/octomap.h>
+#include <octomap/OcTree.h>
 #include "../../3rdParty/tinyXML/tinyxml2.h"
 #include "Utilities/observer.h"
 #include <iostream>
@@ -49,6 +51,7 @@ public:
 
 private:
     mapping::PointCloud cloud;
+    octomap::OcTree map;
 };
 
 #endif // OCTOMAP_H_INCLUDED

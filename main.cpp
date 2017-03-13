@@ -1,6 +1,3 @@
-#include <octomap/octomap.h>
-#include <octomap/OcTree.h>
-
 #include <iostream>
 
 #include "Map/octomap.h"
@@ -10,11 +7,9 @@
 #include "include/Utilities/img2pcl.h"
 
 using namespace std;
-using namespace octomap;
 
 unsigned int filesSaved = 0;
 bool saveCloud(false), noColor(false);
-OcTree tree (0.01);
 
 void printUsage(const char* programName)
 {

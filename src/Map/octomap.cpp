@@ -7,7 +7,7 @@
 /// A single instance of Octomap
 OctoMap::Ptr octoMap;
 
-OctoMap::OctoMap(void){
+OctoMap::OctoMap(void) : map(0.1) {
     std::cout << "OctoMap created\n";
     for (int i=0;i<20;i++){
         for (int j=0;j<20;j++){
@@ -17,7 +17,7 @@ OctoMap::OctoMap(void){
     }
 }
 
-OctoMap::OctoMap(mapping::PointCloud PC) {
+OctoMap::OctoMap(mapping::PointCloud PC) : map(0.1) {
     cloud = PC;
 }
 
