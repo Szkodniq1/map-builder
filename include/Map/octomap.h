@@ -17,6 +17,7 @@
 namespace mapping {
     /// create a single Maping object
     Map* createMapOcto(void);
+    Map* createMapOcto(PointCloud PC);
 }
 
 /// Grabber implementation
@@ -26,6 +27,7 @@ public:
     typedef std::unique_ptr<OctoMap> Ptr;
 
     OctoMap(void);
+    OctoMap(mapping::PointCloud PC);
 
     /// Name of the map
     const std::string& getName() const {return name;}

@@ -116,7 +116,7 @@ void QGLVisualizer::drawPointCloud(void){
            glPointSize(3);
            glBegin(GL_POINTS);
            for (size_t i = 0;i<pointCloud.size();i++){
-               glColor3ub(255,255,255);
+               glColor3ub(pointCloud[i].color.r,pointCloud[i].color.g,pointCloud[i].color.b);
                glVertex3d(pointCloud[i].position.x(), pointCloud[i].position.y(), pointCloud[i].position.z());
            }
            glEnd();

@@ -2,6 +2,6 @@
 CMakeLists.txt.user
 CMakeLists.txt.user.*
 #Build
-/build/
-/build/bin/
-
+/build/*
+/build/bin/*
+/img/*

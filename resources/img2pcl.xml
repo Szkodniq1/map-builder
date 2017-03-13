@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <!-- Image Grabber-->
+
+  <Path>../../img/</Path>
+  <Form>%d.png</Form>
+  <Color>1</Color>
+  <stateFile>livingRoom0.gt.freiburg</stateFile>
+  <fx>481.20</fx>
+  <fy>-480.0</fy>
+  <cx>319.5</cx>
+  <cy>239.5</cy>
+  <factor>5000</factor>
+
+
+
+

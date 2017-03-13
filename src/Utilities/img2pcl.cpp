@@ -3,16 +3,155 @@
 
 namespace mapping {
 
-/// Convert disparity image to point cloud
-PointCloud depth2cloud(cv::Mat& depthImage) {
+img2pcl::img2pcl() {
+    img2pcl("../resources");
+}
+
+img2pcl::img2pcl(std::string xmlPath) {
+    tinyxml2::XMLDocument xmlDoc;
+    tinyxml2::XMLError Result = xmlDoc.LoadFile(xmlPath.c_str());
+
+    std::cout << Result <<std::endl;
+
+
+    if(Result == tinyxml2::XML_SUCCESS) {
+        xmlDoc.FirstChildElement("Color")->QueryIntText(&color);
+        xmlDoc.FirstChildElement("fx")->QueryFloatText(&focalLength[0]);
+        xmlDoc.FirstChildElement("fy")->QueryFloatText(&focalLength[1]);
+        xmlDoc.FirstChildElement("cx")->QueryFloatText(&focalAxis[0]);
+        xmlDoc.FirstChildElement("cy")->QueryFloatText(&focalAxis[1]);
+        xmlDoc.FirstChildElement("factor")->QueryFloatText(&factor);
+
+        path = xmlDoc.FirstChildElement( "Path" )->GetText();
+        form = xmlDoc.FirstChildElement( "Form" )->GetText();
+        fileName = xmlDoc.FirstChildElement( "stateFile" )->GetText();;
+        stateFile.open(path + fileName, std::ios::in);
+
+        if(!stateFile.is_open()) {
+            path = "Loading Camera state file failed!\n";
+            std::cout << path;
+            exit(414);
+        }
+    }
+    else {
+        path = "Loading Frame Grabber configuration file failed!\n";
+        std::cout << path << std::endl << xmlPath;
+        exit(404);
+    }
+}
+
+img2pcl::~img2pcl() {
+    if(stateFile.is_open()) {
+        std::cout << "State File closed!\n";
+        stateFile.close();
+    }
+
+
+}
+
+int img2pcl::grabFrame() {
+
+    if(!stateFile.eof()) {
+        std::string data;
+        std::getline(stateFile, data);
+
+        std::cout << data << std::endl;
+
+        std::stringstream dataStr(data);
+        dataStr >> Timestamp;
+
+        for(int i=0; i<3;i++)
+            dataStr >> t[i];
+
+        for(int i=0; i<4;i++)
+            dataStr >> q[i];
+
+        char buff[100];
+        std::sprintf(buff, form.c_str(), Timestamp);
+        depth = cv::imread(path + "depth/" + buff, CV_LOAD_IMAGE_ANYDEPTH);
+        bgr = cv::imread(path + "rgb/" + buff);
+//        cv::imshow("troll", depth);
+//        cv::imshow("troll2", bgr);
+//        cv::waitKey(30);
+
+        return 1;
+
+    }
+    else {
+        std::cout << "Koniec nagrania!" <<std::endl;
+        return 0;
+    }
+
+
+}
+
+int img2pcl::calcPCL() {
+    if(color == 0) {
+        depth2cloud();
+    }
+    else {
+        depth2colorcloud();
+    }
+}
+
+float img2pcl::z0(int u, int v, float_type d) {
+    float dx = u-focalAxis[0], dy=v-focalAxis[1];
+    return factor*sqrt(d*d/(dx*dx+factor*factor+dy*dy));
+}
+
+float img2pcl::x0(int u, float z) {
+    float dx = u-focalAxis[0];
+    return dx*z/focalLength[0];
+}
+
+float img2pcl::y0(int v, float z) {
+    float dy = v-focalAxis[1];
+    return -1*dy*z/focalLength[1];
+}
+
+Eigen::Vector3d img2pcl::xyz0(int u, int v, float_type d) {
+    float z = z0(u,v,d);
+    Eigen::Vector3d xyz(x0(u,z), y0(v,z), z);
+    return xyz;
+}
+
+Eigen::Matrix<float_type,3,3> img2pcl::Rot() {
+    float r11 = 1 - 2*q[1]*q[1] - 2*q[2]*q[2], r12 = 2*q[0]*q[1] - 2*q[2]*q[3],     r13 = 2*q[0]*q[2] + 2*q[1]*q[3],
+          r21 = 2*q[0]*q[1] + 2*q[2]*q[3],     r22 = 1 - 2*q[0]*q[0] - 2*q[2]*q[2], r23 = 2*q[1]*q[2] - 2*q[0]*q[3],
+          r31 = 2*q[0]*q[2] - 2*q[1]*q[3],     r32 = 2*q[1]*q[2] + 2*q[0]*q[3],     r33 = 1 - 2*q[0]*q[0] - 2*q[1]*q[1];
+
+    Eigen::Matrix<float_type,3,3> Rotation;
+    Rotation <<   r11, r12, r13,
+                  r21, r22, r23,
+                  r31, r32, r33;
+    return Rotation;
+}
+
+Eigen::Vector3d img2pcl::Trans() {
+    Eigen::Vector3d xyz(t[0],t[1],t[2]);
+    return xyz;
+}
+
+
+int img2pcl::depth2cloud() {
     Eigen::Vector3d point;
-    PointCloud cloud;
-    cloud.clear();
-    for (unsigned int i=0;i<depthImage.rows;i++) {
-        for (unsigned int j=0;j<depthImage.cols;j++) {
-            if(depthImage.at<uint16_t>(i,j)>800&&depthImage.at<uint16_t>(i,j)<8500){
-                float_type depthM = float_type(depthImage.at<uint16_t>(i,j))*0.001;
-                getPoint(j,i,depthM,point);
+    PointCloud tempCloud;
+    tempCloud.clear();
+    tempCloud.resize(depth.cols*depth.rows);
+
+    Eigen::Matrix<float_type,3,3> R = Rot();
+    Eigen::Vector3d T = Trans();
+
+    uint16_t tmp;
+
+    for (unsigned int i=0;i<depth.rows;i++) {
+        for (unsigned int j=0;j<depth.cols;j++) {
+            tmp = (depth.at<uint16_t>(i,j)>>3);
+            if(tmp>800 && tmp<8500){
+                float_type depthM = float_type(tmp)*0.001;
+
+                point = xyz0(j,i,depthM);
+                //getPoint(j,i,depthM,point);
                 Point3D pointPCL;
                 pointPCL.position.x() = point(0);
                 pointPCL.position.y() = point(1);
@@ -22,46 +161,68 @@ PointCloud depth2cloud(cv::Mat& depthImage) {
                 pointPCL.color.b = 0;
                 pointPCL.color.a = 0;
                 //std::cout << "depth: " << depthM << " u: " << i << " v: " <<  j << " x y z " << pointPCL.position.position.x() << ", " << pointPCL.position.position.y() << "," << pointPCL.position.position.z() << "\n";
-                cloud.push_back(pointPCL);
+                tempCloud[depth.cols*i + j] = pointPCL;
             }
         }
     }
-    return cloud;
+    Cloud = tempCloud;
+    return 1;
 }
 
 /// Convert disparity image to point cloud
-PointCloud depth2cloud(cv::Mat& depthImage, cv::Mat& colorImage) {
+int img2pcl::depth2colorcloud() {
     Eigen::Vector3d point;
-    PointCloud cloud;
-    cloud.clear();
-    for (unsigned int i=0;i<depthImage.rows;i++){
-        for (unsigned int j=0;j<depthImage.cols;j++){
-            if(depthImage.at<uint16_t>(i,j)>800&&depthImage.at<uint16_t>(i,j)<8500){
-                float_type depthM = float_type(depthImage.at<uint16_t>(i,j))*0.001;
-                getPoint(j,i,depthM,point);
+    PointCloud tempCloud;
+    tempCloud.clear();
+    tempCloud.resize(depth.cols*depth.rows);
+
+    Eigen::Matrix<float_type,3,3> R = Rot();
+    Eigen::Vector3d T = Trans();
+
+    uint16_t tmp;
+
+    for (unsigned int i=0;i<depth.rows;i++) {
+        for (unsigned int j=0;j<depth.cols;j++) {
+            tmp = (depth.at<uint16_t>(i,j)>>3);
+            if(tmp>800 && tmp<8500){
+                float_type depthM = float_type(tmp)*0.001;
+
+                point = xyz0(j,i,depthM);
+                //getPoint(j,i,depthM,point);
                 Point3D pointPCL;
                 pointPCL.position.x() = point(0);
                 pointPCL.position.y() = point(1);
                 pointPCL.position.z() = point(2);
-                cv::Vec3i colorBGR = colorImage.at<cv::Vec3b>(cv::Point2f((float)j,(float)i));
-                pointPCL.color.r = colorBGR.val[2];
-                pointPCL.color.g = colorBGR.val[1];
-                pointPCL.color.b = colorBGR.val[0];
-                pointPCL.color.a = 0;
+                pointPCL.color.r = bgr.at<uint8_t>(i,3*j+2);
+                pointPCL.color.g = bgr.at<uint8_t>(i,3*j+1);
+                pointPCL.color.b = bgr.at<uint8_t>(i,3*j);
+                pointPCL.color.a = 255;
                 //std::cout << "depth: " << depthM << " u: " << i << " v: " <<  j << " x y z " << pointPCL.position.position.x() << ", " << pointPCL.position.position.y() << "," << pointPCL.position.position.z() << "\n";
-                cloud.push_back(pointPCL);
+                tempCloud[depth.cols*i + j] = pointPCL;
+
+
             }
         }
     }
-    return cloud;
+    Cloud = tempCloud;
+    return 1;
+}
+
+PointCloud img2pcl::returnPC()
+{
+    return Cloud;
 }
 
 void getPoint(unsigned int u, unsigned int v, float_type depth, Eigen::Vector3d& point3D) {
     Eigen::Vector3d point(u, v, 1);
     Eigen::Matrix<float_type,3,3> PHCPModel;
-    PHCPModel << 1/582.64,0,-320.17/582.64, 0,1/586.97, -260.0/586.97, 0,0,1;
-    std::cout << PHCPModel << std::endl;
+    PHCPModel <<    1/582.64,   0,          -320.17/582.64,
+                    0,          1/586.97,   -260.0/586.97,
+                    0,          0,          1;
+//    std::cout << PHCPModel << std::endl;
     point3D = depth*PHCPModel*point;
+
+    std::cout<<point3D <<std::endl;
 }
 }
 

@@ -1,19 +1,19 @@
 <!DOCTYPE QGLVIEWER>
-<QGLViewer version="2.6.3">
+<QGLViewer version="2.6.4">
   <State stereo="false">
     <foregroundColor red="180" blue="180" green="180"/>
     <backgroundColor red="0" blue="0" green="0"/>
   </State>
   <Display axisIsDrawn="false" gridIsDrawn="false" FPSIsDisplayed="false" cameraIsEdited="false"/>
-  <Geometry fullScreen="false" width="600" posX="1310" height="400" posY="642"/>
+  <Geometry fullScreen="false" width="600" posX="549" height="400" posY="294"/>
   <Camera>
     <Parameters fieldOfView="0.785398" sceneRadius="1" Type="PERSPECTIVE" zNearCoefficient="1e-05" orthoCoef="0.414214" zClippingCoefficient="100">
       <SceneCenter x="0" y="0" z="0"/>
     </Parameters>
     <Stereo focusDistance="2.41421" physScreenWidth="0.5" IODist="0.062"/>
     <ManipulatedCameraFrame>
-      <position x="0" y="0" z="2.61313"/>
-      <orientation q0="0" q1="0" q2="0" q3="1"/>
+      <position x="2.00135" y="-0.519248" z="-3.63321"/>
+      <orientation q0="-0.86926" q1="0.423019" q2="-0.250763" q3="0.0505852"/>
       <ManipulatedParameters transSens="1" zoomSens="1" rotSens="1" wheelSens="1" spinSens="0.3"/>
       <ManipulatedCameraParameters zoomsOnPivotPoint="false" flySpeed="0.01" rotatesAroundUpVector="false">
         <sceneUpVector x="0" y="1" z="0"/>

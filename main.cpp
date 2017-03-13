@@ -7,6 +7,7 @@
 #include "Visualizer/Qvisualizer.h"
 #include <GL/glut.h>
 #include <qapplication.h>
+#include "include/Utilities/img2pcl.h"
 
 using namespace std;
 using namespace octomap;
@@ -28,8 +29,25 @@ void printUsage(const char* programName)
 }
 
 int main(int argc, char** argv) {
+
+    int a=0;
+    mapping::PointCloud PC, PD, PCD;
+    mapping::img2pcl troll("../../resources/img2pcl.xml");
+    while(troll.grabFrame()) {
+
+        if(a%300 == 0) {
+            troll.calcPCL();
+            PC = troll.returnPC();
+            PD.insert(PD.end(), PC.begin(), PC.end());
+            break;
+        }
+
+        a++;
+    }
+
+
     std::cout << "Start\n";
-    mapping::Map* map = mapping::createMapOcto();
+    mapping::Map* map = mapping::createMapOcto(PC);
     std::cout << map->getName() << "\n";
 
     QApplication application(argc,argv);

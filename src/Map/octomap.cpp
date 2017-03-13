@@ -17,6 +17,10 @@ OctoMap::OctoMap(void){
     }
 }
 
+OctoMap::OctoMap(mapping::PointCloud PC) {
+    cloud = PC;
+}
+
 /// Insert point cloud into map
 void OctoMap::insertCloud(octomap::Pointcloud& pcl){
     notify(cloud);
@@ -39,5 +43,10 @@ void OctoMap::printMap(){
 
 mapping::Map* mapping::createMapOcto(void) {
     octoMap.reset(new OctoMap());
+    return octoMap.get();
+}
+
+mapping::Map* mapping::createMapOcto(PointCloud PC) {
+    octoMap.reset(new OctoMap(PC));
     return octoMap.get();
 }
