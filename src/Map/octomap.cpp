@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <chrono>
 #include <thread>
+#include <iostream>
 
 /// A single instance of Octomap
 OctoMap::Ptr octoMap;
@@ -26,9 +27,20 @@ void OctoMap::insertCloud(octomap::Pointcloud& pcl){
     notify(cloud);
 }
 
+void OctoMap::insertCloud(mapping::PointCloud& PC){
+    for(mapping::Point3D point : PC) {
+        octoCloud.push_back(point.position.x(), point.position.y(), point.position.z());
+    }
+    octomap::point3d origin (0,0,0);
+    this->map.insertPointCloud(octoCloud, origin);
+    notify(PC);
+}
+
 /// save map in file
 void OctoMap::saveMap(){
-
+    std::stringstream stream;
+    stream <<"tree.bt";
+    this->map.writeBinary(stream.str());
 }
 
 ///Attach visualizer

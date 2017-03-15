@@ -1,3 +1,4 @@
+
 #include <iostream>
 
 #include "Map/octomap.h"
@@ -28,18 +29,6 @@ int main(int argc, char** argv) {
     int a=0;
     mapping::PointCloud PC, PD, PCD;
     mapping::img2pcl troll("../../resources/img2pcl.xml");
-    while(troll.grabFrame()) {
-
-        if(a%300 == 0) {
-            troll.calcPCL();
-            PC = troll.returnPC();
-            PD.insert(PD.end(), PC.begin(), PC.end());
-            break;
-        }
-
-        a++;
-    }
-
 
     std::cout << "Start\n";
     mapping::Map* map = mapping::createMapOcto(PC);
@@ -54,9 +43,17 @@ int main(int argc, char** argv) {
     visu.show();
     map->attachVisualizer(&visu);
 
-    octomap::Pointcloud pcl = octomap::Pointcloud();
+    while(troll.grabFrame()) {
+        if(a%300 == 0) {
+            troll.calcPCL();
+            PC = troll.returnPC();
+            map->insertCloud(PC);
+            map->saveMap();
+            break;
+        }
 
-    map->insertCloud(pcl);
+        a++;
+    }
 
     application.exec();
 
@@ -65,10 +62,4 @@ int main(int argc, char** argv) {
 
     tinyxml2::XMLDocument model;
     model.LoadFile("../../resources/KinectModel.xml");
-
-
-    /*model->FirstChildElement( "focalLength" )->QueryDoubleAttribute("fx", &focalLength[0]);
-    model->FirstChildElement( "focalLength" )->QueryDoubleAttribute("fy", &focalLength[1]);
-    model->FirstChildElement( "focalAxis" )->QueryDoubleAttribute("Cx", &focalAxis[0]);
-    model->FirstChildElement( "focalAxis" )->QueryDoubleAttribute("Cy", &focalAxis[1]);*/
 }

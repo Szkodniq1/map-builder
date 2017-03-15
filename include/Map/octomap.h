@@ -13,6 +13,7 @@
 #include <octomap/OcTree.h>
 #include "../../3rdParty/tinyXML/tinyxml2.h"
 #include "Utilities/observer.h"
+#include "Utilities/img2pcl.h"
 #include <iostream>
 #include <memory>
 
@@ -37,6 +38,9 @@ public:
     /// Insert point cloud into map
     void insertCloud(octomap::Pointcloud& pcl);
 
+    /// Insert point cloud into map
+    void insertCloud(mapping::PointCloud& PC);
+
     /// save map in file
     void saveMap();
 
@@ -51,6 +55,7 @@ public:
 
 private:
     mapping::PointCloud cloud;
+    octomap::Pointcloud octoCloud;
     octomap::OcTree map;
 };
 
