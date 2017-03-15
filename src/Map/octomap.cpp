@@ -8,7 +8,7 @@
 /// A single instance of Octomap
 OctoMap::Ptr octoMap;
 
-OctoMap::OctoMap(void) : map(0.1) {
+OctoMap::OctoMap(void) : map(0.02) {
     std::cout << "OctoMap created\n";
     for (int i=0;i<20;i++){
         for (int j=0;j<20;j++){

@@ -44,17 +44,18 @@ int main(int argc, char** argv) {
     map->attachVisualizer(&visu);
 
     while(troll.grabFrame()) {
-        if(a%300 == 0) {
+        if(a%50 == 0) {
             troll.calcPCL();
             PC = troll.returnPC();
             map->insertCloud(PC);
-            map->saveMap();
-            break;
-        }
+            if(a==300) {
+                break;
+            }
 
+        }
         a++;
     }
-
+    map->saveMap();
     application.exec();
 
     std::cout << "Done\n";
