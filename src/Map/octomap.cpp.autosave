@@ -33,7 +33,7 @@ void OctoMap::insertCloud(mapping::PointCloud& PC, octomap::pose6d pose){
     // Assemble an Eigen Transform
     Eigen::Quaternion<float> pos(pose.rot().u(),pose.rot().x(), pose.rot().y(), pose.rot().z());
     Eigen::Transform<float, 3, Eigen::Affine> transform (translation * pos);
-
+    octoCloud.reserve(PC.size());
     for(mapping::Point3D point : PC) {
         Eigen::Matrix<float, 3, 1> pt (point.position.x(), point.position.y(), point.position.z());
         octoCloud.push_back(

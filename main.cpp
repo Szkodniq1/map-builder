@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
     map->attachVisualizer(&visu);
 
     while(troll.grabFrame()) {
-        if(a%50 == 0) {
+        if(a%10 == 0) {
             troll.calcPCL();
             PC = troll.returnPC();
             map->insertCloud(PC.pointCloud, PC.octoPose);
