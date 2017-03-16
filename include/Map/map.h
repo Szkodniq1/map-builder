@@ -41,7 +41,7 @@ namespace mapping {
         virtual void insertCloud(octomap::Pointcloud& pcl) = 0;
 
         /// Insert point cloud into map
-        virtual void insertCloud(mapping::PointCloud& pcl) = 0;
+        virtual void insertCloud(mapping::PointCloud& pcl, octomap::pose6d) = 0;
 
         /// save map in file
         virtual void saveMap() = 0;

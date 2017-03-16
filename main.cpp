@@ -27,11 +27,12 @@ void printUsage(const char* programName)
 int main(int argc, char** argv) {
 
     int a=0;
-    mapping::PointCloud PC, PD, PCD;
+    mapping::PointCloud PD, PCD;
+    mapping::GrabbedImage PC;
     mapping::img2pcl troll("../../resources/img2pcl.xml");
 
     std::cout << "Start\n";
-    mapping::Map* map = mapping::createMapOcto(PC);
+    mapping::Map* map = mapping::createMapOcto(PC.pointCloud);
     std::cout << map->getName() << "\n";
 
     QApplication application(argc,argv);
@@ -47,7 +48,7 @@ int main(int argc, char** argv) {
         if(a%50 == 0) {
             troll.calcPCL();
             PC = troll.returnPC();
-            map->insertCloud(PC);
+            map->insertCloud(PC.pointCloud, PC.octoPose);
             if(a==300) {
                 break;
             }

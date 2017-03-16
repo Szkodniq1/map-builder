@@ -56,9 +56,11 @@ int img2pcl::grabFrame() {
         std::getline(stateFile, data);
 
         std::cout << data << std::endl;
+        pos = data;
 
         std::stringstream dataStr(data);
         dataStr >> Timestamp;
+
 
         for(int i=0; i<3;i++)
             dataStr >> t[i];
@@ -132,6 +134,9 @@ Eigen::Vector3d img2pcl::Trans() {
     return xyz;
 }
 
+octomap::pose6d img2pcl::FramePose() {
+    return octomap::pose6d(octomath::Vector3(t[0],t[1],t[2]), octomath::Quaternion(q[3], q[0], q[1], q[2]));
+}
 
 int img2pcl::depth2cloud() {
     Eigen::Vector3d point;
@@ -208,9 +213,9 @@ int img2pcl::depth2colorcloud() {
     return 1;
 }
 
-PointCloud img2pcl::returnPC()
+mapping::GrabbedImage img2pcl::returnPC()
 {
-    return Cloud;
+    return mapping::GrabbedImage(Cloud, FramePose());
 }
 
 void getPoint(unsigned int u, unsigned int v, float_type depth, Eigen::Vector3d& point3D) {

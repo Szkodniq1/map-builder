@@ -8,7 +8,7 @@
 /// A single instance of Octomap
 OctoMap::Ptr octoMap;
 
-OctoMap::OctoMap(void) : map(0.02) {
+OctoMap::OctoMap(void) : map(this->MAP_RES) {
     std::cout << "OctoMap created\n";
     for (int i=0;i<20;i++){
         for (int j=0;j<20;j++){
@@ -18,7 +18,7 @@ OctoMap::OctoMap(void) : map(0.02) {
     }
 }
 
-OctoMap::OctoMap(mapping::PointCloud PC) : map(0.1) {
+OctoMap::OctoMap(mapping::PointCloud PC) : map(this->MAP_RES) {
     cloud = PC;
 }
 
@@ -27,12 +27,11 @@ void OctoMap::insertCloud(octomap::Pointcloud& pcl){
     notify(cloud);
 }
 
-void OctoMap::insertCloud(mapping::PointCloud& PC){
+void OctoMap::insertCloud(mapping::PointCloud& PC, octomap::pose6d pose){
     for(mapping::Point3D point : PC) {
         octoCloud.push_back(point.position.x(), point.position.y(), point.position.z());
     }
-    octomap::point3d origin (0,0,0);
-    this->map.insertPointCloud(octoCloud, origin);
+    this->map.insertPointCloud(octoCloud, pose.trans(), octomap::pose6d(octomath::Vector3(0,0,0), octomath::Quaternion(pose.roll(), pose.pitch(), pose.yaw())));
     notify(PC);
 }
 

@@ -10,6 +10,8 @@
 #include "map.h"
 #include "octomap/Pointcloud.h"
 #include <octomap/octomap.h>
+#include <octomap/math/Quaternion.h>
+#include <octomap/math/Vector3.h>
 #include <octomap/OcTree.h>
 #include "../../3rdParty/tinyXML/tinyxml2.h"
 #include "Utilities/observer.h"
@@ -39,7 +41,7 @@ public:
     void insertCloud(octomap::Pointcloud& pcl);
 
     /// Insert point cloud into map
-    void insertCloud(mapping::PointCloud& PC);
+    void insertCloud(mapping::PointCloud& PC, octomap::pose6d);
 
     /// save map in file
     void saveMap();
@@ -54,6 +56,7 @@ public:
     ~OctoMap() {}
 
 private:
+    const double MAP_RES = 0.1;
     mapping::PointCloud cloud;
     octomap::Pointcloud octoCloud;
     octomap::OcTree map;

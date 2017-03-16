@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "../../3rdParty/Eigen/Geometry"
+#include "octomap/Pointcloud.h"
 
 
 /// mapping namespace
@@ -63,6 +64,27 @@ public:
 
 /// 3D point cloud representation
 typedef std::vector<Point3D> PointCloud;
+
+class GrabbedImage {
+public:
+    PointCloud pointCloud;
+    std::string framePos;
+    octomap::pose6d octoPose;
+
+    inline GrabbedImage() {
+
+    }
+
+    inline GrabbedImage(PointCloud pc, std::string fP) {
+       this->pointCloud = pc;
+       this->framePos = fP;
+    }
+
+    inline GrabbedImage(PointCloud pc, octomap::pose6d fP) {
+       this->pointCloud = pc;
+       this->octoPose = fP;
+    }
+};
 
 /// Quaternion representation of SO(3) group of rotations
 typedef Eigen::Quaternion<float_type> Quaternion;

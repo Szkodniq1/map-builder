@@ -5,6 +5,8 @@
 #include "opencv2/opencv.hpp"
 #include "../../3rdParty/Eigen/Dense"
 #include "octomap/Pointcloud.h"
+#include "octomap/math/Vector3.h"
+#include "octomap/math/Quaternion.h"
 
 #include "3rdParty/tinyXML/tinyxml2.h"
 #include <fstream>
@@ -42,6 +44,8 @@ private:
 
     //Point Cloude generated from images
     PointCloud Cloud;
+    //Position for each frame
+    std::string pos;
 
     float z0(int u, int v, float_type d);
     float x0(int u, float z);
@@ -50,6 +54,7 @@ private:
     Eigen::Vector3d xyz0(int u, int v, float_type d);
     Eigen::Matrix<float_type,3,3> Rot();
     Eigen::Vector3d Trans();
+    octomap::pose6d FramePose();
 
     int depth2cloud();
     int depth2colorcloud();
@@ -61,7 +66,7 @@ public:
     int grabFrame();
     int calcPCL();
 
-    PointCloud returnPC();
+    mapping::GrabbedImage returnPC();
 
 
 
