@@ -45,8 +45,6 @@ img2pcl::~img2pcl() {
         std::cout << "State File closed!\n";
         stateFile.close();
     }
-
-
 }
 
 int img2pcl::grabFrame() {

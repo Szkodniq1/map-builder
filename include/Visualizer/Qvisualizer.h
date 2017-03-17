@@ -126,7 +126,7 @@ private:
     Config config;
 
     //pcl
-    mapping::PointCloud pointCloud;
+    std::vector<mapping::PointCloud> pointClouds;
 
     /// mutex for critical section - point clouds
     std::mutex mtxPointCloud;

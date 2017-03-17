@@ -33,7 +33,7 @@ public:
         std::vector<GLfloat>::iterator n = normals.begin();
         std::vector<GLfloat>::iterator t = texcoords.begin();
         for(r = 0; r < rings; r++)
-        	for(s = 0; s < sectors; s++) {
+            for(s = 0; s < sectors; s++) {
                 float const y = (float) sin( -M_PI_2 + M_PI * r * R );
                 float const x = (float) cos(2*M_PI * s * S) * (float) sin( M_PI * r * R );
                 float const z = (float) sin(2*M_PI * s * S) * (float) sin( M_PI * r * R );
@@ -48,17 +48,17 @@ public:
                 *n++ = (float) x;
                 *n++ = (float) y;
                 *n++ = (float) z;
-        }
+            }
 
         indices.resize(rings * sectors * 4);
         std::vector<GLushort>::iterator i = indices.begin();
         for(r = 0; r < rings-1; r++)
-        	for(s = 0; s < sectors-1; s++) {
+            for(s = 0; s < sectors-1; s++) {
                 *i++ = (GLushort) ((float) r * (float)sectors + (float) s);
                 *i++ = (GLushort) ((float) r * (float)sectors + (float) (s+1));
                 *i++ = (GLushort) ((float) (r+1) * (float)sectors + (float) (s+1));
                 *i++ = (GLushort) ((float) (r+1) * (float)sectors + (float) s);
-        }
+            }
     }
 
     void draw(GLfloat x, GLfloat y, GLfloat z)
@@ -88,7 +88,7 @@ QGLVisualizer::QGLVisualizer(Config _config): config(_config){
 
 /// Construction
 QGLVisualizer::QGLVisualizer(std::string configFile) :
-        config(configFile) {
+    config(configFile) {
     tinyxml2::XMLDocument configXML;
     std::string filename = "../../resources/" + configFile;
     configXML.LoadFile(filename.c_str());
@@ -104,7 +104,7 @@ QGLVisualizer::~QGLVisualizer(void) {
 /// Observer update
 void QGLVisualizer::update(const mapping::PointCloud& newCloud) {
     mtxPointCloud.lock();
-    pointCloud=newCloud;
+    pointClouds.push_back(newCloud);
     mtxPointCloud.unlock();
 }
 
@@ -112,15 +112,17 @@ void QGLVisualizer::update(const mapping::PointCloud& newCloud) {
 /// Draw point clouds
 void QGLVisualizer::drawPointCloud(void){
     mtxPointCloud.lock();
-        glPushMatrix();
-           glPointSize(3);
-           glBegin(GL_POINTS);
-           for (size_t i = 0;i<pointCloud.size();i++){
-               glColor3ub(pointCloud[i].color.r,pointCloud[i].color.g,pointCloud[i].color.b);
-               glVertex3d(pointCloud[i].position.x(), pointCloud[i].position.y(), pointCloud[i].position.z());
-           }
-           glEnd();
-        glPopMatrix();
+    glPushMatrix();
+    glPointSize(3);
+    glBegin(GL_POINTS);
+    for(mapping::PointCloud pointCloud : pointClouds) {
+        for (size_t i = 0;i<pointCloud.size();i++) {
+            glColor3ub(pointCloud[i].color.r,pointCloud[i].color.g,pointCloud[i].color.b);
+            glVertex3d(pointCloud[i].position.x(), pointCloud[i].position.y(), pointCloud[i].position.z());
+        }
+    }
+    glEnd();
+    glPopMatrix();
     mtxPointCloud.unlock();
 }
 /// draw objects
@@ -128,7 +130,6 @@ void QGLVisualizer::draw(){
     // Here we are in the world coordinate system. Draw unit size axis.
     drawAxis();
     drawPointCloud();
-    drawGrid();
 }
 
 /// draw objects
