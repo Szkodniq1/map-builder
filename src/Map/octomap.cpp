@@ -95,6 +95,7 @@ void OctoMap::insertCloud(mapping::PointCloud& PC, octomap::pose6d pose){
                     point.position.z());
     }
     e1 = cv::getTickCount();
+    //First cloud 2,7s, second cloud 5,2s
     this->map.insertPointCloud(octoCloud, pose.trans());
     this->map.updateInnerOccupancy();
     e2 = cv::getTickCount();
