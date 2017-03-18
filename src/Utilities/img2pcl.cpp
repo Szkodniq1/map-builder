@@ -94,13 +94,13 @@ int img2pcl::calcPCL() {
     }
 }
 
-Eigen::Vector3d img2pcl::xyz0(int u, int v, float_type d) {
+Eigen::Translation<float_type,3> img2pcl::xyz0(int u, int v, float_type d) {
     Eigen::Vector3d point(u, v, 1);
     Eigen::Matrix<float_type,3,3> PHCPModel;
     PHCPModel <<    1/focalLength[0],   0, -focalAxis[0]/focalLength[0],
             0,          1/focalLength[1],   -focalAxis[1]/focalLength[1],
             0,          0,          1;
-    Eigen::Vector3d xyz(d*PHCPModel*point);
+    Eigen::Translation<float_type,3> xyz(d*PHCPModel*point);
     return xyz;
 }
 
@@ -116,8 +116,8 @@ Eigen::Matrix<float_type,3,3> img2pcl::Rot() {
     return Rotation;
 }
 
-Eigen::Vector3d img2pcl::Trans() {
-    Eigen::Vector3d xyz(t[0],t[1],t[2]);
+Eigen::Translation<float_type,3> img2pcl::Trans() {
+    Eigen::Translation<float_type,3> xyz(t[0],t[1],t[2]);
     return xyz;
 }
 
@@ -126,13 +126,13 @@ octomap::pose6d img2pcl::FramePose() {
 }
 
 int img2pcl::depth2cloud() {
-    Eigen::Vector3d point;
+    Eigen::Translation<float_type,3> point;
     PointCloud tempCloud;
     tempCloud.clear();
     tempCloud.resize(depth.cols*depth.rows);
 
     Eigen::Matrix<float_type,3,3> R = Rot();
-    Eigen::Vector3d T = Trans();
+    Eigen::Translation<float_type,3> T = Trans();
 
     uint16_t tmp;
 
@@ -144,9 +144,9 @@ int img2pcl::depth2cloud() {
 
                 point = xyz0(j,i,depthM);
                 Point3D pointPCL;
-                pointPCL.position.x() = point(0);
-                pointPCL.position.y() = point(1);
-                pointPCL.position.z() = point(2);
+                pointPCL.position.x() = point.x();
+                pointPCL.position.y() = point.y();
+                pointPCL.position.z() = point.z();
                 pointPCL.color.r = 255;
                 pointPCL.color.g = 255;
                 pointPCL.color.b = 0;
@@ -162,13 +162,13 @@ int img2pcl::depth2cloud() {
 
 /// Convert disparity image to point cloud
 int img2pcl::depth2colorcloud() {
-    Eigen::Vector3d point;
+    Eigen::Translation<float_type,3> point;
     PointCloud tempCloud;
     tempCloud.clear();
     tempCloud.resize(depth.cols*depth.rows);
 
     Eigen::Matrix<float_type,3,3> R = Rot();
-    Eigen::Vector3d T = Trans();
+    Eigen::Translation<float_type,3> T = Trans();
 
     uint16_t tmp;
 
@@ -180,9 +180,9 @@ int img2pcl::depth2colorcloud() {
 
                 point = xyz0(j,i,depthM);
                 Point3D pointPCL;
-                pointPCL.position.x() = point(0);
-                pointPCL.position.y() = point(1);
-                pointPCL.position.z() = point(2);
+                pointPCL.position.x() = point.x();
+                pointPCL.position.y() = point.y();
+                pointPCL.position.z() = point.z();
                 pointPCL.color.r = bgr.at<uint8_t>(i,3*j+2);
                 pointPCL.color.g = bgr.at<uint8_t>(i,3*j+1);
                 pointPCL.color.b = bgr.at<uint8_t>(i,3*j);

@@ -47,9 +47,9 @@ private:
     //Position for each frame
     std::string pos;
 
-    Eigen::Vector3d xyz0(int u, int v, float_type d);
+    Eigen::Translation<float_type,3> xyz0(int u, int v, float_type d);
     Eigen::Matrix<float_type,3,3> Rot();
-    Eigen::Vector3d Trans();
+    Eigen::Translation<float_type,3> Trans();
     octomap::pose6d FramePose();
 
     int depth2cloud();
