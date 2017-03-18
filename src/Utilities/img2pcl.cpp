@@ -70,9 +70,9 @@ int img2pcl::grabFrame() {
         std::sprintf(buff, form.c_str(), Timestamp);
         depth = cv::imread(path + "depth/" + buff, CV_LOAD_IMAGE_ANYDEPTH);
         bgr = cv::imread(path + "rgb/" + buff);
-//        cv::imshow("troll", depth);
-//        cv::imshow("troll2", bgr);
-//        cv::waitKey(30);
+        //        cv::imshow("troll", depth);
+        //        cv::imshow("troll2", bgr);
+        //        cv::waitKey(30);
 
         return 1;
 
@@ -94,36 +94,25 @@ int img2pcl::calcPCL() {
     }
 }
 
-float img2pcl::z0(int u, int v, float_type d) {
-    float dx = u-focalAxis[0], dy=v-focalAxis[1];
-    return factor*sqrt(d*d/(dx*dx+factor*factor+dy*dy));
-}
-
-float img2pcl::x0(int u, float z) {
-    float dx = u-focalAxis[0];
-    return dx*z/focalLength[0];
-}
-
-float img2pcl::y0(int v, float z) {
-    float dy = v-focalAxis[1];
-    return -1*dy*z/focalLength[1];
-}
-
 Eigen::Vector3d img2pcl::xyz0(int u, int v, float_type d) {
-    float z = z0(u,v,d);
-    Eigen::Vector3d xyz(x0(u,z), y0(v,z), z);
+    Eigen::Vector3d point(u, v, 1);
+    Eigen::Matrix<float_type,3,3> PHCPModel;
+    PHCPModel <<    1/focalLength[0],   0, -focalAxis[0]/focalLength[0],
+            0,          1/focalLength[1],   -focalAxis[1]/focalLength[1],
+            0,          0,          1;
+    Eigen::Vector3d xyz(d*PHCPModel*point);
     return xyz;
 }
 
 Eigen::Matrix<float_type,3,3> img2pcl::Rot() {
     float r11 = 1 - 2*q[1]*q[1] - 2*q[2]*q[2], r12 = 2*q[0]*q[1] - 2*q[2]*q[3],     r13 = 2*q[0]*q[2] + 2*q[1]*q[3],
-          r21 = 2*q[0]*q[1] + 2*q[2]*q[3],     r22 = 1 - 2*q[0]*q[0] - 2*q[2]*q[2], r23 = 2*q[1]*q[2] - 2*q[0]*q[3],
-          r31 = 2*q[0]*q[2] - 2*q[1]*q[3],     r32 = 2*q[1]*q[2] + 2*q[0]*q[3],     r33 = 1 - 2*q[0]*q[0] - 2*q[1]*q[1];
+            r21 = 2*q[0]*q[1] + 2*q[2]*q[3],     r22 = 1 - 2*q[0]*q[0] - 2*q[2]*q[2], r23 = 2*q[1]*q[2] - 2*q[0]*q[3],
+            r31 = 2*q[0]*q[2] - 2*q[1]*q[3],     r32 = 2*q[1]*q[2] + 2*q[0]*q[3],     r33 = 1 - 2*q[0]*q[0] - 2*q[1]*q[1];
 
     Eigen::Matrix<float_type,3,3> Rotation;
     Rotation <<   r11, r12, r13,
-                  r21, r22, r23,
-                  r31, r32, r33;
+            r21, r22, r23,
+            r31, r32, r33;
     return Rotation;
 }
 
@@ -154,7 +143,6 @@ int img2pcl::depth2cloud() {
                 float_type depthM = float_type(tmp)*0.001;
 
                 point = xyz0(j,i,depthM);
-                //getPoint(j,i,depthM,point);
                 Point3D pointPCL;
                 pointPCL.position.x() = point(0);
                 pointPCL.position.y() = point(1);
@@ -191,7 +179,6 @@ int img2pcl::depth2colorcloud() {
                 float_type depthM = float_type(tmp)*0.001;
 
                 point = xyz0(j,i,depthM);
-                //getPoint(j,i,depthM,point);
                 Point3D pointPCL;
                 pointPCL.position.x() = point(0);
                 pointPCL.position.y() = point(1);
@@ -215,18 +202,6 @@ mapping::GrabbedImage img2pcl::returnPC()
 {
     return mapping::GrabbedImage(Cloud, FramePose());
 }
-
-void getPoint(unsigned int u, unsigned int v, float_type depth, Eigen::Vector3d& point3D) {
-    Eigen::Vector3d point(u, v, 1);
-    Eigen::Matrix<float_type,3,3> PHCPModel;
-    PHCPModel <<    1/582.64,   0,          -320.17/582.64,
-                    0,          1/586.97,   -260.0/586.97,
-                    0,          0,          1;
-//    std::cout << PHCPModel << std::endl;
-    point3D = depth*PHCPModel*point;
-
-    std::cout<<point3D <<std::endl;
-}
 }
 
 void octopointToPointcloud(octomap::Pointcloud& fromCloud, mapping::PointCloud toCloud) {
@@ -243,22 +218,3 @@ void pointcloudToOctopoint(mapping::PointCloud& fromCloud, octomap::Pointcloud& 
         toCloud.push_back(point.position.x(), point.position.y(), point.position.z());
     }
 }
-
-/*
-void getPoint(unsigned int u, unsigned int v, float_type depth, Eigen::Vector3d& point3D){
-    Eigen::Vector3d point(u, v, 1);
-    point3D = depth*PHCPModel*point;
-}
-
-/// Construction
-UncertaintyModel(std::string configFile) : config(configFile){
-    PHCPModel << 1/config.focalLength[0],0,-config.focalAxis[0]/config.focalLength[0],0,1/config.focalLength[1], -config.focalAxis[1]/config.focalLength[1], 0,0,1;
-    Ruvd << config.varU, 0, 0, 0, config.varV, 0, 0, 0, 0;
-}
-
-Config() :
-    focalLength{582.64, 586.97},
-    focalAxis{320.17, 260.0},
-    varU(1.1046), varV(0.64160),
-    distVarCoefs{-8.9997e-06, 3.069e-003, 3.6512e-006, -0.0017512e-3}{}
-}*/

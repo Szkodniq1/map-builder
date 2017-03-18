@@ -47,10 +47,6 @@ private:
     //Position for each frame
     std::string pos;
 
-    float z0(int u, int v, float_type d);
-    float x0(int u, float z);
-    float y0(int v, float z);
-
     Eigen::Vector3d xyz0(int u, int v, float_type d);
     Eigen::Matrix<float_type,3,3> Rot();
     Eigen::Vector3d Trans();
@@ -78,7 +74,6 @@ public:
 
     PointCloud depth2cloud(cv::Mat& depthImage);
     PointCloud depth2cloud(cv::Mat& depthImage, cv::Mat& colorImage);
-    void getPoint(unsigned int u, unsigned int v, float_type depth, Eigen::Vector3d& point3D);
     void octopointToPointcloud(octomap::Pointcloud& fromCloud, mapping::PointCloud toCloud);
     void pointcloudToOctopoint(mapping::PointCloud& fromCloud, octomap::Pointcloud& toCloud);
 }
