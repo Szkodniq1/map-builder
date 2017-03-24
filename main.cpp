@@ -45,11 +45,11 @@ int main(int argc, char** argv) {
     map->attachVisualizer(&visu);
 
     while(troll.grabFrame()) {
-        if( a  == 200 || a  == 300  ) {
+        if(a%100 == 0) {
             troll.calcPCL();
             PC = troll.returnPC();
             map->insertCloud(PC.pointCloud, PC.octoPose);
-            if(a == 300) {
+            if(a == 1000) {
                 break;
             }
 

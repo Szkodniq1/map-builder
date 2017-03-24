@@ -116,16 +116,11 @@ void QGLVisualizer::drawPointCloud(void){
     glPushMatrix();
     glPointSize(3);
     glBegin(GL_POINTS);
-    int j = 0;
     for(mapping::PointCloud pointCloud : pointClouds) {
         for (size_t i = 0;i<pointCloud.size();i++) {
-            if(pointCloud[i].color.r == 255 && pointCloud[i].color.g == 255 && pointCloud[i].color.b == 255) {
-                std::cout<<"Oho"<<std::endl;
-            }
             glColor3ub(pointCloud[i].color.r,pointCloud[i].color.g,pointCloud[i].color.b);
             glVertex3d(pointCloud[i].position.x(), pointCloud[i].position.y(), pointCloud[i].position.z());
         }
-        j++;
     }
     glEnd();
     glPopMatrix();

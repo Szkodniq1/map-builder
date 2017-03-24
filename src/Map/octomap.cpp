@@ -90,8 +90,8 @@ void OctoMap::insertCloud(mapping::PointCloud& PC, octomap::pose6d pose){
     }
     e1 = cv::getTickCount();
     //First cloud 2,7s, second cloud 5,2s
-    //this->map.insertPointCloud(octoCloud, pose.trans());
-    //this->map.updateInnerOccupancy();
+    this->map.insertPointCloud(octoCloud, pose.trans());
+    this->map.updateInnerOccupancy();
     e2 = cv::getTickCount();
     time = ((e2 - e1)/ cv::getTickFrequency());
     std::cout<<"Octomap insert time and update: "<<time<<std::endl;
