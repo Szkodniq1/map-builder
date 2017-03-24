@@ -97,9 +97,9 @@ int img2pcl::calcPCL() {
 Eigen::Translation<float_type,3> img2pcl::xyz0(int u, int v, float_type d) {
     Eigen::Vector3d point(u, v, 1);
     Eigen::Matrix<float_type,3,3> PHCPModel;
-    PHCPModel <<    1/focalLength[0],   0, -focalAxis[0]/focalLength[0],
-            0,          1/focalLength[1],   -focalAxis[1]/focalLength[1],
-            0,          0,          1;
+    PHCPModel <<1/focalLength[0],   0,                  -focalAxis[0]/focalLength[0],
+                0,                  1/focalLength[1],   -focalAxis[1]/focalLength[1],
+                0,                  0,                  1;
     Eigen::Translation<float_type,3> xyz(d*PHCPModel*point);
     return xyz;
 }
@@ -198,8 +198,7 @@ int img2pcl::depth2colorcloud() {
     return 1;
 }
 
-mapping::GrabbedImage img2pcl::returnPC()
-{
+mapping::GrabbedImage img2pcl::returnPC() {
     return mapping::GrabbedImage(Cloud, FramePose());
 }
 }

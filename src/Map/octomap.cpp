@@ -4,7 +4,7 @@
 #include <chrono>
 #include <thread>
 #include <iostream>
-#include <opencv2/core.hpp>
+#include <opencv2/core/core.hpp>
 
 /// A single instance of Octomap
 OctoMap::Ptr octoMap;

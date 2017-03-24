@@ -91,6 +91,40 @@ typedef Eigen::Quaternion<float_type> Quaternion;
 
 /// Homogeneous representation of SE(3) rigid body transformations
 typedef Eigen::Transform<double, 3, Eigen::Affine> Mat34;
+
+/// Voxel class definition
+class Voxel {
+public:
+    struct NormalDist{
+        double mean;
+        double stdDev;
+    };
+
+    double probability;
+    unsigned int sampNumber;
+    NormalDist xAxis, yAxis, zAxis;
+
+    ///default constructor
+    inline Voxel(){
+        probability = 0;
+        sampNumber = 0;
+        xAxis.mean = 0;
+        xAxis.stdDev = 0;
+        yAxis = xAxis = zAxis;
+    }
+    ///constructor
+    inline Voxel(double prob, unsigned int samps, double xMean = 0, double xDev = 0, double yMean = 0, double yDev = 0, double zMean = 0, double zDev = 0) {
+        probability = prob;
+        sampNumber = samps;
+        xAxis.mean = xMean;
+        xAxis.stdDev = xDev;
+        yAxis.mean = yMean;
+        yAxis.stdDev = yDev;
+        zAxis.mean = zMean;
+        zAxis.stdDev = zDev;
+    }
+};
+
 }
 
 #endif
