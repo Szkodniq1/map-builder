@@ -57,7 +57,6 @@ public:
 
 private:
     const double MAP_RES = 0.1;
-    mapping::PointCloud cloud;
     octomap::Pointcloud octoCloud;
     octomap::OcTree map;
 };

@@ -129,7 +129,6 @@ int img2pcl::depth2cloud() {
     Eigen::Translation<float_type,3> point;
     PointCloud tempCloud;
     tempCloud.clear();
-    tempCloud.resize(depth.cols*depth.rows);
 
     Eigen::Matrix<float_type,3,3> R = Rot();
     Eigen::Translation<float_type,3> T = Trans();
@@ -152,7 +151,7 @@ int img2pcl::depth2cloud() {
                 pointPCL.color.b = 0;
                 pointPCL.color.a = 0;
                 //std::cout << "depth: " << depthM << " u: " << i << " v: " <<  j << " x y z " << pointPCL.position.position.x() << ", " << pointPCL.position.position.y() << "," << pointPCL.position.position.z() << "\n";
-                tempCloud[depth.cols*i + j] = pointPCL;
+                tempCloud.push_back(pointPCL);
             }
         }
     }
@@ -165,7 +164,6 @@ int img2pcl::depth2colorcloud() {
     Eigen::Translation<float_type,3> point;
     PointCloud tempCloud;
     tempCloud.clear();
-    tempCloud.resize(depth.cols*depth.rows);
 
     Eigen::Matrix<float_type,3,3> R = Rot();
     Eigen::Translation<float_type,3> T = Trans();
@@ -188,7 +186,7 @@ int img2pcl::depth2colorcloud() {
                 pointPCL.color.b = bgr.at<uint8_t>(i,3*j);
                 pointPCL.color.a = 255;
                 //std::cout << "depth: " << depthM << " u: " << i << " v: " <<  j << " x y z " << pointPCL.position.position.x() << ", " << pointPCL.position.position.y() << "," << pointPCL.position.position.z() << "\n";
-                tempCloud[depth.cols*i + j] = pointPCL;
+                tempCloud.push_back(pointPCL);
 
 
             }
