@@ -66,6 +66,9 @@ public:
     void writeBinary( std::ostream& out ) const;
     void readBinary( std::istream& in );
 
+    // Expanding, merging etc.
+    void expand(int size, int x, int y, int z);
+
 protected:
 
     // Octree node types

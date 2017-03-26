@@ -953,3 +953,61 @@ void Octree<T,AS>::readBinaryRecursive( std::istream& in, Node** node )
             break;
     }
 }
+
+
+/**
+ *
+ */
+template< typename T, int AS >
+void Octree<T,AS>::expand(int size, int x, int y, int z) {
+    Octree<T,AS> *expanded = new Octree<T,AS>(size, emptyValue_);
+    int scale = expanded->size()/size_;
+
+    Node** tmp = &expanded->root_;
+    Branch* Btmp;
+
+    int xCh, yCh, zCh;
+
+    while(scale>1){
+
+        if(x > scale/2) {
+            xCh = 1;
+            x = x - scale/2;
+        }
+        else {
+            xCh = 0;
+        }
+
+        if(y > scale/2) {
+            yCh = 1;
+            y = y - scale/2;
+        }
+        else {
+            yCh = 0;
+        }
+
+        if(z > scale/2) {
+            zCh = 1;
+            z = z - scale/2;
+        }
+        else {
+            zCh = 0;
+        }
+
+        *tmp  = new Branch();
+        Btmp = (Branch*) *tmp;
+        tmp = &Btmp->child(xCh, yCh, zCh);
+
+        scale = scale/2;
+
+    }
+
+    *tmp = root_;
+
+    memcpy(this, expanded, sizeof(Octree<T,AS>));
+
+}
+
+
+
+
