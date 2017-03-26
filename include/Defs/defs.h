@@ -65,27 +65,6 @@ public:
 /// 3D point cloud representation
 typedef std::vector<Point3D> PointCloud;
 
-class GrabbedImage {
-public:
-    PointCloud pointCloud;
-    std::string framePos;
-    octomap::pose6d octoPose;
-
-    inline GrabbedImage() {
-
-    }
-
-    inline GrabbedImage(PointCloud pc, std::string fP) {
-       this->pointCloud = pc;
-       this->framePos = fP;
-    }
-
-    inline GrabbedImage(PointCloud pc, octomap::pose6d fP) {
-       this->pointCloud = pc;
-       this->octoPose = fP;
-    }
-};
-
 /// Quaternion representation of SO(3) group of rotations
 typedef Eigen::Quaternion<float_type> Quaternion;
 
@@ -112,6 +91,16 @@ public:
         xAxis.stdDev = 0;
         yAxis = xAxis = zAxis;
     }
+
+    //default contructor int OcTree structure
+    inline Voxel(int res){
+        probability = 0;
+        sampNumber = 0;
+        xAxis.mean = 0;
+        xAxis.stdDev = 0;
+        yAxis = xAxis = zAxis;
+    }
+
     ///constructor
     inline Voxel(double prob, unsigned int samps, double xMean = 0, double xDev = 0, double yMean = 0, double yDev = 0, double zMean = 0, double zDev = 0) {
         probability = prob;

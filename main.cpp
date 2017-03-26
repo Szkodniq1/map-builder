@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "Map/octomap.h"
+#include "Map/gaussmap.h"
 #include "Visualizer/Qvisualizer.h"
 #include <GL/glut.h>
 #include <qapplication.h>
@@ -48,8 +49,8 @@ int main(int argc, char** argv) {
         if(a%100 == 0) {
             troll.calcPCL();
             PC = troll.returnPC();
-            map->insertCloud(PC.pointCloud, PC.octoPose);
-            if(a == 1000) {
+            map->insertCloud(PC);
+            if(a == 500) {
                 break;
             }
 
