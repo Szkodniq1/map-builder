@@ -197,8 +197,9 @@ int img2pcl::depth2colorcloud() {
 }
 
 mapping::GrabbedImage img2pcl::returnPC() {
-    return mapping::GrabbedImage(Cloud, FramePose());
+    return mapping::GrabbedImage(Cloud, Vec3(t[0],t[1],t[2]), Quaternion(q[3], q[0], q[1], q[2]));
 }
+
 }
 
 void octopointToPointcloud(octomap::Pointcloud& fromCloud, mapping::PointCloud toCloud) {

@@ -12,11 +12,7 @@ Gaussmap::Gaussmap(mapping::PointCloud PC) : map(256) {
 }
 
 /// Insert point cloud into map
-void Gaussmap::insertCloud(octomap::Pointcloud& pcl){
-
-}
-
-void Gaussmap::insertCloud(mapping::PointCloud& PC, octomap::pose6d pose){
+void Gaussmap::insertCloud(mapping::GrabbedImage grab) {
 
 }
 

@@ -29,10 +29,7 @@ public:
     const std::string& getName() const {return name;}
 
     /// Insert point cloud into map
-    void insertCloud(octomap::Pointcloud& pcl);
-
-    /// Insert point cloud into map
-    void insertCloud(mapping::PointCloud& PC, octomap::pose6d);
+    void insertCloud(mapping::GrabbedImage grab);
 
     /// save map in file
     void saveMap();

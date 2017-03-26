@@ -2,6 +2,7 @@
 #define IMG2PCL_H
 
 #include "../include/Defs/defs.h"
+#include "../include/Defs/grabbedimage.h"
 #include "opencv2/opencv.hpp"
 #include "../../3rdParty/Eigen/Dense"
 #include "octomap/Pointcloud.h"
@@ -63,11 +64,6 @@ public:
     int calcPCL();
 
     mapping::GrabbedImage returnPC();
-
-
-
-
-
 
 };
 
