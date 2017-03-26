@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "Map/octomap.h"
+#include "Map/gaussmap.h"
 #include "Visualizer/Qvisualizer.h"
 #include <GL/glut.h>
 #include <qapplication.h>
@@ -33,6 +34,7 @@ int main(int argc, char** argv) {
 
     std::cout << "Start\n";
     mapping::Map* map = mapping::createMapOcto(PC.pointCloud);
+    mapping::Map* otherMap = mapping::createMapGauss();
     std::cout << map->getName() << "\n";
 
     QApplication application(argc,argv);
@@ -49,7 +51,7 @@ int main(int argc, char** argv) {
             troll.calcPCL();
             PC = troll.returnPC();
             map->insertCloud(PC.pointCloud, PC.octoPose);
-            if(a == 1000) {
+            if(a == 500) {
                 break;
             }
 

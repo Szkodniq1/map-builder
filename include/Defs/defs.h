@@ -112,6 +112,15 @@ public:
         xAxis.stdDev = 0;
         yAxis = xAxis = zAxis;
     }
+
+    inline Voxel(int res){
+        probability = 0;
+        sampNumber = 0;
+        xAxis.mean = 0;
+        xAxis.stdDev = 0;
+        yAxis = xAxis = zAxis;
+    }
+
     ///constructor
     inline Voxel(double prob, unsigned int samps, double xMean = 0, double xDev = 0, double yMean = 0, double yDev = 0, double zMean = 0, double zDev = 0) {
         probability = prob;
