@@ -113,6 +113,7 @@ public:
         yAxis = xAxis = zAxis;
     }
 
+    //default contructor int OcTree structure
     inline Voxel(int res){
         probability = 0;
         sampNumber = 0;

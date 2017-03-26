@@ -34,7 +34,6 @@ int main(int argc, char** argv) {
 
     std::cout << "Start\n";
     mapping::Map* map = mapping::createMapOcto(PC.pointCloud);
-    mapping::Map* otherMap = mapping::createMapGauss();
     std::cout << map->getName() << "\n";
 
     QApplication application(argc,argv);
