@@ -10,17 +10,20 @@ img2pcl::img2pcl() {
 img2pcl::img2pcl(std::string xmlPath) {
     tinyxml2::XMLDocument xmlDoc;
     tinyxml2::XMLError Result = xmlDoc.LoadFile(xmlPath.c_str());
+    int asso;
 
     std::cout << Result <<std::endl;
 
 
     if(Result == tinyxml2::XML_SUCCESS) {
         xmlDoc.FirstChildElement("Color")->QueryIntText(&color);
+        xmlDoc.FirstChildElement("Association")->QueryIntText(&asso);
         xmlDoc.FirstChildElement("fx")->QueryFloatText(&focalLength[0]);
         xmlDoc.FirstChildElement("fy")->QueryFloatText(&focalLength[1]);
         xmlDoc.FirstChildElement("cx")->QueryFloatText(&focalAxis[0]);
         xmlDoc.FirstChildElement("cy")->QueryFloatText(&focalAxis[1]);
         xmlDoc.FirstChildElement("factor")->QueryFloatText(&factor);
+
 
         path = xmlDoc.FirstChildElement( "Path" )->GetText();
         form = xmlDoc.FirstChildElement( "Form" )->GetText();
@@ -32,6 +35,23 @@ img2pcl::img2pcl(std::string xmlPath) {
             std::cout << path;
             exit(414);
         }
+
+        if(asso==1){
+            association_D.open(path+"depth.txt", std::ios::in);
+            if(!association_D.is_open()) {
+                path = "Loading Camera association file failed!\n";
+                std::cout << path;
+                exit(424);
+            }
+
+            association_RGB.open(path+"rgb.txt", std::ios::in);
+            if(!association_RGB.is_open()) {
+                path = "Loading Camera association file failed!\n";
+                std::cout << path;
+                exit(424);
+            }
+        }
+
     }
     else {
         path = "Loading Frame Grabber configuration file failed!\n";
@@ -45,19 +65,33 @@ img2pcl::~img2pcl() {
         std::cout << "State File closed!\n";
         stateFile.close();
     }
+
+    if(association_D.is_open()) {
+        std::cout << "Association File closed!\n";
+        association_D.close();
+    }
+
+    if(association_RGB.is_open()) {
+        std::cout << "Association File closed!\n";
+        association_RGB.close();
+    }
 }
 
 int img2pcl::grabFrame() {
 
     if(!stateFile.eof()) {
-        std::string data;
-        std::getline(stateFile, data);
+        std::string data = "#";
+
+        while(data[0] == '#')
+            std::getline(stateFile, data);
+
 
         std::cout << data << std::endl;
         pos = data;
 
         std::stringstream dataStr(data);
-        dataStr >> Timestamp;
+
+        std::getline(dataStr, Timestamp,' ');
 
 
         for(int i=0; i<3;i++)
@@ -67,12 +101,77 @@ int img2pcl::grabFrame() {
             dataStr >> q[i];
 
         char buff[100];
-        std::sprintf(buff, form.c_str(), Timestamp);
+        std::sprintf(buff, form.c_str(), Timestamp.c_str());
         depth = cv::imread(path + "depth/" + buff, CV_LOAD_IMAGE_ANYDEPTH);
         bgr = cv::imread(path + "rgb/" + buff);
         //        cv::imshow("troll", depth);
         //        cv::imshow("troll2", bgr);
+        //        cv::waitKey(0);
+
+        return 1;
+
+    }
+    else {
+        std::cout << "Koniec nagrania!" <<std::endl;
+        return 0;
+    }
+
+
+}
+
+int img2pcl::grabFrame2() {
+
+    if(!association_D.eof()) {
+        std::string params = "#", time;
+
+        std::string depthName = "#";
+        while(depthName[0] == '#')
+        {
+            std::getline(association_D, depthName);
+            std::cout << depthName << std::endl;
+        }
+        std::string rgbName = "#";
+        while(rgbName[0] == '#')
+            std::getline(association_RGB, rgbName);
+
+        std::stringstream dataStr(depthName);
+        std::getline(dataStr, Timestamp,' ');
+
+        char buff[100];
+        std::sprintf(buff, form.c_str(), Timestamp.c_str());
+        depth = cv::imread(path + "depth/" + buff, CV_LOAD_IMAGE_ANYDEPTH);
+
+        dataStr.str(rgbName);
+        std::getline(dataStr, rgbName,' ');
+        std::sprintf(buff, form.c_str(), rgbName.c_str());
+        bgr = cv::imread(path + "rgb/" + buff);
+        //        cv::imshow("troll", depth);
+        //        cv::imshow("troll2", bgr);
         //        cv::waitKey(30);
+
+        Timestamp.resize(Timestamp.size() - 4);
+
+        while(Timestamp != time) {
+            params = "#";
+            while(params[0] == '#')
+                std::getline(stateFile, params);
+
+            std::cout << params << std::endl;
+            pos = params;
+
+
+            dataStr.str(params);
+            std::getline(dataStr, time,' ');
+            time.resize(time.size() - 2);
+
+            std::cout << time << std::endl;
+        }
+
+        for(int i=0; i<3;i++)
+            dataStr >> t[i];
+
+        for(int i=0; i<4;i++)
+            dataStr >> q[i];
 
         return 1;
 
@@ -125,6 +224,7 @@ octomap::pose6d img2pcl::FramePose() {
     return octomap::pose6d(octomath::Vector3(t[0],t[1],t[2]), octomath::Quaternion(q[3], q[0], q[1], q[2]));
 }
 
+/// Convert disparity image to point cloud
 int img2pcl::depth2cloud() {
     Eigen::Translation<double,3> point;
     PointCloud tempCloud;
@@ -137,9 +237,9 @@ int img2pcl::depth2cloud() {
 
     for (unsigned int i=0;i<depth.rows;i++) {
         for (unsigned int j=0;j<depth.cols;j++) {
-            tmp = (depth.at<uint16_t>(i,j)>>3);
-            if(tmp>800 && tmp<8500){
-                double depthM = double(tmp)*0.001;
+            tmp = (depth.at<uint16_t>(i,j));
+            if(tmp>800 && tmp<60000){
+                double depthM = double(tmp)/factor;
 
                 point = xyz0(j,i,depthM);
                 Point3D pointPCL;
@@ -159,22 +259,21 @@ int img2pcl::depth2cloud() {
     return 1;
 }
 
-/// Convert disparity image to point cloud
 int img2pcl::depth2colorcloud() {
     Eigen::Translation<double,3> point;
     PointCloud tempCloud;
     tempCloud.clear();
 
-    Eigen::Matrix<double,3,3> R = Rot();
-    Eigen::Translation<double,3> T = Trans();
+//    Eigen::Matrix<float_type,3,3> R = Rot();
+//    Eigen::Translation<float_type,3> T = Trans();
 
     uint16_t tmp;
 
     for (unsigned int i=0;i<depth.rows;i++) {
         for (unsigned int j=0;j<depth.cols;j++) {
-            tmp = (depth.at<uint16_t>(i,j)>>3);
-            if(tmp>800 && tmp<8500){
-                double depthM = double(tmp)*0.001;
+            tmp = (depth.at<uint16_t>(i,j));
+            if(tmp>800 && tmp<60000){
+                double depthM = double(tmp)/factor;
 
                 point = xyz0(j,i,depthM);
                 Point3D pointPCL;

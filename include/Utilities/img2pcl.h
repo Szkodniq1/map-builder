@@ -25,9 +25,11 @@ private:
     //File containing camera parameters
     std::string fileName;
     std::ifstream stateFile;
+    std::ifstream association_RGB;
+    std::ifstream association_D;
 
     //Grabbed images of scene
-    int Timestamp;
+    std::string Timestamp;
     int color;
 
     cv::Mat depth;
@@ -61,6 +63,7 @@ public:
     img2pcl(std::string xmlPath);
     ~img2pcl();
     int grabFrame();
+    int grabFrame2();
     int calcPCL();
 
     mapping::GrabbedImage returnPC();
