@@ -94,30 +94,30 @@ int img2pcl::calcPCL() {
     }
 }
 
-Eigen::Translation<float_type,3> img2pcl::xyz0(int u, int v, float_type d) {
+Eigen::Translation<double,3> img2pcl::xyz0(int u, int v, double d) {
     Eigen::Vector3d point(u, v, 1);
-    Eigen::Matrix<float_type,3,3> PHCPModel;
+    Eigen::Matrix<double,3,3> PHCPModel;
     PHCPModel <<1/focalLength[0],   0,                  -focalAxis[0]/focalLength[0],
                 0,                  1/focalLength[1],   -focalAxis[1]/focalLength[1],
                 0,                  0,                  1;
-    Eigen::Translation<float_type,3> xyz(d*PHCPModel*point);
+    Eigen::Translation<double,3> xyz(d*PHCPModel*point);
     return xyz;
 }
 
-Eigen::Matrix<float_type,3,3> img2pcl::Rot() {
+Eigen::Matrix<double,3,3> img2pcl::Rot() {
     float r11 = 1 - 2*q[1]*q[1] - 2*q[2]*q[2], r12 = 2*q[0]*q[1] - 2*q[2]*q[3],     r13 = 2*q[0]*q[2] + 2*q[1]*q[3],
             r21 = 2*q[0]*q[1] + 2*q[2]*q[3],     r22 = 1 - 2*q[0]*q[0] - 2*q[2]*q[2], r23 = 2*q[1]*q[2] - 2*q[0]*q[3],
             r31 = 2*q[0]*q[2] - 2*q[1]*q[3],     r32 = 2*q[1]*q[2] + 2*q[0]*q[3],     r33 = 1 - 2*q[0]*q[0] - 2*q[1]*q[1];
 
-    Eigen::Matrix<float_type,3,3> Rotation;
+    Eigen::Matrix<double,3,3> Rotation;
     Rotation <<   r11, r12, r13,
             r21, r22, r23,
             r31, r32, r33;
     return Rotation;
 }
 
-Eigen::Translation<float_type,3> img2pcl::Trans() {
-    Eigen::Translation<float_type,3> xyz(t[0],t[1],t[2]);
+Eigen::Translation<double,3> img2pcl::Trans() {
+    Eigen::Translation<double,3> xyz(t[0],t[1],t[2]);
     return xyz;
 }
 
@@ -126,12 +126,12 @@ octomap::pose6d img2pcl::FramePose() {
 }
 
 int img2pcl::depth2cloud() {
-    Eigen::Translation<float_type,3> point;
+    Eigen::Translation<double,3> point;
     PointCloud tempCloud;
     tempCloud.clear();
 
-    Eigen::Matrix<float_type,3,3> R = Rot();
-    Eigen::Translation<float_type,3> T = Trans();
+    Eigen::Matrix<double,3,3> R = Rot();
+    Eigen::Translation<double,3> T = Trans();
 
     uint16_t tmp;
 
@@ -139,7 +139,7 @@ int img2pcl::depth2cloud() {
         for (unsigned int j=0;j<depth.cols;j++) {
             tmp = (depth.at<uint16_t>(i,j)>>3);
             if(tmp>800 && tmp<8500){
-                float_type depthM = float_type(tmp)*0.001;
+                double depthM = double(tmp)*0.001;
 
                 point = xyz0(j,i,depthM);
                 Point3D pointPCL;
@@ -161,12 +161,12 @@ int img2pcl::depth2cloud() {
 
 /// Convert disparity image to point cloud
 int img2pcl::depth2colorcloud() {
-    Eigen::Translation<float_type,3> point;
+    Eigen::Translation<double,3> point;
     PointCloud tempCloud;
     tempCloud.clear();
 
-    Eigen::Matrix<float_type,3,3> R = Rot();
-    Eigen::Translation<float_type,3> T = Trans();
+    Eigen::Matrix<double,3,3> R = Rot();
+    Eigen::Translation<double,3> T = Trans();
 
     uint16_t tmp;
 
@@ -174,7 +174,7 @@ int img2pcl::depth2colorcloud() {
         for (unsigned int j=0;j<depth.cols;j++) {
             tmp = (depth.at<uint16_t>(i,j)>>3);
             if(tmp>800 && tmp<8500){
-                float_type depthM = float_type(tmp)*0.001;
+                double depthM = double(tmp)*0.001;
 
                 point = xyz0(j,i,depthM);
                 Point3D pointPCL;

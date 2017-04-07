@@ -15,18 +15,18 @@ GrabbedImage::GrabbedImage(PointCloud pc, Vec3 translation, Quaternion orientati
 
 PointCloud GrabbedImage::transformedPointCloud() {
     PointCloud newPC;
-    Eigen::Transform<float_type, 3, Eigen::Affine> transform (translation * orientation);
+    Eigen::Transform<double, 3, Eigen::Affine> transform (translation * orientation);
     newPC.reserve(this->pointCloud.size());
     this->orientation.normalize();
 
     int64 e1 = cv::getTickCount();
     for(mapping::Point3D point : this->pointCloud) {
         /// Performance +/- 0,6s left as it more readable solution
-        Eigen::Matrix<float, 3, 1> pt (point.position.x(), point.position.y(), point.position.z());
+        Eigen::Matrix<double, 3, 1> pt (point.position.x(), point.position.y(), point.position.z());
                 newPC.push_back(mapping::Point3D(
-                            static_cast<float> (transform (0, 0) * pt.coeffRef (0) + transform (0, 1) * pt.coeffRef (1) + transform (0, 2) * pt.coeffRef (2) + transform (0, 3)),
-                            static_cast<float> (transform (1, 0) * pt.coeffRef (0) + transform (1, 1) * pt.coeffRef (1) + transform (1, 2) * pt.coeffRef (2) + transform (1, 3)),
-                            static_cast<float> (transform (2, 0) * pt.coeffRef (0) + transform (2, 1) * pt.coeffRef (1) + transform (2, 2) * pt.coeffRef (2) + transform (2, 3)),point.color.r,
+                            static_cast<double> (transform (0, 0) * pt.coeffRef (0) + transform (0, 1) * pt.coeffRef (1) + transform (0, 2) * pt.coeffRef (2) + transform (0, 3)),
+                            static_cast<double> (transform (1, 0) * pt.coeffRef (0) + transform (1, 1) * pt.coeffRef (1) + transform (1, 2) * pt.coeffRef (2) + transform (1, 3)),
+                            static_cast<double> (transform (2, 0) * pt.coeffRef (0) + transform (2, 1) * pt.coeffRef (1) + transform (2, 2) * pt.coeffRef (2) + transform (2, 3)),point.color.r,
                             point.color.g,
                             point.color.b,
                             point.color.a));

@@ -22,8 +22,8 @@ protected:
 public:
     SolidSphere(float radius, unsigned int rings, unsigned int sectors)
     {
-        float const R = 1.0f/(float)(rings-1);
-        float const S = 1.0f/(float)(sectors-1);
+        double const R = 1.0f/(double)(rings-1);
+        double const S = 1.0f/(double)(sectors-1);
         unsigned int r, s;
 
         vertices.resize(rings * sectors * 3);
@@ -34,30 +34,30 @@ public:
         std::vector<GLfloat>::iterator t = texcoords.begin();
         for(r = 0; r < rings; r++)
             for(s = 0; s < sectors; s++) {
-                float const y = (float) sin( -M_PI_2 + M_PI * r * R );
-                float const x = (float) cos(2*M_PI * s * S) * (float) sin( M_PI * r * R );
-                float const z = (float) sin(2*M_PI * s * S) * (float) sin( M_PI * r * R );
+                double const y = (double) sin( -M_PI_2 + M_PI * r * R );
+                double const x = (double) cos(2*M_PI * s * S) * (double) sin( M_PI * r * R );
+                double const z = (double) sin(2*M_PI * s * S) * (double) sin( M_PI * r * R );
 
-                *t++ = (float) s*S;
-                *t++ = (float) r*R;
+                *t++ = (double) s*S;
+                *t++ = (double) r*R;
 
-                *v++ = (float) x * radius;
-                *v++ = (float) y * radius;
-                *v++ = (float) z * radius;
+                *v++ = (double) x * radius;
+                *v++ = (double) y * radius;
+                *v++ = (double) z * radius;
 
-                *n++ = (float) x;
-                *n++ = (float) y;
-                *n++ = (float) z;
+                *n++ = (double) x;
+                *n++ = (double) y;
+                *n++ = (double) z;
             }
 
         indices.resize(rings * sectors * 4);
         std::vector<GLushort>::iterator i = indices.begin();
         for(r = 0; r < rings-1; r++)
             for(s = 0; s < sectors-1; s++) {
-                *i++ = (GLushort) ((float) r * (float)sectors + (float) s);
-                *i++ = (GLushort) ((float) r * (float)sectors + (float) (s+1));
-                *i++ = (GLushort) ((float) (r+1) * (float)sectors + (float) (s+1));
-                *i++ = (GLushort) ((float) (r+1) * (float)sectors + (float) s);
+                *i++ = (GLushort) ((double) r * (double)sectors + (double) s);
+                *i++ = (GLushort) ((double) r * (double)sectors + (double) (s+1));
+                *i++ = (GLushort) ((double) (r+1) * (double)sectors + (double) (s+1));
+                *i++ = (GLushort) ((double) (r+1) * (double)sectors + (double) s);
             }
     }
 

@@ -10,11 +10,8 @@
 namespace mapping {
 
 
-/// default floating point // zamienic, po co
-typedef double float_type;
-
 /// 3 element vector class
-typedef Eigen::Translation<float_type,3> Vec3;
+typedef Eigen::Translation<double,3> Vec3;
 
 /// RGBA color space
 class RGBA {
@@ -66,7 +63,7 @@ public:
 typedef std::vector<Point3D> PointCloud;
 
 /// Quaternion representation of SO(3) group of rotations
-typedef Eigen::Quaternion<float_type> Quaternion;
+typedef Eigen::Quaternion<double> Quaternion;
 
 /// Homogeneous representation of SE(3) rigid body transformations
 typedef Eigen::Transform<double, 3, Eigen::Affine> Mat34;
