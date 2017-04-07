@@ -10,7 +10,7 @@
 namespace mapping {
 
 
-/// default floating point
+/// default floating point // zamienic, po co
 typedef double float_type;
 
 /// 3 element vector class
@@ -111,6 +111,8 @@ public:
         yAxis.stdDev = yDev;
         zAxis.mean = zMean;
         zAxis.stdDev = zDev;
+
+        //dodac kolory zmienic zmienne na wektor i macierz
     }
 };
 
