@@ -39,7 +39,7 @@ namespace mapping {
         virtual const std::string& getName() const = 0;
 
         /// Insert point cloud into map
-        virtual void insertCloud(mapping::GrabbedImage grab) = 0;
+        virtual void insertCloud(mapping::GrabbedImage grab, bool isLast) = 0;
 
         /// save map in file
         virtual void saveMap() = 0;

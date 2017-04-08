@@ -9,7 +9,7 @@
 class Observer
 {
 public:
-    virtual void update(const mapping::PointCloud& newCloud) = 0;
+    virtual void update(const mapping::PointCloud& newCloud, bool isLast) = 0;
 };
 
 class Subject
@@ -19,7 +19,7 @@ class Subject
 public:
     void attach(Observer *observer);
     void detach(Observer *observer);
-    void notify(const mapping::PointCloud& newCloud);
+    void notify(const mapping::PointCloud& newCloud, bool isLast);
 };
 
 #endif // OBSERVER_H_

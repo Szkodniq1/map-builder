@@ -18,7 +18,7 @@ OctoMap::OctoMap(mapping::PointCloud PC) : map(this->MAP_RES) {
 }
 
 /// Insert point cloud into map
-void OctoMap::insertCloud(mapping::GrabbedImage grab) {
+void OctoMap::insertCloud(mapping::GrabbedImage grab, bool isLast) {
     mapping::PointCloud newPC = grab.transformedPointCloud();
     octoCloud.reserve(newPC.size());
     for(mapping::Point3D point : newPC) {
@@ -35,7 +35,7 @@ void OctoMap::insertCloud(mapping::GrabbedImage grab) {
     double time = ((e2 - e1)/ cv::getTickFrequency());
     std::cout<<"Octomap insert time and update: "<<time<<std::endl;
 
-    notify(newPC);
+    notify(newPC, isLast);
 }
 
 /// save map in file

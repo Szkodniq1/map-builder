@@ -119,11 +119,11 @@ public:
     /// Destruction
     ~QGLVisualizer(void);
 
-    /// Observer update
-    void update(const mapping::PointCloud& newCloud);
+    void update(const mapping::PointCloud& newCloud, bool isLast);
 
 private:
     Config config;
+    GLuint list;
 
     //pcl
     std::vector<mapping::PointCloud> pointClouds;
@@ -145,6 +145,8 @@ private:
 
     /// Draw point clouds
     void drawPointCloud(void);
+
+    void createDisplayList();
 };
 
 #endif // QVISUALIZER_H_INCLUDED

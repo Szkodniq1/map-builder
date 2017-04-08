@@ -103,17 +103,18 @@ QGLVisualizer::~QGLVisualizer(void) {
 
 
 /// Observer update
-void QGLVisualizer::update(const mapping::PointCloud& newCloud) {
+void QGLVisualizer::update(const mapping::PointCloud& newCloud, bool isLast) {
     mtxPointCloud.lock();
     pointClouds.push_back(newCloud);
+    if(isLast) {
+        createDisplayList();
+    }
     mtxPointCloud.unlock();
 }
 
-
-/// Draw point clouds
-void QGLVisualizer::drawPointCloud(void){
-    mtxPointCloud.lock();
-    glPushMatrix();
+void QGLVisualizer::createDisplayList() {
+    list = glGenLists(1);
+    glNewList(list, GL_COMPILE);
     glPointSize(3);
     glBegin(GL_POINTS);
     for(mapping::PointCloud pointCloud : pointClouds) {
@@ -123,6 +124,15 @@ void QGLVisualizer::drawPointCloud(void){
         }
     }
     glEnd();
+    glEndList();
+}
+
+
+/// Draw point clouds
+void QGLVisualizer::drawPointCloud(void){
+    mtxPointCloud.lock();
+    glPushMatrix();
+    glCallList(list);
     glPopMatrix();
     mtxPointCloud.unlock();
 }

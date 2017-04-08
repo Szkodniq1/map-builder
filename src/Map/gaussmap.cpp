@@ -12,7 +12,7 @@ Gaussmap::Gaussmap(mapping::PointCloud PC) : map(256) {
 }
 
 /// Insert point cloud into map
-void Gaussmap::insertCloud(mapping::GrabbedImage grab) {
+void Gaussmap::insertCloud(mapping::GrabbedImage grab, bool isLast) {
 
 }
 
