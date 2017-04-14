@@ -68,26 +68,31 @@ typedef Eigen::Quaternion<double> Quaternion;
 /// Homogeneous representation of SE(3) rigid body transformations
 typedef Eigen::Transform<double, 3, Eigen::Affine> Mat34;
 
+typedef Eigen::Matrix3d Mat33;
+
 /// Voxel class definition
 class Voxel {
 public:
-    struct NormalDist{
-        double mean;
-        double stdDev;
-    };
-
+    // [ mean_x mean_y mean_z]
+    Vec3 mean;
+    /*
+     * --                    --
+     * | dev_xx dev_xy dev_xz |
+     * | dev_yx dev_yy dev_yz |
+     * | dev_zx dev_yz dev_zz |
+     * --                    --
+     */
+    Mat33 dev;
     double probability;
     unsigned int sampNumber;
-    NormalDist xAxis, yAxis, zAxis;
     RGBA color;
 
     ///default constructor
     inline Voxel(){
         probability = 0;
         sampNumber = 0;
-        xAxis.mean = 0;
-        xAxis.stdDev = 0;
-        yAxis = xAxis = zAxis;
+        mean = Vec3(0, 0, 0);
+        dev << 0, 0, 0, 0, 0, 0, 0, 0, 0;
         color = RGBA(255, 255, 255);
     }
 
@@ -95,24 +100,18 @@ public:
     inline Voxel(int res){
         probability = 0;
         sampNumber = 0;
-        xAxis.mean = 0;
-        xAxis.stdDev = 0;
-        yAxis = xAxis = zAxis;
+        mean = Vec3(0, 0, 0);
+        dev << 0, 0, 0, 0, 0, 0, 0, 0, 0;
         color = RGBA(255, 255, 255);
     }
 
     ///constructor
-    inline Voxel(double prob, unsigned int samps, double xMean = 0, double xDev = 0, double yMean = 0, double yDev = 0, double zMean = 0, double zDev = 0, RGBA color) {
+    inline Voxel(double prob, unsigned int samps, Vec3 mean, Mat33 dev, RGBA color) {
         probability = prob;
         sampNumber = samps;
-        xAxis.mean = xMean;
-        xAxis.stdDev = xDev;
-        yAxis.mean = yMean;
-        yAxis.stdDev = yDev;
-        zAxis.mean = zMean;
-        zAxis.stdDev = zDev;
+        this->mean = mean;
+        this->dev = dev;
         this->color = color;
-        //dodac kolory zmienic zmienne na wektor i macierz
     }
 };
 
