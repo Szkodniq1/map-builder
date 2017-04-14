@@ -79,6 +79,7 @@ public:
     double probability;
     unsigned int sampNumber;
     NormalDist xAxis, yAxis, zAxis;
+    RGBA color;
 
     ///default constructor
     inline Voxel(){
@@ -87,6 +88,7 @@ public:
         xAxis.mean = 0;
         xAxis.stdDev = 0;
         yAxis = xAxis = zAxis;
+        color = RGBA(255, 255, 255);
     }
 
     //default contructor int OcTree structure
@@ -96,10 +98,11 @@ public:
         xAxis.mean = 0;
         xAxis.stdDev = 0;
         yAxis = xAxis = zAxis;
+        color = RGBA(255, 255, 255);
     }
 
     ///constructor
-    inline Voxel(double prob, unsigned int samps, double xMean = 0, double xDev = 0, double yMean = 0, double yDev = 0, double zMean = 0, double zDev = 0) {
+    inline Voxel(double prob, unsigned int samps, double xMean = 0, double xDev = 0, double yMean = 0, double yDev = 0, double zMean = 0, double zDev = 0, RGBA color) {
         probability = prob;
         sampNumber = samps;
         xAxis.mean = xMean;
@@ -108,7 +111,7 @@ public:
         yAxis.stdDev = yDev;
         zAxis.mean = zMean;
         zAxis.stdDev = zDev;
-
+        this->color = color;
         //dodac kolory zmienic zmienne na wektor i macierz
     }
 };
