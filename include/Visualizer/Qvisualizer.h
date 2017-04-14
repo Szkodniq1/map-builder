@@ -15,6 +15,7 @@
 #include <memory>
 #include <thread>
 #include <mutex>
+#include "3rdParty/octree/octree.h"
 
 using namespace mapping;
 
@@ -147,6 +148,10 @@ private:
     void drawPointCloud(void);
 
     void createDisplayList();
+
+    Octree<mapping::Voxel> prepareTestMap();
+
+    void drawMap(Octree<mapping::Voxel> map);
 };
 
 #endif // QVISUALIZER_H_INCLUDED

@@ -1,5 +1,6 @@
 #include "Visualizer/Qvisualizer.h"
 #include <Eigen/Core>
+#include <Eigen/Eigenvalues>
 #include <memory>
 #include <cmath>
 #include <stdexcept>
@@ -119,7 +120,7 @@ void QGLVisualizer::createDisplayList() {
     glBegin(GL_POINTS);
     for(mapping::PointCloud pointCloud : pointClouds) {
         for (size_t i = 0;i<pointCloud.size();i++) {
-            glColor3ub(pointCloud[i].color.r,pointCloud[i].color.g,pointCloud[i].color.b);
+            glColor4ub(pointCloud[i].color.r,pointCloud[i].color.g,pointCloud[i].color.b, pointCloud[i].color.a);
             glVertex3d(pointCloud[i].position.x(), pointCloud[i].position.y(), pointCloud[i].position.z());
         }
     }
@@ -141,6 +142,7 @@ void QGLVisualizer::draw(){
     // Here we are in the world coordinate system. Draw unit size axis.
     drawAxis();
     drawPointCloud();
+    drawMap(prepareTestMap());
 }
 
 /// draw objects
@@ -150,15 +152,19 @@ void QGLVisualizer::animate(){
 
 /// initialize visualizer
 void QGLVisualizer::init(){
-    // Light setup
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 50.0);
-    GLfloat specular_color[4] = { 0.99f, 0.99f, 0.99f, 1.0 };
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  specular_color);
+    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+       GLfloat mat_shininess[] = { 50.0 };
+       GLfloat light_position[] = { 1.0, 1.0, 1.0, 0.0 };
+       glClearColor (0.0, 0.0, 0.0, 0.0);
+       glShadeModel (GL_SMOOTH);
 
-    //Set global ambient light
-    GLfloat black[] = {0.99f, 0.99f, 0.99f, 1.0f};
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, black);
+       glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+       glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+       glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
+       glEnable(GL_LIGHTING);
+       glEnable(GL_LIGHT0);
+       glEnable(GL_DEPTH_TEST);
     glEnable(GL_AUTO_NORMAL);
     glEnable(GL_NORMALIZE);
     // Restore previous viewer state.
@@ -178,6 +184,55 @@ void QGLVisualizer::init(){
     help();
 
     startAnimation();
+}
+
+Octree<mapping::Voxel> QGLVisualizer::prepareTestMap() {
+    Octree<mapping::Voxel> map(4);
+    Vec3 mean = Vec3(1,1,1);
+    Mat33 dev;
+    dev <<  1, 0, 0,
+            0, 1, 0,
+            0, 0, 0.25;
+    RGBA color = RGBA(255, 255, 0);
+    map(0,0,2) = Voxel(1, 0, mean, dev, color);
+    map(0,1,2) = Voxel(1, 0, mean, dev, color);
+    map(0,1,1) = Voxel(1, 0, mean, dev, color);
+    map(0,2,2) = Voxel(1, 0, mean, dev, color);
+    map(0,3,2) = Voxel(1, 0, mean, dev, color);
+    map(1,1,2) = Voxel(1, 0, mean, dev, color);
+    map(1,2,2) = Voxel(1, 0, mean, dev, color);
+    map(1,2,3) = Voxel(1, 0, mean, dev, color);
+    map(1,3,2) = Voxel(1, 0, mean, dev, color);
+    map(2,3,2) = Voxel(1, 0, mean, dev, color);
+    map(2,2,2) = Voxel(1, 0, mean, dev, color);
+    map(3,3,2) = Voxel(1, 0, mean, dev, color);
+    return map;
+}
+
+void QGLVisualizer::drawMap(Octree<mapping::Voxel> map) {
+    int n = map.size();
+    for(int i = 0; i<n; i++) {
+        for(int j = 0; j<n; j++) {
+            for(int k = 0; k<n; k++) {
+                Voxel v = map(i, j, k);
+                if(v.probability == 1) {
+                    glPushMatrix();
+
+                    GLfloat mat[]={
+                    v.dev(0,0), v.dev(1,0), v.dev(2,0), 0, // vecteur1
+                    v.dev(0,1), v.dev(1,1), v.dev(2,1), 0, // vecteur2
+                    v.dev(0,2), v.dev(1,2), v.dev(2,2), 0, // vecteur3
+                    v.mean.x() * i, v.mean.y() * j, v.mean.z() * k, 1
+                    };
+                    glMultMatrixf(mat);
+                    glutSolidSphere(1,30,30);//drawCloudObj(pointsObjVox);
+                    glColor4ub(v.color.r,v.color.g,v.color.b, v.color.a);
+                    glPopMatrix();
+                    glFlush();
+                }
+            }
+        }
+    }
 }
 
 /// generate help string
