@@ -2,9 +2,11 @@
 #define _GAUSSMAP_H
 
 #include "Defs/defs.h"
-#include "../Defs/voxel.h"
+#include "Defs/voxel.h"
 #include "3rdParty/octree/octree.h"
 #include "map.h"
+#include "math.h"
+#include <unordered_map>
 
 #define MAP_SIZE 256
 
@@ -20,6 +22,8 @@ private:
     const double res = 0.1;
     PointCloud cloud;
 
+    std::unordered_map<std::string, PointGroup> dataMap;
+
     //Map borders
     double xmin, xmax;
     double ymin, ymax;
@@ -29,7 +33,7 @@ private:
 protected:
     //Protected functions
     void updateMap();
-    void updateVoxel(int xCoor, int yCoor, int zCoor, mapping::Point3D point);
+    double normalize(double p, double min);
     int xCoordinate(double x);
     int yCoordinate(double y);
     int zCoordinate(double z);

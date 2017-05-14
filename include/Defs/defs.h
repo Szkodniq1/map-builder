@@ -70,6 +70,26 @@ typedef Eigen::Transform<double, 3, Eigen::Affine> Mat34;
 
 typedef Eigen::Matrix3d Mat33;
 
+class PointGroup {
+public:
+    int xCoord, yCoord, zCoord;
+    std::vector<Vec3> points;
+
+    inline PointGroup() {
+
+    }
+
+    inline PointGroup(int xC, int yC, int zC) {
+        xCoord = xC;
+        yCoord = yC;
+        zCoord = zC;
+    }
+
+    inline bool isInserted(int xC, int yC, int zC) {
+        return xCoord == xC && yCoord == yC && zCoord == zC;
+    }
+};
+
 }
 
 #endif

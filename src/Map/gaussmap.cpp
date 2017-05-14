@@ -61,10 +61,29 @@ void Gaussmap::updateMap() {
         yCoor = yCoordinate(point.position.y());
         zCoor = zCoordinate(point.position.z());
 
-        updateVoxel(xCoor, yCoor, zCoor, point);
+        std::string key = std::to_string(xCoor) + std::to_string(yCoor) + std::to_string(zCoor);
+
+std::unordered_map<std::string, PointGroup>::iterator got = dataMap.find(key);
+
+        if(got == dataMap.end()) {
+            dataMap[key] = PointGroup(xCoor, yCoor, zCoor);
+            dataMap[key].points.push_back(Vec3(normalize(point.position.x(), xmin), normalize(point.position.y(), ymin), normalize(point.position.z(), zmin)));
+        } else {
+            got->second.points.push_back(Vec3(normalize(point.position.x(), xmin), normalize(point.position.y(), ymin), normalize(point.position.z(), zmin)));
+        }
     }
+
+    for( const auto& n : dataMap ) {
+        //wait for merge
+        //map(n.second.xCoord, n.second.yCoord, n.second.zCoord).insertData(n.second.points);
+    }
+
+    dataMap.clear();
 }
 
+double Gaussmap::normalize(double p, double min) {
+    return (fmod((p - min), res) * 2/res) - 1.0;
+}
 
 
 int Gaussmap::xCoordinate(double x) {

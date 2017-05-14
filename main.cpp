@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
     mapping::img2pcl troll("../../resources/img2pcl.xml");
 
     std::cout << "Start\n";
-    mapping::Map* map = mapping::createMapOcto(PC.pointCloud);
+    mapping::Map* map = mapping::createMapGauss(PC.pointCloud);
     std::cout << map->getName() << "\n";
 
     QApplication application(argc,argv);
@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
     visu.show();
     map->attachVisualizer(&visu);
 
-    /*while(troll.grabFrame()) {
+    while(troll.grabFrame()) {
         if(a%100 == 0) {
             troll.calcPCL();
             PC = troll.returnPC();
@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
 
         }
         a++;
-    }*/
+    }
     map->saveMap();
     application.exec();
 
