@@ -8,7 +8,7 @@ namespace mapping{
 
 void Voxel::update(std::vector<Vec3> measurements, double distance) {
 
-
+    updateDistribution(measurements, distance);
 
 
 }
