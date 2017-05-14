@@ -2,6 +2,7 @@
 #define _GAUSSMAP_H
 
 #include "Defs/defs.h"
+#include "../Defs/voxel.h"
 #include "3rdParty/octree/octree.h"
 #include "map.h"
 
