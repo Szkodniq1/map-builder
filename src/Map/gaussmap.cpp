@@ -24,7 +24,6 @@ Gaussmap::Gaussmap(mapping::PointCloud PC, float vxmin, float vxmax, float vymin
 /// Insert point cloud into map
 void Gaussmap::insertCloud(mapping::GrabbedImage grab, bool isLast) {
     cloud = grab.transformedPointCloud();
-
     updateMap();
 }
 
@@ -63,7 +62,7 @@ void Gaussmap::updateMap() {
 
         std::string key = std::to_string(xCoor) + std::to_string(yCoor) + std::to_string(zCoor);
 
-std::unordered_map<std::string, PointGroup>::iterator got = dataMap.find(key);
+    std::unordered_map<std::string, PointGroup>::iterator got = dataMap.find(key);
 
         if(got == dataMap.end()) {
             dataMap[key] = PointGroup(xCoor, yCoor, zCoor);
@@ -76,7 +75,7 @@ std::unordered_map<std::string, PointGroup>::iterator got = dataMap.find(key);
     for( const auto& n : dataMap ) {
         map(n.second.xCoord, n.second.yCoord, n.second.zCoord).update(n.second.points, 0.0);
     }
-
+    notify(map);
     dataMap.clear();
 }
 

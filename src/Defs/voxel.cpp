@@ -1,31 +1,36 @@
 #include "voxel.h"
+#include "../../3rdParty/Eigen/Dense"
 
 /*
  * Voxel methods
  */
-
 namespace mapping{
 
 void Voxel::update(std::vector<Vec3> measurements, double distance) {
 
-    updateDistribution(measurements, distance);
+    updateDistribution(measurements);
 
 
 }
 
 void Voxel::updateDistribution(std::vector<Vec3> measurements){
 
-    Vec3 sampleMean = Vec3(0, 0, 0);
-    Mat33 sampleVar = (Mat33() << 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    Mat33 sampleVar;
+    sampleVar << 0, 0, 0, 0, 0, 0, 0, 0, 0;
 
     Mat33 priorVar = var;
 
     int sampleNumber = measurements.size();
+    double x=0,y=0,z=0;
 
-    for(Vec3 &point : measurements)
-        sampleMean += point;
+    for(Vec3 &point : measurements) {
+        x += point.x();
+        y += point.y();
+        z += point.z();
 
-    sampleMean /= sampleNumber;
+    }
+
+    Vec3 sampleMean = Vec3(x/sampleNumber, y/sampleNumber, z/sampleNumber);
 
     for(Vec3 &point : measurements){
         sampleVar(0, 0) += ((point.x() - sampleMean.x()) * (point.x() - sampleMean.x()));
@@ -43,8 +48,8 @@ void Voxel::updateDistribution(std::vector<Vec3> measurements){
 
     sampleVar /= sampleNumber;
 
-    var = Eigen::inverse((Eigen::inverse(priorVar) + sampleNumber * Eigen::inverse(sampleVar)));
-    mean = var * (sampleNumber * Eigen::inverse(sampleVar)*sampleMean + Eigen::inverse(priorVar) * mean);
+    //var = Eigen::inverse((Eigen::inverse(priorVar) + sampleNumber * Eigen::inverse(sampleVar)));
+    //mean = var * (sampleNumber * Eigen::inverse(sampleVar)*sampleMean + Eigen::inverse(priorVar) * mean);
 
 }
 

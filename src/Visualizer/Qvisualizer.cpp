@@ -79,18 +79,18 @@ public:
     }
 };
 
-QGLVisualizer::QGLVisualizer(void) {
+QGLVisualizer::QGLVisualizer(void) : map(256) {
 
 }
 
 /// Construction
-QGLVisualizer::QGLVisualizer(Config _config): config(_config){
+QGLVisualizer::QGLVisualizer(Config _config): config(_config), map(256){
 
 }
 
 /// Construction
 QGLVisualizer::QGLVisualizer(std::string configFile) :
-    config(configFile) {
+    config(configFile), map(256) {
     tinyxml2::XMLDocument configXML;
     std::string filename = "../../resources/" + configFile;
     configXML.LoadFile(filename.c_str());
@@ -111,6 +111,10 @@ void QGLVisualizer::update(const mapping::PointCloud& newCloud, bool isLast) {
         createDisplayList();
     }
     mtxPointCloud.unlock();
+}
+
+void QGLVisualizer::update(Octree<mapping::Voxel>& map) {
+    this->map = map;
 }
 
 void QGLVisualizer::createDisplayList() {
@@ -141,8 +145,8 @@ void QGLVisualizer::drawPointCloud(void){
 void QGLVisualizer::draw(){
     // Here we are in the world coordinate system. Draw unit size axis.
     drawAxis();
-    drawPointCloud();
-    drawMap(prepareTestMap());
+    //drawPointCloud();
+    drawMap(this->map);
 }
 
 /// draw objects
