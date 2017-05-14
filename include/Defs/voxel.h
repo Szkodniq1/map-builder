@@ -10,12 +10,12 @@ namespace mapping {
         Vec3 mean;
         /*
          * --                    --
-         * | dev_xx dev_xy dev_xz |
-         * | dev_yx dev_yy dev_yz |
-         * | dev_zx dev_yz dev_zz |
+         * | var_xx var_xy var_xz |
+         * | var_yx var_yy var_yz |
+         * | var_zx var_yz var_zz |
          * --                    --
          */
-        Mat33 dev;
+        Mat33 var;
         double probability;
         unsigned int sampNumber;
         RGBA color;
@@ -25,7 +25,7 @@ namespace mapping {
             probability = 0;
             sampNumber = 0;
             mean = Vec3(0, 0, 0);
-            dev << 0, 0, 0, 0, 0, 0, 0, 0, 0;
+            var << 0, 0, 0, 0, 0, 0, 0, 0, 0;
             color = RGBA(255, 255, 255);
         }
 
@@ -34,7 +34,7 @@ namespace mapping {
             probability = 0;
             sampNumber = 0;
             mean = Vec3(0, 0, 0);
-            dev << 0, 0, 0, 0, 0, 0, 0, 0, 0;
+            var << 0, 0, 0, 0, 0, 0, 0, 0, 0;
             color = RGBA(255, 255, 255);
         }
 
@@ -43,9 +43,14 @@ namespace mapping {
             probability = prob;
             sampNumber = samps;
             this->mean = mean;
-            this->dev = dev;
+            this->var = dev;
             this->color = color;
+
         }
+
+        void update(std::vector<Vec3> measurements, double distance);
+        void updateOccupancy();
+        void updateDistribution(std::vector<Vec3> measurements);
     };
 }
 

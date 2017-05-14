@@ -65,17 +65,7 @@ void Gaussmap::updateMap() {
     }
 }
 
-void Gaussmap::updateVoxel(int xCoor, int yCoor, int zCoor, mapping::Point3D point) {
-    Voxel *tmp = &map(xCoor, yCoor, zCoor);
 
-    if((tmp->mean.x() == 0) && (tmp->mean.y() == 0) && (tmp->mean.z() == 0)) {
-        tmp->mean = Vec3(point.position.x(), point.position.y(), point.position.z());
-        tmp->dev(0,0) = tmp->dev(1,1) = tmp->dev(2,2) = res/2;
-        return;
-    }
-
-
-}
 
 int Gaussmap::xCoordinate(double x) {
     double  a = MAP_SIZE/(xmax-xmin);

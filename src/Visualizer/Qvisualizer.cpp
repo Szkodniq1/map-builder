@@ -219,9 +219,9 @@ void QGLVisualizer::drawMap(Octree<mapping::Voxel> map) {
                     glPushMatrix();
 
                     GLfloat mat[]={
-                    v.dev(0,0), v.dev(1,0), v.dev(2,0), 0, // vecteur1
-                    v.dev(0,1), v.dev(1,1), v.dev(2,1), 0, // vecteur2
-                    v.dev(0,2), v.dev(1,2), v.dev(2,2), 0, // vecteur3
+                    v.var(0,0), v.var(1,0), v.var(2,0), 0, // vecteur1
+                    v.var(0,1), v.var(1,1), v.var(2,1), 0, // vecteur2
+                    v.var(0,2), v.var(1,2), v.var(2,2), 0, // vecteur3
                     v.mean.x() * i, v.mean.y() * j, v.mean.z() * k, 1
                     };
                     glMultMatrixf(mat);
