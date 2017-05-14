@@ -74,8 +74,7 @@ std::unordered_map<std::string, PointGroup>::iterator got = dataMap.find(key);
     }
 
     for( const auto& n : dataMap ) {
-        //wait for merge
-        //map(n.second.xCoord, n.second.yCoord, n.second.zCoord).insertData(n.second.points);
+        map(n.second.xCoord, n.second.yCoord, n.second.zCoord).update(n.second.points, 0.0);
     }
 
     dataMap.clear();
