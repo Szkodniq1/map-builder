@@ -45,7 +45,12 @@ void Voxel::updateDistribution(std::vector<Vec3> measurements){
     Mat33 sampleVar;
     sampleVar << 0, 0, 0, 0, 0, 0, 0, 0, 0;
 
-    Mat33 priorVar = var;
+    Mat33 priorVar;
+    if(var.sum() == 0) {
+        priorVar<< 1,0,0,0,1,0,0,0,1;
+    } else {
+        priorVar = var;
+    }
 
     int sampleNumber = measurements.size();
     double x=0,y=0,z=0;
@@ -76,9 +81,12 @@ void Voxel::updateDistribution(std::vector<Vec3> measurements){
     sampleVar /= sampleNumber;
 
     //var = Eigen::inverse((Eigen::inverse(priorVar) + sampleNumber * Eigen::inverse(sampleVar)));
-    Mat33 temp = priorVar.inverse() + (sampleNumber * sampleVar.inverse());
+    Mat33 temp;
+    temp = priorVar.inverse();
+    temp += (sampleNumber * sampleVar.inverse());
     var = temp.inverse();
     mean = var * (sampleNumber * sampleVar.inverse()*sampleMean + priorVar.inverse() * mean);
+    probability = 1;
 
 }
 

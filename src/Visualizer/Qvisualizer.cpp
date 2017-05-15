@@ -219,7 +219,7 @@ void QGLVisualizer::drawMap(Octree<mapping::Voxel> map) {
         for(int j = 0; j<n; j++) {
             for(int k = 0; k<n; k++) {
                 Voxel v = map(i, j, k);
-                if( i >110 && i < 150 && j > 110 && j < 150 && k >110 && k <150 ) {//v.probability == 1) {
+                if(v.probability == 1) {
                     glPushMatrix();
 
                     GLfloat mat[]={
