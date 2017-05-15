@@ -16,6 +16,7 @@ namespace mapping {
     Map* createMapGauss(PointCloud PC);
 }
 
+
 class Gaussmap : public mapping::Map, public Subject {
 private:
     Octree<mapping::Voxel> map;

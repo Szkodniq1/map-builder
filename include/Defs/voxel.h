@@ -1,7 +1,9 @@
 #ifndef VOXEL_H
 #define VOXEL_H
 
-#include "defs.h"
+#include "Defs/defs.h"
+#include "../../3rdParty/Eigen/Dense"
+
 
 namespace mapping {
     class Voxel {
@@ -21,37 +23,22 @@ namespace mapping {
         RGBA color;
 
         ///default constructor
-        inline Voxel(){
-            probability = 0;
-            sampNumber = 0;
-            mean = Vec3(0, 0, 0);
-            var << 0, 0, 0, 0, 0, 0, 0, 0, 0;
-            color = RGBA(255, 255, 255);
-        }
+        Voxel();
 
         //default contructor int OcTree structure
-        inline Voxel(int res){
-            probability = 0;
-            sampNumber = 0;
-            mean = Vec3(0, 0, 0);
-            var << 0, 0, 0, 0, 0, 0, 0, 0, 0;
-            color = RGBA(255, 255, 255);
-        }
+        Voxel(int res);
 
         ///constructor
-        inline Voxel(double prob, unsigned int samps, Vec3 mean, Mat33 dev, RGBA color) {
-            probability = prob;
-            sampNumber = samps;
-            this->mean = mean;
-            this->var = dev;
-            this->color = color;
-
-        }
+        Voxel(double prob, unsigned int samps, Vec3 mean, Mat33 dev, RGBA color);
 
         void update(std::vector<Vec3> measurements, double distance);
         void updateOccupancy();
         void updateDistribution(std::vector<Vec3> measurements);
     };
+
+
+
+
 }
 
 #endif // VOXEL_H

@@ -1,10 +1,35 @@
-#include "voxel.h"
-#include "../../3rdParty/Eigen/Dense"
+#include "Defs/voxel.h"
+
 
 /*
  * Voxel methods
  */
 namespace mapping{
+
+Voxel::Voxel(){
+    probability = 0;
+    sampNumber = 0;
+    mean = Vec3(0, 0, 0);
+    var << 0, 0, 0, 0, 0, 0, 0, 0, 0;
+    color = RGBA(255, 255, 255);
+}
+
+Voxel::Voxel(int res){
+    probability = 0;
+    sampNumber = 0;
+    mean = Vec3(0, 0, 0);
+    var << 0, 0, 0, 0, 0, 0, 0, 0, 0;
+    color = RGBA(255, 255, 255);
+}
+
+Voxel::Voxel(double prob, unsigned int samps, Vec3 mean, Mat33 dev, RGBA color) {
+    probability = prob;
+    sampNumber = samps;
+    this->mean = mean;
+    this->var = dev;
+    this->color = color;
+
+}
 
 void Voxel::update(std::vector<Vec3> measurements, double distance) {
 
@@ -47,6 +72,7 @@ void Voxel::updateDistribution(std::vector<Vec3> measurements){
     sampleVar(2, 1) = sampleVar(1, 2);
 
     sampleVar /= sampleNumber;
+
 
     //var = Eigen::inverse((Eigen::inverse(priorVar) + sampleNumber * Eigen::inverse(sampleVar)));
     //mean = var * (sampleNumber * Eigen::inverse(sampleVar)*sampleMean + Eigen::inverse(priorVar) * mean);

@@ -135,7 +135,7 @@ add_definitions(-DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT)
             "${CMAKE_SOURCE_DIR}/include/Map/*.h"
         )
         add_library(Map STATIC ${MAP_SOURCES} ${MAP_HEADERS})
-        TARGET_LINK_LIBRARIES(Map tinyxml2 Utilities)
+        TARGET_LINK_LIBRARIES(Map Defs tinyxml2 Utilities)
 #        INSTALL(TARGETS Utilities RUNTIME DESTINATION bin LIBRARY DESTINATION bin ARCHIVE DESTINATION lib)
 #        INSTALL(FILES ${TRACKER_HEADERS} DESTINATION include/walkers/Utilities/)
 #endif(BUILD_WALKERS_UTILITIES)
