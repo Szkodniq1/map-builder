@@ -9,7 +9,7 @@ namespace mapping {
     class Voxel {
     public:
         // [ mean_x mean_y mean_z]
-        Vec3 mean;
+        Eigen::Vector3d mean;
         /*
          * --                    --
          * | var_xx var_xy var_xz |
@@ -29,7 +29,7 @@ namespace mapping {
         Voxel(int res);
 
         ///constructor
-        Voxel(double prob, unsigned int samps, Vec3 mean, Mat33 dev, RGBA color);
+        Voxel(double prob, unsigned int samps, Eigen::Vector3d mean, Mat33 dev, RGBA color);
 
         void update(std::vector<Vec3> measurements, double distance);
         void updateOccupancy();

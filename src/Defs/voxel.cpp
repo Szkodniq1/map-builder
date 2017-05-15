@@ -4,12 +4,14 @@
 /*
  * Voxel methods
  */
+
+
 namespace mapping{
 
 Voxel::Voxel(){
     probability = 0;
     sampNumber = 0;
-    mean = Vec3(0, 0, 0);
+    mean = Eigen::Vector3d(0, 0, 0);
     var << 0, 0, 0, 0, 0, 0, 0, 0, 0;
     color = RGBA(255, 255, 255);
 }
@@ -17,12 +19,12 @@ Voxel::Voxel(){
 Voxel::Voxel(int res){
     probability = 0;
     sampNumber = 0;
-    mean = Vec3(0, 0, 0);
+    mean = Eigen::Vector3d(0, 0, 0);
     var << 0, 0, 0, 0, 0, 0, 0, 0, 0;
     color = RGBA(255, 255, 255);
 }
 
-Voxel::Voxel(double prob, unsigned int samps, Vec3 mean, Mat33 dev, RGBA color) {
+Voxel::Voxel(double prob, unsigned int samps, Eigen::Vector3d mean, Mat33 dev, RGBA color) {
     probability = prob;
     sampNumber = samps;
     this->mean = mean;
@@ -55,7 +57,7 @@ void Voxel::updateDistribution(std::vector<Vec3> measurements){
 
     }
 
-    Vec3 sampleMean = Vec3(x/sampleNumber, y/sampleNumber, z/sampleNumber);
+    Eigen::Vector3d sampleMean = Eigen::Vector3d(x/sampleNumber, y/sampleNumber, z/sampleNumber);
 
     for(Vec3 &point : measurements){
         sampleVar(0, 0) += ((point.x() - sampleMean.x()) * (point.x() - sampleMean.x()));
@@ -73,9 +75,10 @@ void Voxel::updateDistribution(std::vector<Vec3> measurements){
 
     sampleVar /= sampleNumber;
 
-
     //var = Eigen::inverse((Eigen::inverse(priorVar) + sampleNumber * Eigen::inverse(sampleVar)));
-    //mean = var * (sampleNumber * Eigen::inverse(sampleVar)*sampleMean + Eigen::inverse(priorVar) * mean);
+    Mat33 temp = priorVar.inverse() + (sampleNumber * sampleVar.inverse());
+    var = temp.inverse();
+    mean = var * (sampleNumber * sampleVar.inverse()*sampleMean + priorVar.inverse() * mean);
 
 }
 

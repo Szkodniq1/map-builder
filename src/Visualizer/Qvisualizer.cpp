@@ -192,7 +192,7 @@ void QGLVisualizer::init(){
 
 Octree<mapping::Voxel> QGLVisualizer::prepareTestMap() {
     Octree<mapping::Voxel> map(4);
-    Vec3 mean = Vec3(1,1,1);
+    Eigen::Vector3d mean = Eigen::Vector3d(1,1,1);
     Mat33 dev;
     dev <<  1, 0, 0,
             0, 1, 0,
@@ -219,7 +219,7 @@ void QGLVisualizer::drawMap(Octree<mapping::Voxel> map) {
         for(int j = 0; j<n; j++) {
             for(int k = 0; k<n; k++) {
                 Voxel v = map(i, j, k);
-                if(v.probability == 1) {
+                if( i >110 && i < 150 && j > 110 && j < 150 && k >110 && k <150 ) {//v.probability == 1) {
                     glPushMatrix();
 
                     GLfloat mat[]={
@@ -230,7 +230,8 @@ void QGLVisualizer::drawMap(Octree<mapping::Voxel> map) {
                     };
                     glMultMatrixf(mat);
                     glutSolidSphere(1,30,30);//drawCloudObj(pointsObjVox);
-                    glColor4ub(v.color.r,v.color.g,v.color.b, v.color.a);
+                    //glColor4ub(v.color.r,v.color.g,v.color.b, v.color.a);
+                    glColor4ub(255,255,0,0);
                     glPopMatrix();
                     glFlush();
                 }
