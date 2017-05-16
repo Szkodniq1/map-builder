@@ -123,12 +123,13 @@ public:
 
     void update(const mapping::PointCloud& newCloud, bool isLast);
 
-    void update(Octree<mapping::Voxel>& map);
+    void update(Octree<mapping::Voxel>& map, double res);
 
 private:
     Config config;
     GLuint list;
     Octree<mapping::Voxel> map;
+    double res;
 
     //pcl
     std::vector<mapping::PointCloud> pointClouds;

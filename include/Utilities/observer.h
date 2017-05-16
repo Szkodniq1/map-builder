@@ -24,7 +24,7 @@ public:
     void attach(Observer *observer);
     void detach(Observer *observer);
     void notify(const mapping::PointCloud& newCloud, bool isLast);
-    void notify(Octree<mapping::Voxel>& map);
+    void notify(Octree<mapping::Voxel>& map, double res);
 };
 
 #endif // OBSERVER_H_

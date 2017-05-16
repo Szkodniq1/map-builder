@@ -113,8 +113,9 @@ void QGLVisualizer::update(const mapping::PointCloud& newCloud, bool isLast) {
     mtxPointCloud.unlock();
 }
 
-void QGLVisualizer::update(Octree<mapping::Voxel>& map) {
+void QGLVisualizer::update(Octree<mapping::Voxel>& map, double res) {
     this->map = map;
+    this->res = res;
 }
 
 void QGLVisualizer::createDisplayList() {
@@ -226,7 +227,7 @@ void QGLVisualizer::drawMap(Octree<mapping::Voxel> map) {
                     v.var(0,0), v.var(1,0), v.var(2,0), 0, // vecteur1
                     v.var(0,1), v.var(1,1), v.var(2,1), 0, // vecteur2
                     v.var(0,2), v.var(1,2), v.var(2,2), 0, // vecteur3
-                    v.mean.x() * i, v.mean.y() * j, v.mean.z() * k, 1
+                    v.mean.x() * i * res, v.mean.y() * j * res, v.mean.z() * k * res, 1
                     };
                     glMultMatrixf(mat);
                     glutSolidSphere(1,30,30);//drawCloudObj(pointsObjVox);

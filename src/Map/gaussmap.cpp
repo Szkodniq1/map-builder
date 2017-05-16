@@ -75,7 +75,7 @@ void Gaussmap::updateMap() {
     for( const auto& n : dataMap ) {
         map(n.second.xCoord, n.second.yCoord, n.second.zCoord).update(n.second.points, 0.0);
     }
-    notify(map);
+    notify(map, res);
     dataMap.clear();
 }
 
