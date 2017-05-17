@@ -113,9 +113,11 @@ void QGLVisualizer::update(const mapping::PointCloud& newCloud, bool isLast) {
     mtxPointCloud.unlock();
 }
 
-void QGLVisualizer::update(Octree<mapping::Voxel>& map, double res) {
+void QGLVisualizer::update(Octree<mapping::Voxel>& map, double res, std::unordered_map<std::string, Eigen::Vector3i> indexes) {
     this->map = map;
     this->res = res;
+    //TODO trzeba t¹ liste gdzieœ czyœciæ, albo co update przepisywaæ, ogólnie trzeba siê zastanowiæ jak te dane trzymaæ w ogóle, bo jedne mog¹ nadpisaæ drugie
+    this->updatedVoxels = indexes;
 }
 
 void QGLVisualizer::createDisplayList() {
@@ -222,18 +224,15 @@ void QGLVisualizer::drawMap(Octree<mapping::Voxel> map) {
             0, 0, 0.125;
     RGBA color = RGBA(255, 255, 0);
     int n = map.size();
-    for(int i = 0; i<n; i++) {
-        for(int j = 0; j<n; j++) {
-            for(int k = 0; k<n; k++) {
-                Voxel l = map(i, j, k);
-                if(l.probability == 1) {
+    for( const auto& n : updatedVoxels ) {
+        Eigen::Vector3i indexes = n.second;
                     glPushMatrix();
                     Voxel v = Voxel(1, 0, mean, dev, color);
                     GLfloat mat[]={
                     v.var(0,0), v.var(1,0), v.var(2,0), 0, // vecteur1
                     v.var(0,1), v.var(1,1), v.var(2,1), 0, // vecteur2
                     v.var(0,2), v.var(1,2), v.var(2,2), 0, // vecteur3
-                    (v.mean.x() * i * res) - 3.2, (v.mean.y() * j * res ) - 3.2, (v.mean.z() * k * res ) - 3.2, 1
+                    (v.mean.x() * indexes(0) * res) - 3.2, (v.mean.y() * indexes(1) * res ) - 3.2, (v.mean.z() * indexes(2) * res ) - 3.2, 1
                     };
                     glMultMatrixf(mat);
                     glutSolidSphere(1,10,10);//drawCloudObj(pointsObjVox);
@@ -241,9 +240,6 @@ void QGLVisualizer::drawMap(Octree<mapping::Voxel> map) {
                     //glColor4ub(255,255,0,0);
                     glPopMatrix();
                     glFlush();
-                }
-            }
-        }
     }
 }
 

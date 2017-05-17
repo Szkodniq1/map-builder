@@ -69,17 +69,18 @@ void Gaussmap::updateMap() {
         std::unordered_map<std::string, PointGroup>::iterator got = dataMap.find(key);
 
         if(got == dataMap.end()) {
+            indexes[key] = Eigen::Vector3i(xCoor, yCoor, zCoor);
             dataMap[key] = PointGroup(xCoor, yCoor, zCoor);
-            dataMap[key].points.push_back(Vec3(normalize(point.position.x(), xmin), normalize(point.position.y(), ymin), normalize(point.position.z(), zmin)));
+            dataMap[key].points.push_back(Vec3(point.position.x(), point.position.y(), point.position.z()));
         } else {
-            got->second.points.push_back(Vec3(normalize(point.position.x(), xmin), normalize(point.position.y(), ymin), normalize(point.position.z(), zmin)));
+            got->second.points.push_back(Vec3(point.position.x(), point.position.y(), point.position.z()));
         }
     }
 
     for( const auto& n : dataMap ) {
         map(n.second.xCoord, n.second.yCoord, n.second.zCoord).update(n.second.points, 0.0);
     }
-    notify(map, res);
+    notify(map, res, indexes);
     dataMap.clear();
 }
 

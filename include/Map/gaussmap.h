@@ -24,6 +24,7 @@ private:
     PointCloud cloud;
 
     std::unordered_map<std::string, PointGroup> dataMap;
+    std::unordered_map<std::string, Eigen::Vector3i> indexes;
 
     //Map borders
     double xmin, xmax;

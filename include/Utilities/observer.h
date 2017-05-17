@@ -7,13 +7,14 @@
 #include <vector>
 #include <list>
 #include "3rdParty/octree/octree.h"
+#include <unordered_map>
 
 
 class Observer
 {
 public:
     virtual void update(const mapping::PointCloud& newCloud, bool isLast) = 0;
-    virtual void update(Octree<mapping::Voxel>& map, double res) = 0;
+    virtual void update(Octree<mapping::Voxel>& map, double res, std::unordered_map<std::string, Eigen::Vector3i> indexes) = 0;
 };
 
 class Subject
@@ -24,7 +25,7 @@ public:
     void attach(Observer *observer);
     void detach(Observer *observer);
     void notify(const mapping::PointCloud& newCloud, bool isLast);
-    void notify(Octree<mapping::Voxel>& map, double res);
+    void notify(Octree<mapping::Voxel>& map, double res, std::unordered_map<std::string, Eigen::Vector3i> indexes);
 };
 
 #endif // OBSERVER_H_

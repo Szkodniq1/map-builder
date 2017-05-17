@@ -123,13 +123,14 @@ public:
 
     void update(const mapping::PointCloud& newCloud, bool isLast);
 
-    void update(Octree<mapping::Voxel>& map, double res);
+    void update(Octree<mapping::Voxel>& map, double res, std::unordered_map<std::string, Eigen::Vector3i> indexes);
 
 private:
     Config config;
     GLuint list;
     Octree<mapping::Voxel> map;
     double res;
+    std::unordered_map<std::string, Eigen::Vector3i> updatedVoxels;
 
     //pcl
     std::vector<mapping::PointCloud> pointClouds;
