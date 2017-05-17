@@ -215,24 +215,30 @@ Octree<mapping::Voxel> QGLVisualizer::prepareTestMap() {
 }
 
 void QGLVisualizer::drawMap(Octree<mapping::Voxel> map) {
+    Eigen::Vector3d mean = Eigen::Vector3d(1,1,1);
+    Mat33 dev;
+    dev <<  0.25, 0, 0,
+            0, 0.25, 0,
+            0, 0, 0.125;
+    RGBA color = RGBA(255, 255, 0);
     int n = map.size();
     for(int i = 0; i<n; i++) {
         for(int j = 0; j<n; j++) {
             for(int k = 0; k<n; k++) {
-                Voxel v = map(i, j, k);
-                if(v.probability == 1) {
+                Voxel l = map(i, j, k);
+                if(l.probability == 1) {
                     glPushMatrix();
-
+                    Voxel v = Voxel(1, 0, mean, dev, color);
                     GLfloat mat[]={
                     v.var(0,0), v.var(1,0), v.var(2,0), 0, // vecteur1
                     v.var(0,1), v.var(1,1), v.var(2,1), 0, // vecteur2
                     v.var(0,2), v.var(1,2), v.var(2,2), 0, // vecteur3
-                    v.mean.x() * i * res, v.mean.y() * j * res, v.mean.z() * k * res, 1
+                    (v.mean.x() * i * res) - 3.2, (v.mean.y() * j * res ) - 3.2, (v.mean.z() * k * res ) - 3.2, 1
                     };
                     glMultMatrixf(mat);
-                    glutSolidSphere(1,30,30);//drawCloudObj(pointsObjVox);
-                    //glColor4ub(v.color.r,v.color.g,v.color.b, v.color.a);
-                    glColor4ub(255,255,0,0);
+                    glutSolidSphere(1,10,10);//drawCloudObj(pointsObjVox);
+                    glColor4ub(v.color.r,v.color.g,v.color.b, v.color.a);
+                    //glColor4ub(255,255,0,0);
                     glPopMatrix();
                     glFlush();
                 }

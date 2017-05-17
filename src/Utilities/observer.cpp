@@ -21,7 +21,7 @@ void Subject::notify(const mapping::PointCloud& newCloud, bool isLast){
     }
 }
 
-void Subject::notify(Octree<mapping::Voxel>& map, dobule res){
+void Subject::notify(Octree<mapping::Voxel>& map, double res){
     for(vector<Observer*>::const_iterator iter = list.begin(); iter != list.end(); ++iter)
     {
         if(*iter != 0) {

@@ -13,7 +13,7 @@ class Observer
 {
 public:
     virtual void update(const mapping::PointCloud& newCloud, bool isLast) = 0;
-    virtual void update(Octree<mapping::Voxel>& map) = 0;
+    virtual void update(Octree<mapping::Voxel>& map, double res) = 0;
 };
 
 class Subject
