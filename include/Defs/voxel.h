@@ -18,7 +18,7 @@ namespace mapping {
          * --                    --
          */
         Mat33 var;
-        double probability;
+        int probability;
         unsigned int sampNumber;
         RGBA color;
 
@@ -33,7 +33,8 @@ namespace mapping {
 
         void update(Point3D point, Mat33 uncertaintyError);
         void updateOccupancy();
-        void updateDistribution(Point3D points, Mat33 uncertaintyError);
+        void updateDistribution(Point3D point, Mat33 uncertaintyError);
+        void updateNullOccupancy();
     };
 
 
