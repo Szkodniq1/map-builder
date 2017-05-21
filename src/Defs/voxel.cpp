@@ -33,14 +33,14 @@ Voxel::Voxel(double prob, unsigned int samps, Eigen::Vector3d mean, Mat33 dev, R
 
 }
 
-void Voxel::update(std::vector<Vec3> measurements, double distance) {
+void Voxel::update(Point3D point, Mat33 uncertaintyError) {
 
-    updateDistribution(measurements);
-
+    updateDistribution(point, uncertaintyError);
+    updateOccupancy();
 
 }
 
-void Voxel::updateDistribution(std::vector<Vec3> measurements){
+void Voxel::updateDistribution(Point3D point, Mat33 uncertaintyError) {
 
     Mat33 sampleVar;
     sampleVar << 0, 0, 0, 0, 0, 0, 0, 0, 0;
@@ -52,49 +52,35 @@ void Voxel::updateDistribution(std::vector<Vec3> measurements){
         priorVar = var;
     }
 
-    int sampleNumber = measurements.size();
-    double x=0,y=0,z=0;
+    ++sampNumber;
 
-    for(Vec3 &point : measurements) {
-        x += point.x();
-        y += point.y();
-        z += point.z();
+    Eigen::Vector3d sampleMean = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
 
-    }
 
-    Eigen::Vector3d sampleMean = Eigen::Vector3d(x/sampleNumber, y/sampleNumber, z/sampleNumber);
+    sampleVar(0, 0) += ((point.position.x() - sampleMean.x()) * (point.position.x() - sampleMean.x()));
+    sampleVar(0, 1) += ((point.position.x() - sampleMean.x()) * (point.position.y() - sampleMean.y()));
+    sampleVar(0, 2) += ((point.position.x() - sampleMean.x()) * (point.position.z() - sampleMean.z()));
 
-    for(Vec3 &point : measurements){
-        sampleVar(0, 0) += ((point.x() - sampleMean.x()) * (point.x() - sampleMean.x()));
-        sampleVar(0, 1) += ((point.x() - sampleMean.x()) * (point.y() - sampleMean.y()));
-        sampleVar(0, 2) += ((point.x() - sampleMean.x()) * (point.z() - sampleMean.z()));
+    sampleVar(1, 1) += ((point.position.y() - sampleMean.y()) * (point.position.y() - sampleMean.y()));
+    sampleVar(1, 2) += ((point.position.y() - sampleMean.y()) * (point.position.z() - sampleMean.z()));
 
-        sampleVar(1, 1) += ((point.y() - sampleMean.y()) * (point.y() - sampleMean.y()));
-        sampleVar(1, 2) += ((point.y() - sampleMean.y()) * (point.z() - sampleMean.z()));
+    sampleVar(2, 2) += ((point.position.z() - sampleMean.z()) * (point.position.z() - sampleMean.z()));
 
-        sampleVar(2, 2) += ((point.z() - sampleMean.z()) * (point.z() - sampleMean.z()));
-    }
     sampleVar(1, 0) = sampleVar(0, 1);
     sampleVar(2, 0) = sampleVar(0, 2);
     sampleVar(2, 1) = sampleVar(1, 2);
 
-    sampleVar /= sampleNumber;
-
-    //var = Eigen::inverse((Eigen::inverse(priorVar) + sampleNumber * Eigen::inverse(sampleVar)));
     Mat33 temp;
     temp = priorVar.inverse();
-    temp += (sampleNumber * sampleVar.inverse());
+    temp += (sampNumber * sampleVar.inverse());
     var = temp.inverse();
-    mean = var * (sampleNumber * sampleVar.inverse()*sampleMean + priorVar.inverse() * mean);
-    probability = 1;
+    mean = var * (sampNumber * sampleVar.inverse()*sampleMean + priorVar.inverse() * mean);
 
 }
 
-
-
-
-
-
+void Voxel::updateOccupancy() {
+    probability = 1;
+}
 
 
 
