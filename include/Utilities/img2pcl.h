@@ -39,6 +39,7 @@ private:
     float focalLength[2];
     float focalAxis[2];
     float factor;
+    float distVarCoefs[4];
 
     //Position and orientation of camera
     float t[3];
@@ -49,6 +50,9 @@ private:
     PointCloud Cloud;
     //Position for each frame
     std::string pos;
+    //uncertinaty errors list
+    std::vector<Mat33> errors;
+
 
     Eigen::Translation<double,3> xyz0(int u, int v, double d);
     Eigen::Matrix<double,3,3> Rot();
@@ -65,6 +69,7 @@ public:
     int grabFrame();
     int grabFrame2();
     int calcPCL();
+    void computeCov(int u, int v, double depth, Mat33& cov);
 
     mapping::GrabbedImage returnPC();
 

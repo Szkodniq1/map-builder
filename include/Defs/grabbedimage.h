@@ -12,9 +12,10 @@ public:
     PointCloud pointCloud;
     Vec3 translation;
     Quaternion orientation;
+    std::vector<Mat33> uncertinatyErrors;
 
     GrabbedImage();
-    GrabbedImage(PointCloud pc, Vec3 translation, Quaternion orientation);
+    GrabbedImage(PointCloud pc, Vec3 translation, Quaternion orientation, std::vector<Mat33> uncertinatyErrors);
     PointCloud transformedPointCloud();
 };
 

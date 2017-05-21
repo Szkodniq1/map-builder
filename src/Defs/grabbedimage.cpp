@@ -6,10 +6,11 @@ GrabbedImage::GrabbedImage () {
 
 }
 
-GrabbedImage::GrabbedImage(PointCloud pc, Vec3 translation, Quaternion orientation) {
+GrabbedImage::GrabbedImage(PointCloud pc, Vec3 translation, Quaternion orientation, std::vector<Mat33> uncertinatyErrors) {
     this->pointCloud = pc;
     this->translation = translation;
     this->orientation = orientation;
+    this->uncertinatyErrors = uncertinatyErrors;
 }
 
 

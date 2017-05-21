@@ -23,6 +23,11 @@ img2pcl::img2pcl(std::string xmlPath) {
         xmlDoc.FirstChildElement("cx")->QueryFloatText(&focalAxis[0]);
         xmlDoc.FirstChildElement("cy")->QueryFloatText(&focalAxis[1]);
         xmlDoc.FirstChildElement("factor")->QueryFloatText(&factor);
+        xmlDoc.FirstChildElement("coefs0")->QueryFloatText(&distVarCoefs[0]);
+        xmlDoc.FirstChildElement("coefs1")->QueryFloatText(&distVarCoefs[1]);
+        xmlDoc.FirstChildElement("coefs2")->QueryFloatText(&distVarCoefs[2]);
+        xmlDoc.FirstChildElement("coefs3")->QueryFloatText(&distVarCoefs[3]);
+
 
 
         path = xmlDoc.FirstChildElement( "Path" )->GetText();
@@ -184,6 +189,17 @@ int img2pcl::grabFrame2() {
 
 }
 
+/// u,v [px], depth [m]
+void img2pcl::computeCov(int u, int v, double depth, Mat33& cov) {
+    Mat33 J;
+    J << depth/focalLength[0], 0, ((u/focalLength[0])-(focalAxis[0]/focalLength[0])),
+         0, depth/focalLength[1], ((v/focalLength[1])-(focalAxis[1]/focalLength[1])),
+         0, 0, 1;
+    Mat33 Ruvd;
+    Ruvd(2,2) = distVarCoefs[0]*pow(depth,3.0) + distVarCoefs[1]*pow(depth,2.0) + distVarCoefs[2]*depth + distVarCoefs[3];
+    cov=J*Ruvd*J.transpose();
+}
+
 int img2pcl::calcPCL() {
     if(color == 0) {
         depth2cloud();
@@ -229,6 +245,7 @@ int img2pcl::depth2cloud() {
     Eigen::Translation<double,3> point;
     PointCloud tempCloud;
     tempCloud.clear();
+    std::vector<Mat33> uncertinatyErrors;
 
     Eigen::Matrix<double,3,3> R = Rot();
     Eigen::Translation<double,3> T = Trans();
@@ -240,7 +257,9 @@ int img2pcl::depth2cloud() {
             tmp = (depth.at<uint16_t>(i,j));
             if(tmp>800 && tmp<60000){
                 double depthM = double(tmp)/factor;
-
+                Mat33 uncError;
+                computeCov(j,i,depthM,uncError);
+                uncertinatyErrors.push_back(uncError);
                 point = xyz0(j,i,depthM);
                 Point3D pointPCL;
                 pointPCL.position.x() = point.x();
@@ -255,6 +274,7 @@ int img2pcl::depth2cloud() {
             }
         }
     }
+    errors = uncertinatyErrors;
     Cloud = tempCloud;
     return 1;
 }
@@ -263,6 +283,7 @@ int img2pcl::depth2colorcloud() {
     Eigen::Translation<double,3> point;
     PointCloud tempCloud;
     tempCloud.clear();
+    std::vector<Mat33> uncertinatyErrors;
 
 //    Eigen::Matrix<float_type,3,3> R = Rot();
 //    Eigen::Translation<float_type,3> T = Trans();
@@ -274,7 +295,9 @@ int img2pcl::depth2colorcloud() {
             tmp = (depth.at<uint16_t>(i,j));
             if(tmp>800 && tmp<60000){
                 double depthM = double(tmp)/factor;
-
+                Mat33 uncError;
+                computeCov(j,i,depthM,uncError);
+                uncertinatyErrors.push_back(uncError);
                 point = xyz0(j,i,depthM);
                 Point3D pointPCL;
                 pointPCL.position.x() = point.x();
@@ -291,12 +314,13 @@ int img2pcl::depth2colorcloud() {
             }
         }
     }
+    errors = uncertinatyErrors;
     Cloud = tempCloud;
     return 1;
 }
 
 mapping::GrabbedImage img2pcl::returnPC() {
-    return mapping::GrabbedImage(Cloud, Vec3(t[0],t[1],t[2]), Quaternion(q[3], q[0], q[1], q[2]));
+    return mapping::GrabbedImage(Cloud, Vec3(t[0],t[1],t[2]), Quaternion(q[3], q[0], q[1], q[2]), errors);
 }
 
 }

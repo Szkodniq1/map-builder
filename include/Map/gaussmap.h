@@ -22,6 +22,7 @@ private:
     Octree<mapping::Voxel> map;
     const double res = 0.2;
     PointCloud cloud;
+    std::vector<Mat33> uncertinatyErrors;
 
     std::unordered_map<std::string, Eigen::Vector3i> indexes;
 

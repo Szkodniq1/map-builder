@@ -24,6 +24,7 @@ Gaussmap::Gaussmap(mapping::PointCloud PC, float vxmin, float vxmax, float vymin
 /// Insert point cloud into map
 void Gaussmap::insertCloud(mapping::GrabbedImage grab, bool isLast) {
     cloud = grab.transformedPointCloud();
+    uncertinatyErrors = grab.uncertinatyErrors;
     int64 e1 = cv::getTickCount();
     updateMap();
     int64 e2 = cv::getTickCount();
@@ -59,6 +60,7 @@ mapping::Map* mapping::createMapGauss(PointCloud PC) {
 
 void Gaussmap::updateMap() {
     int xCoor, yCoor, zCoor;
+    int i = 0;
     for(mapping::Point3D &point : cloud) {
         xCoor = xCoordinate(point.position.x());
         yCoor = yCoordinate(point.position.y());
@@ -72,9 +74,8 @@ void Gaussmap::updateMap() {
             indexes[key] = Eigen::Vector3i(xCoor, yCoor, zCoor);
         }
 
-        Mat33 emptyMat;
-
-        map(xCoor, yCoor, zCoor).update(point, emptyMat);
+        map(xCoor, yCoor, zCoor).update(point, uncertinatyErrors[i]);
+        i++;
     }
     notify(map, res, indexes);
 }
