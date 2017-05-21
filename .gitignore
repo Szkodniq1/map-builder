@@ -4,4 +4,6 @@ CMakeLists.txt.user.*
 #Build
 /build/*
 /build/bin/*
+/build/lib/*
+/build/CMakeFiles/*
 /img/*
