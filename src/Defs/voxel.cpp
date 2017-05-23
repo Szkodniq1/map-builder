@@ -42,22 +42,24 @@ void Voxel::update(Point3D point, Mat33 uncertaintyError) {
 
 void Voxel::updateDistribution(Point3D point, Mat33 uncertaintyError) {
 
-
     Mat33 priorVar;
     priorVar = var;
 
+    Eigen::Vector3d sampleMean = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+
+    Mat33 Inv = uncertaintyError.inverse();
+    double det = Inv.determinant();
+
+    if(det == 0)
+        return;
 
     ++sampNumber;
 
-    Eigen::Vector3d sampleMean = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
-
-
-
     Mat33 temp;
     temp = var.inverse();
-    temp += (sampNumber * uncertaintyError.inverse());
+    temp += (sampNumber * Inv);
     var = temp.inverse();
-    mean = var * (sampNumber * uncertaintyError.inverse()*sampleMean + priorVar.inverse() * mean);
+    mean = var * (sampNumber * Inv*sampleMean + priorVar.inverse() * mean);
 
 }
 
