@@ -33,31 +33,46 @@ Voxel::Voxel(double prob, unsigned int samps, Eigen::Vector3d mean, Mat33 dev, R
 
 }
 
-void Voxel::update(Point3D point, Mat33 uncertaintyError) {
+void Voxel::update(Point3D point, Mat33 uncertaintyError, bool printlog) {
 
-    updateDistribution(point, uncertaintyError);
+    updateDistribution(point, uncertaintyError, printlog);
     updateOccupancy();
 
 }
 
-void Voxel::updateDistribution(Point3D point, Mat33 uncertaintyError) {
-
+void Voxel::updateDistribution(Point3D point, Mat33 uncertaintyError, bool printlog) {
 
     Mat33 priorVar;
     priorVar = var;
 
+    sampNumber++;
 
-    ++sampNumber;
+//    for(int i = 0; i<9 ;i++) {
+//        uncertaintyError(i) = ((int) (uncertaintyError(i) * 100000000.0))  / 100000000.0;
+//    }
 
     Eigen::Vector3d sampleMean = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+    Eigen::FullPivLU<Mat33> lu(var);
+    Mat33 invertedVar = lu.inverse();
+    Eigen::FullPivLU<Mat33> lu2(uncertaintyError);
+    Mat33 invertedError = lu2.inverse();
+    Mat33 invertedPriori = priorVar.inverse();
 
+    if(printlog) {
+        std::cout<<"ITERATION "<<sampNumber<<std::endl;
+        std::cout<<"INCVERSE VAR"<<std::endl;
+        std::cout<<invertedVar<<std::endl;
+        std::cout<<"INCVERSE ERROR"<<std::endl;
+        std::cout<<invertedError<<std::endl;
+        std::cout<<"VAR"<<std::endl;
+        std::cout<<var<<std::endl;
+        std::cout<<"ERROR"<<std::endl;
+        std::cout<<uncertaintyError<<std::endl<<std::endl;
+    }
 
-
-    Mat33 temp;
-    temp = var.inverse();
-    temp += (sampNumber * uncertaintyError.inverse());
+    Mat33 temp = invertedVar + (sampNumber * invertedError);
     var = temp.inverse();
-    mean = var * (sampNumber * uncertaintyError.inverse()*sampleMean + priorVar.inverse() * mean);
+    mean = var * (sampNumber * invertedError*sampleMean + invertedPriori * mean);
 
 }
 

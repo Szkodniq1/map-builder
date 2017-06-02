@@ -158,6 +158,10 @@ private:
     Octree<mapping::Voxel> prepareTestMap();
 
     void drawMap(Octree<mapping::Voxel> map);
+
+    void drawEllipsoid(unsigned int uiStacks, unsigned int uiSlices, double fA, double fB, double fC) const;
+
+    void drawEllipsoid(const Vec3& pos, const Mat33& covariance) const;
 };
 
 #endif // QVISUALIZER_H_INCLUDED

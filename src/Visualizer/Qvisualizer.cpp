@@ -148,8 +148,8 @@ void QGLVisualizer::drawPointCloud(void){
 void QGLVisualizer::draw(){
     // Here we are in the world coordinate system. Draw unit size axis.
     drawAxis();
-    //drawPointCloud();
-    drawMap(this->map);
+    drawPointCloud();
+    //drawMap(this->map);
 }
 
 /// draw objects
@@ -160,18 +160,18 @@ void QGLVisualizer::animate(){
 /// initialize visualizer
 void QGLVisualizer::init(){
     GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-       GLfloat mat_shininess[] = { 50.0 };
-       GLfloat light_position[] = { 1.0, 1.0, 1.0, 0.0 };
-       glClearColor (0.0, 0.0, 0.0, 0.0);
-       glShadeModel (GL_SMOOTH);
+    GLfloat mat_shininess[] = { 50.0 };
+    GLfloat light_position[] = { 1.0, 1.0, 1.0, 0.0 };
+    glClearColor (0.0, 0.0, 0.0, 0.0);
+    glShadeModel (GL_SMOOTH);
 
-       glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-       glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-       glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
-       glEnable(GL_LIGHTING);
-       glEnable(GL_LIGHT0);
-       glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glEnable(GL_DEPTH_TEST);
     glEnable(GL_AUTO_NORMAL);
     glEnable(GL_NORMALIZE);
     // Restore previous viewer state.
@@ -223,25 +223,72 @@ void QGLVisualizer::drawMap(Octree<mapping::Voxel> map) {
             0, 0.25, 0,
             0, 0, 0.125;
     RGBA color = RGBA(255, 255, 0);
-    int n = map.size();
     for( const auto& n : updatedVoxels ) {
         Eigen::Vector3i indexes = n.second;
-                    glPushMatrix();
-                    Voxel v = Voxel(1, 0, mean, dev, color);
-                    GLfloat mat[]={
-                    v.var(0,0), v.var(1,0), v.var(2,0), 0, // vecteur1
-                    v.var(0,1), v.var(1,1), v.var(2,1), 0, // vecteur2
-                    v.var(0,2), v.var(1,2), v.var(2,2), 0, // vecteur3
-                    (v.mean.x() * indexes(0) * res) - 3.2, (v.mean.y() * indexes(1) * res ) - 3.2, (v.mean.z() * indexes(2) * res ) - 3.2, 1
-                    };
-                    glMultMatrixf(mat);
-                    glutSolidSphere(1,10,10);//drawCloudObj(pointsObjVox);
-                    glColor4ub(v.color.r,v.color.g,v.color.b, v.color.a);
-                    //glColor4ub(255,255,0,0);
-                    glPopMatrix();
-                    glFlush();
+        //Voxel v = Voxel(1, 0, mean, dev, color);
+        Voxel v = map(indexes.x(), indexes.y(), indexes.z());
+        drawEllipsoid(Vec3((v.mean.x() * indexes(0) * res) - 3.2, (v.mean.y() * indexes(1) * res ) - 3.2, (v.mean.z() * indexes(2) * res ) - 3.2), v.var);
+
+        /*glPushMatrix();
+        Voxel v = Voxel(1, 0, mean, dev, color);
+        //Voxel v = map(indexes.x(), indexes.y(), indexes.z());
+        GLfloat mat[]={
+            v.var(0,0), v.var(1,0), v.var(2,0), 0, // vecteur1
+            v.var(0,1), v.var(1,1), v.var(2,1), 0, // vecteur2
+            v.var(0,2), v.var(1,2), v.var(2,2), 0, // vecteur3
+            (v.mean.x() * indexes(0) * res) - 3.2, (v.mean.y() * indexes(1) * res ) - 3.2, (v.mean.z() * indexes(2) * res ) - 3.2, 1
+        };
+        glMultMatrixf(mat);
+        glutSolidSphere(1,10,10);//drawCloudObj(pointsObjVox);
+        glColor4ub(v.color.r,v.color.g,v.color.b, v.color.a);
+        //glColor4ub(255,255,0,0);
+        glPopMatrix();
+        glFlush();*/
     }
 }
+
+/// Draw ellipsoid
+void QGLVisualizer::drawEllipsoid(unsigned int uiStacks, unsigned int uiSlices, double fA, double fB, double fC) const {
+    float tStep = (M_PI) / (float)uiSlices;
+    float sStep = (M_PI) / (float)uiStacks;
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK,GL_COLOR);
+    for(float t = -M_PI/2.0; t <= (M_PI/2.0)+.0001; t += tStep) {
+        glBegin(GL_TRIANGLE_STRIP);
+        for(float s = -M_PI; s <= M_PI+.0001; s += sStep) {
+            glVertex3f(fA * cos(t) * cos(s), fB * cos(t) * sin(s), fC *
+                       sin(t));
+            float norm = sqrt(pow(fA * cos(t) * cos(s),2.0)+pow(fB *
+                                                                cos(t) * sin(s),2.0) + pow(fC * sin(t),2.0));
+            glNormal3f((fA * cos(t) * cos(s))/norm, (fB * cos(t) *
+                                                     sin(s))/norm, (fC * sin(t))/norm);
+            glVertex3f(fA * cos(t+tStep) * cos(s), fB * cos(t+tStep) *
+                       sin(s), fC * sin(t+tStep));
+            norm = sqrt(pow(fA * cos(t+tStep) * cos(s),2.0)+pow(fB *
+                                                                cos(t+tStep) * sin(s),2.0) + pow(fC * sin(t+tStep),2.0));
+            glNormal3f((fA * cos(t+tStep) * cos(s))/norm, (fB *
+                                                           cos(t+tStep) * sin(s))/norm, (fC * sin(t+tStep))/norm);
+        }
+        glEnd();
+    }
+}
+
+/// Draw ellipsoid
+void QGLVisualizer::drawEllipsoid(const Vec3& pos, const Mat33& covariance) const{
+    Eigen::SelfAdjointEigenSolver<Mat33> es;
+    es.compute(covariance);
+    Mat33 V(es.eigenvectors());
+    double GLmat[16]={V(0,0), V(1,0), V(2,0), 0, V(0,1), V(1,1),
+                          V(2,1), 0, V(0,2), V(1,2), V(2,2), 0, pos.x(), pos.y(), pos.z(), 1};
+    glPushMatrix();
+    glMultMatrixd(GLmat);
+    double ellipsoidScale = 1000.0;
+    drawEllipsoid(10,10,sqrt(es.eigenvalues()(0))*ellipsoidScale,
+                  sqrt(es.eigenvalues()(1))*ellipsoidScale,
+                  sqrt(es.eigenvalues()(2))*ellipsoidScale);
+    glPopMatrix();
+}
+
 
 /// generate help string
 std::string QGLVisualizer::help() const{

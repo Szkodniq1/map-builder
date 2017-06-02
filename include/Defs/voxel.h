@@ -31,9 +31,9 @@ namespace mapping {
         ///constructor
         Voxel(double prob, unsigned int samps, Eigen::Vector3d mean, Mat33 dev, RGBA color);
 
-        void update(Point3D point, Mat33 uncertaintyError);
+        void update(Point3D point, Mat33 uncertaintyError, bool printlog);
         void updateOccupancy();
-        void updateDistribution(Point3D point, Mat33 uncertaintyError);
+        void updateDistribution(Point3D point, Mat33 uncertaintyError, bool printlog);
         void updateNullOccupancy();
     };
 
