@@ -35,7 +35,7 @@ void OctoMap::insertCloud(mapping::GrabbedImage grab, bool isLast) {
     double time = ((e2 - e1)/ cv::getTickFrequency());
     std::cout<<"Octomap insert time and update: "<<time<<std::endl;
 
-    notify(newPC, isLast);
+    notify(newPC, grab.uncertinatyErrors, isLast);
 }
 
 /// save map in file

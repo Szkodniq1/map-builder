@@ -104,7 +104,8 @@ QGLVisualizer::~QGLVisualizer(void) {
 
 
 /// Observer update
-void QGLVisualizer::update(const mapping::PointCloud& newCloud, bool isLast) {
+void QGLVisualizer::update(const mapping::PointCloud& newCloud, std::vector<Mat33> uncertinatyErrors, bool isLast) {
+    this->uncertinatyErrors = uncertinatyErrors;
     mtxPointCloud.lock();
     pointClouds.push_back(newCloud);
     if(isLast) {
@@ -113,7 +114,7 @@ void QGLVisualizer::update(const mapping::PointCloud& newCloud, bool isLast) {
     mtxPointCloud.unlock();
 }
 
-void QGLVisualizer::update(Octree<mapping::Voxel>& map, double res, std::unordered_map<std::string, Eigen::Vector3i> indexes) {
+void QGLVisualizer::update(Octree<mapping::Voxel>& map, double res, std::unordered_map<std::string, Eigen::Vector3i> indexes , bool isLast) {
     this->map = map;
     this->res = res;
     //TODO trzeba t¹ liste gdzieœ czyœciæ, albo co update przepisywaæ, ogólnie trzeba siê zastanowiæ jak te dane trzymaæ w ogóle, bo jedne mog¹ nadpisaæ drugie
@@ -132,6 +133,33 @@ void QGLVisualizer::createDisplayList() {
         }
     }
     glEnd();
+    for(mapping::PointCloud pointCloud : pointClouds) {
+        for (size_t i = 0;i<pointCloud.size();i++) {
+            if(i%1000==0) {
+                /*glPushMatrix();
+                //Voxel v = Voxel(1, 0, mean, dev, color);
+                Eigen::SelfAdjointEigenSolver<Mat33> es;
+                es.compute(this->uncertinatyErrors[i]);
+                Mat33 v(es.eigenvectors());
+                double mat[16]={
+                    v(0,0), v(1,0), v(2,0), 0, // vecteur1
+                    v(0,1), v(1,1), v(2,1), 0, // vecteur2
+                    v(0,2), v(1,2), v(2,2), 0, // vecteur3
+                    pointCloud[i].position.x(), pointCloud[i].position.y(), pointCloud[i].position.z(), 1
+                };
+                glMultMatrixd(mat);
+                glutSolidSphere(1,10,10);//drawCloudObj(pointsObjVox);
+                //glColor4ub(v.color.r,v.color.g,v.color.b, v.color.a);
+                glColor4ub(255,255,0,0);
+                glPopMatrix();
+                glFlush();*/
+
+
+                drawPreetyEllipsoid(pointCloud[i].position,this->uncertinatyErrors[i]);
+
+            }
+        }
+    }
     glEndList();
 }
 
@@ -148,8 +176,8 @@ void QGLVisualizer::drawPointCloud(void){
 void QGLVisualizer::draw(){
     // Here we are in the world coordinate system. Draw unit size axis.
     drawAxis();
-    drawPointCloud();
-    //drawMap(this->map);
+    //drawPointCloud();
+    drawMap(this->map);
 }
 
 /// draw objects
@@ -227,21 +255,21 @@ void QGLVisualizer::drawMap(Octree<mapping::Voxel> map) {
         Eigen::Vector3i indexes = n.second;
         //Voxel v = Voxel(1, 0, mean, dev, color);
         Voxel v = map(indexes.x(), indexes.y(), indexes.z());
-        drawEllipsoid(Vec3((v.mean.x() * indexes(0) * res) - 3.2, (v.mean.y() * indexes(1) * res ) - 3.2, (v.mean.z() * indexes(2) * res ) - 3.2), v.var);
+        drawPreetyEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var);
 
         /*glPushMatrix();
-        Voxel v = Voxel(1, 0, mean, dev, color);
-        //Voxel v = map(indexes.x(), indexes.y(), indexes.z());
+        //Voxel v = Voxel(1, 0, mean, dev, color);
+        Voxel v = map(indexes.x(), indexes.y(), indexes.z());
         GLfloat mat[]={
             v.var(0,0), v.var(1,0), v.var(2,0), 0, // vecteur1
             v.var(0,1), v.var(1,1), v.var(2,1), 0, // vecteur2
             v.var(0,2), v.var(1,2), v.var(2,2), 0, // vecteur3
-            (v.mean.x() * indexes(0) * res) - 3.2, (v.mean.y() * indexes(1) * res ) - 3.2, (v.mean.z() * indexes(2) * res ) - 3.2, 1
+            (v.mean.x()), (v.mean.y()), (v.mean.z()), 1
         };
         glMultMatrixf(mat);
         glutSolidSphere(1,10,10);//drawCloudObj(pointsObjVox);
-        glColor4ub(v.color.r,v.color.g,v.color.b, v.color.a);
-        //glColor4ub(255,255,0,0);
+        //glColor4ub(v.color.r,v.color.g,v.color.b, v.color.a);
+        glColor4ub(255,255,0,0);
         glPopMatrix();
         glFlush();*/
     }
@@ -279,14 +307,56 @@ void QGLVisualizer::drawEllipsoid(const Vec3& pos, const Mat33& covariance) cons
     es.compute(covariance);
     Mat33 V(es.eigenvectors());
     double GLmat[16]={V(0,0), V(1,0), V(2,0), 0, V(0,1), V(1,1),
-                          V(2,1), 0, V(0,2), V(1,2), V(2,2), 0, pos.x(), pos.y(), pos.z(), 1};
+                      V(2,1), 0, V(0,2), V(1,2), V(2,2), 0, pos.x(), pos.y(), pos.z(), 1};
     glPushMatrix();
     glMultMatrixd(GLmat);
-    double ellipsoidScale = 1000.0;
+    double ellipsoidScale = 1.0;
     drawEllipsoid(10,10,sqrt(es.eigenvalues()(0))*ellipsoidScale,
                   sqrt(es.eigenvalues()(1))*ellipsoidScale,
                   sqrt(es.eigenvalues()(2))*ellipsoidScale);
     glPopMatrix();
+}
+
+void QGLVisualizer::drawPreetyEllipsoid(const Vec3& pos, const Mat33& covariance) const{
+    // ---------------------
+    //    3D ellipsoid
+    // ---------------------
+    GLfloat		mat[16];
+    Eigen::SelfAdjointEigenSolver<Mat33> es;
+    es.compute(covariance);
+    Mat33 m_eigVec(es.eigenvectors());
+    m_eigVec = m_eigVec;
+
+    //  A homogeneous transformation matrix, in this order:
+    //
+    //     0  4  8  12
+    //     1  5  9  13
+    //     2  6  10 14
+    //     3  7  11 15
+    //
+    mat[3] = mat[7] = mat[11] = 0;
+    mat[15] = 1;
+    mat[12] = mat[13] = mat[14] = 0;
+
+    mat[0] = m_eigVec(0,0); mat[1] = m_eigVec(1,0); mat[2] = m_eigVec(2,0); mat[12] = pos.x();// New X-axis
+    mat[4] = m_eigVec(0,1); mat[5] = m_eigVec(1,1); mat[6] = m_eigVec(2,1);	mat[13] = pos.y();// New X-axis
+    mat[8] = m_eigVec(0,2); mat[9] = m_eigVec(1,2); mat[10] = m_eigVec(2,2); mat[14] = pos.z();// New X-axis
+
+    GLUquadricObj	*obj = gluNewQuadric();
+
+    gluQuadricDrawStyle( obj, GLU_FILL);
+
+    glPushMatrix();
+    glMultMatrixf( mat );
+    double ellipsoidScale = 1.0;
+
+    glScalef(sqrt(es.eigenvalues()(0))*ellipsoidScale,sqrt(es.eigenvalues()(1))*ellipsoidScale,sqrt(es.eigenvalues()(2))*ellipsoidScale);
+
+    gluSphere( obj, 1,10,10);
+
+    glPopMatrix();
+
+    gluDeleteQuadric(obj);
 }
 
 

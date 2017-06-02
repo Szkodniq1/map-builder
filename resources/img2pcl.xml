@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
   <!-- Image Grabber-->
 
-  <Path>../../img/</Path>
-  <Form>%d.png</Form>
+<Path>../../img/The_Test/</Path>
+  <Form>%s.png</Form>
   <Color>1</Color>
+  <Association>0</Association>
   <stateFile>livingRoom0.gt.freiburg</stateFile>
-  <fx>481.20</fx>
-  <fy>480.0</fy>
+  <fx>480.6</fx>
+  <fy>-480.6</fy>
   <cx>319.5</cx>
   <cy>239.5</cy>
-  <factor>5000</factor>
+<factor>5000</factor>
+<variance sigmaU="1.1046" sigmaV="0.64160"/>
+<varianceDepth c3="-8.9997e-06" c2="3.069e-003" c1="3.6512e-006" c0="-0.0017512e-3"/>
 
 
 

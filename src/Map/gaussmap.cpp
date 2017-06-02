@@ -26,11 +26,11 @@ void Gaussmap::insertCloud(mapping::GrabbedImage grab, bool isLast) {
     cloud = grab.transformedPointCloud();
     uncertinatyErrors = grab.uncertinatyErrors;
     int64 e1 = cv::getTickCount();
-    //updateMap();
+    updateMap(isLast);
     int64 e2 = cv::getTickCount();
     double time = ((e2 - e1)/ cv::getTickFrequency());
     std::cout<<"Gaussmap insert time and update: "<<time<<std::endl;
-    notify(grab.transformedPointCloud(), isLast);
+    //notify(grab.transformedPointCloud(),grab.uncertinatyErrors, isLast);
 }
 
 /// save map in file
@@ -59,7 +59,7 @@ mapping::Map* mapping::createMapGauss(PointCloud PC) {
 }
 
 
-void Gaussmap::updateMap() {
+void Gaussmap::updateMap(bool isLast) {
     int xCoor, yCoor, zCoor;
     int i = 0;
     for(mapping::Point3D &point : cloud) {
@@ -78,7 +78,7 @@ void Gaussmap::updateMap() {
         map(xCoor, yCoor, zCoor).update(point, uncertinatyErrors[i], xCoor==50&&yCoor==29&&zCoor==26);
         i++;
     }
-    notify(map, res, indexes);
+    notify(map, res, indexes, isLast);
 }
 
 double Gaussmap::normalize(double p, double min) {

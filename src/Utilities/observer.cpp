@@ -12,20 +12,20 @@ void Subject::detach(Observer *observer){
     list.erase(std::remove(list.begin(), list.end(), observer), list.end());
 }
 
-void Subject::notify(const mapping::PointCloud& newCloud, bool isLast){
+void Subject::notify(const mapping::PointCloud& newCloud,std::vector<mapping::Mat33> uncertinatyErrors,  bool isLast){
     for(vector<Observer*>::const_iterator iter = list.begin(); iter != list.end(); ++iter)
     {
         if(*iter != 0) {
-           (*iter)->update(newCloud,isLast);
+           (*iter)->update(newCloud,uncertinatyErrors,isLast);
         }
     }
 }
 
-void Subject::notify(Octree<mapping::Voxel>& map, double res, std::unordered_map<std::string, Eigen::Vector3i> indexes){
+void Subject::notify(Octree<mapping::Voxel>& map, double res, std::unordered_map<std::string, Eigen::Vector3i> indexes , bool isLast){
     for(vector<Observer*>::const_iterator iter = list.begin(); iter != list.end(); ++iter)
     {
         if(*iter != 0) {
-           (*iter)->update(map, res, indexes);
+           (*iter)->update(map, res, indexes, isLast);
         }
     }
 }

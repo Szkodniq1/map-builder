@@ -121,9 +121,9 @@ public:
     /// Destruction
     ~QGLVisualizer(void);
 
-    void update(const mapping::PointCloud& newCloud, bool isLast);
+    void update(const mapping::PointCloud& newCloud, std::vector<Mat33> uncertinatyErrors, bool isLast);
 
-    void update(Octree<mapping::Voxel>& map, double res, std::unordered_map<std::string, Eigen::Vector3i> indexes);
+    void update(Octree<mapping::Voxel>& map, double res, std::unordered_map<std::string, Eigen::Vector3i> indexes, bool isLast);
 
 private:
     Config config;
@@ -131,6 +131,7 @@ private:
     Octree<mapping::Voxel> map;
     double res;
     std::unordered_map<std::string, Eigen::Vector3i> updatedVoxels;
+    std::vector<Mat33> uncertinatyErrors;
 
     //pcl
     std::vector<mapping::PointCloud> pointClouds;
@@ -162,6 +163,8 @@ private:
     void drawEllipsoid(unsigned int uiStacks, unsigned int uiSlices, double fA, double fB, double fC) const;
 
     void drawEllipsoid(const Vec3& pos, const Mat33& covariance) const;
+
+    void drawPreetyEllipsoid(const Vec3& pos, const Mat33& covariance) const;
 };
 
 #endif // QVISUALIZER_H_INCLUDED

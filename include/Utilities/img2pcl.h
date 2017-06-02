@@ -40,6 +40,8 @@ private:
     float focalAxis[2];
     float factor;
     float distVarCoefs[4];
+    Mat33 Ruvd;
+
 
     //Position and orientation of camera
     float t[3];

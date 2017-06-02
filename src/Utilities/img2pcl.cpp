@@ -23,10 +23,13 @@ img2pcl::img2pcl(std::string xmlPath) {
         xmlDoc.FirstChildElement("cx")->QueryFloatText(&focalAxis[0]);
         xmlDoc.FirstChildElement("cy")->QueryFloatText(&focalAxis[1]);
         xmlDoc.FirstChildElement("factor")->QueryFloatText(&factor);
-        xmlDoc.FirstChildElement("coefs0")->QueryFloatText(&distVarCoefs[0]);
-        xmlDoc.FirstChildElement("coefs1")->QueryFloatText(&distVarCoefs[1]);
-        xmlDoc.FirstChildElement("coefs2")->QueryFloatText(&distVarCoefs[2]);
-        xmlDoc.FirstChildElement("coefs3")->QueryFloatText(&distVarCoefs[3]);
+        xmlDoc.FirstChildElement( "varianceDepth" )->QueryFloatAttribute("c3", &distVarCoefs[0]);
+        xmlDoc.FirstChildElement( "varianceDepth" )->QueryFloatAttribute("c2",&distVarCoefs[1]);
+        xmlDoc.FirstChildElement( "varianceDepth" )->QueryFloatAttribute("c1",&distVarCoefs[2]);
+        xmlDoc.FirstChildElement( "varianceDepth" )->QueryFloatAttribute("c0",&distVarCoefs[3]);
+        Ruvd << 0, 0, 0, 0, 0, 0, 0, 0, 0;
+        xmlDoc.FirstChildElement( "variance" )->QueryDoubleAttribute("sigmaU",&Ruvd(0,0));
+        xmlDoc.FirstChildElement( "variance" )->QueryDoubleAttribute("sigmaV",&Ruvd(1,1));
 
 
 
@@ -195,7 +198,6 @@ void img2pcl::computeCov(int u, int v, double depth, Mat33& cov) {
     J << depth/focalLength[0], 0, ((u/focalLength[0])-(focalAxis[0]/focalLength[0])),
          0, depth/focalLength[1], ((v/focalLength[1])-(focalAxis[1]/focalLength[1])),
          0, 0, 1;
-    Mat33 Ruvd;
     Ruvd(2,2) = distVarCoefs[0]*pow(depth,3.0) + distVarCoefs[1]*pow(depth,2.0) + distVarCoefs[2]*depth + distVarCoefs[3];
     cov=J*Ruvd*J.transpose();
 }

@@ -26,12 +26,6 @@ void printUsage(const char* programName)
 }
 
 int main(int argc, char** argv) {
-
-    mapping::Mat33 mat;
-    mat << 0.0096839, -0.0077051,  0.0155071,
-           -0.0077051, 0.00613065, -0.0123384,
-            0.0155071, -0.0123384,   0.024832;
-    std::cout<<"TEST"<<std::endl<<mat.inverse()<<std::endl;
     int a=0;
     mapping::PointCloud PD, PCD;
     mapping::GrabbedImage PC;
