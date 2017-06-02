@@ -156,9 +156,11 @@ private:
 
     void createDisplayList();
 
+    void createMapDisplayList();
+
     Octree<mapping::Voxel> prepareTestMap();
 
-    void drawMap(Octree<mapping::Voxel> map);
+    void drawMap();
 
     void drawEllipsoid(unsigned int uiStacks, unsigned int uiSlices, double fA, double fB, double fC) const;
 

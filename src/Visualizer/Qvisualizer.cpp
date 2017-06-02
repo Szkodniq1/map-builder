@@ -119,6 +119,36 @@ void QGLVisualizer::update(Octree<mapping::Voxel>& map, double res, std::unorder
     this->res = res;
     //TODO trzeba t¹ liste gdzieœ czyœciæ, albo co update przepisywaæ, ogólnie trzeba siê zastanowiæ jak te dane trzymaæ w ogóle, bo jedne mog¹ nadpisaæ drugie
     this->updatedVoxels = indexes;
+    if(isLast) {
+        createMapDisplayList();
+    }
+}
+
+void QGLVisualizer::createMapDisplayList() {
+    list = glGenLists(1);
+    glNewList(list, GL_COMPILE);
+    for( const auto& n : updatedVoxels ) {
+        Eigen::Vector3i indexes = n.second;
+        Voxel v = map(indexes.x(), indexes.y(), indexes.z());
+        drawEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var);
+
+        /*glPushMatrix();
+        //Voxel v = Voxel(1, 0, mean, dev, color);
+        Voxel v = map(indexes.x(), indexes.y(), indexes.z());
+        GLfloat mat[]={
+            v.var(0,0), v.var(1,0), v.var(2,0), 0, // vecteur1
+            v.var(0,1), v.var(1,1), v.var(2,1), 0, // vecteur2
+            v.var(0,2), v.var(1,2), v.var(2,2), 0, // vecteur3
+            (v.mean.x()), (v.mean.y()), (v.mean.z()), 1
+        };
+        glMultMatrixf(mat);
+        glutSolidSphere(1,10,10);//drawCloudObj(pointsObjVox);
+        //glColor4ub(v.color.r,v.color.g,v.color.b, v.color.a);
+        glColor4ub(255,255,0,0);
+        glPopMatrix();
+        glFlush();*/
+    }
+    glEndList();
 }
 
 void QGLVisualizer::createDisplayList() {
@@ -133,30 +163,11 @@ void QGLVisualizer::createDisplayList() {
         }
     }
     glEnd();
+    //uncertainity ellipses
     for(mapping::PointCloud pointCloud : pointClouds) {
         for (size_t i = 0;i<pointCloud.size();i++) {
             if(i%1000==0) {
-                /*glPushMatrix();
-                //Voxel v = Voxel(1, 0, mean, dev, color);
-                Eigen::SelfAdjointEigenSolver<Mat33> es;
-                es.compute(this->uncertinatyErrors[i]);
-                Mat33 v(es.eigenvectors());
-                double mat[16]={
-                    v(0,0), v(1,0), v(2,0), 0, // vecteur1
-                    v(0,1), v(1,1), v(2,1), 0, // vecteur2
-                    v(0,2), v(1,2), v(2,2), 0, // vecteur3
-                    pointCloud[i].position.x(), pointCloud[i].position.y(), pointCloud[i].position.z(), 1
-                };
-                glMultMatrixd(mat);
-                glutSolidSphere(1,10,10);//drawCloudObj(pointsObjVox);
-                //glColor4ub(v.color.r,v.color.g,v.color.b, v.color.a);
-                glColor4ub(255,255,0,0);
-                glPopMatrix();
-                glFlush();*/
-
-
                 drawPreetyEllipsoid(pointCloud[i].position,this->uncertinatyErrors[i]);
-
             }
         }
     }
@@ -177,7 +188,7 @@ void QGLVisualizer::draw(){
     // Here we are in the world coordinate system. Draw unit size axis.
     drawAxis();
     //drawPointCloud();
-    drawMap(this->map);
+    drawMap();
 }
 
 /// draw objects
@@ -244,35 +255,10 @@ Octree<mapping::Voxel> QGLVisualizer::prepareTestMap() {
     return map;
 }
 
-void QGLVisualizer::drawMap(Octree<mapping::Voxel> map) {
-    Eigen::Vector3d mean = Eigen::Vector3d(1,1,1);
-    Mat33 dev;
-    dev <<  0.25, 0, 0,
-            0, 0.25, 0,
-            0, 0, 0.125;
-    RGBA color = RGBA(255, 255, 0);
-    for( const auto& n : updatedVoxels ) {
-        Eigen::Vector3i indexes = n.second;
-        //Voxel v = Voxel(1, 0, mean, dev, color);
-        Voxel v = map(indexes.x(), indexes.y(), indexes.z());
-        drawPreetyEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var);
-
-        /*glPushMatrix();
-        //Voxel v = Voxel(1, 0, mean, dev, color);
-        Voxel v = map(indexes.x(), indexes.y(), indexes.z());
-        GLfloat mat[]={
-            v.var(0,0), v.var(1,0), v.var(2,0), 0, // vecteur1
-            v.var(0,1), v.var(1,1), v.var(2,1), 0, // vecteur2
-            v.var(0,2), v.var(1,2), v.var(2,2), 0, // vecteur3
-            (v.mean.x()), (v.mean.y()), (v.mean.z()), 1
-        };
-        glMultMatrixf(mat);
-        glutSolidSphere(1,10,10);//drawCloudObj(pointsObjVox);
-        //glColor4ub(v.color.r,v.color.g,v.color.b, v.color.a);
-        glColor4ub(255,255,0,0);
-        glPopMatrix();
-        glFlush();*/
-    }
+void QGLVisualizer::drawMap() {
+    glPushMatrix();
+    glCallList(list);
+    glPopMatrix();
 }
 
 /// Draw ellipsoid
