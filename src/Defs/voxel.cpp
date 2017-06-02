@@ -36,6 +36,7 @@ Voxel::Voxel(double prob, unsigned int samps, Eigen::Vector3d mean, Mat33 dev, R
 void Voxel::update(Point3D point, Mat33 uncertaintyError, bool printlog) {
 
     updateDistribution(point, uncertaintyError, printlog);
+    updateColor(point.color);
     updateOccupancy();
 
 }
@@ -60,6 +61,17 @@ void Voxel::updateDistribution(Point3D point, Mat33 uncertaintyError, bool print
         temp += (sampNumber * Inv);
         var = temp.inverse();
         mean = var * (sampNumber * Inv*sampleMean + priorVar.inverse() * mean);
+}
+
+void Voxel::updateColor(RGBA color) {
+    if(sampNumber == 1) {
+         this->color = color;
+    } else {
+        this->color.r = ((this->color.r*(sampNumber-1)) + color.r)/sampNumber;
+        this->color.g = ((this->color.g*(sampNumber-1)) + color.g)/sampNumber;
+        this->color.b = ((this->color.b*(sampNumber-1)) + color.b)/sampNumber;
+        this->color.a = ((this->color.a*(sampNumber-1)) + color.a)/sampNumber;
+    }
 }
 
 void Voxel::updateOccupancy() {

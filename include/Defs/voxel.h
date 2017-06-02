@@ -34,6 +34,7 @@ namespace mapping {
         void update(Point3D point, Mat33 uncertaintyError, bool printlog);
         void updateOccupancy();
         void updateDistribution(Point3D point, Mat33 uncertaintyError, bool printlog);
+        void updateColor(RGBA color);
         void updateNullOccupancy();
     };
 

@@ -166,7 +166,7 @@ private:
 
     void drawEllipsoid(const Vec3& pos, const Mat33& covariance) const;
 
-    void drawPreetyEllipsoid(const Vec3& pos, const Mat33& covariance) const;
+    void drawPreetyEllipsoid(const Vec3& pos, const Mat33& covariance, RGBA color) const;
 };
 
 #endif // QVISUALIZER_H_INCLUDED

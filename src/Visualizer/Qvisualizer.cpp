@@ -130,7 +130,7 @@ void QGLVisualizer::createMapDisplayList() {
     for( const auto& n : updatedVoxels ) {
         Eigen::Vector3i indexes = n.second;
         Voxel v = map(indexes.x(), indexes.y(), indexes.z());
-        drawEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var);
+        drawPreetyEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
 
         /*glPushMatrix();
         //Voxel v = Voxel(1, 0, mean, dev, color);
@@ -167,7 +167,7 @@ void QGLVisualizer::createDisplayList() {
     for(mapping::PointCloud pointCloud : pointClouds) {
         for (size_t i = 0;i<pointCloud.size();i++) {
             if(i%1000==0) {
-                drawPreetyEllipsoid(pointCloud[i].position,this->uncertinatyErrors[i]);
+                drawPreetyEllipsoid(pointCloud[i].position,this->uncertinatyErrors[i], RGBA(255, 255, 255));
             }
         }
     }
@@ -303,7 +303,7 @@ void QGLVisualizer::drawEllipsoid(const Vec3& pos, const Mat33& covariance) cons
     glPopMatrix();
 }
 
-void QGLVisualizer::drawPreetyEllipsoid(const Vec3& pos, const Mat33& covariance) const{
+void QGLVisualizer::drawPreetyEllipsoid(const Vec3& pos, const Mat33& covariance, RGBA color) const{
     // ---------------------
     //    3D ellipsoid
     // ---------------------
@@ -339,7 +339,7 @@ void QGLVisualizer::drawPreetyEllipsoid(const Vec3& pos, const Mat33& covariance
     glScalef(sqrt(es.eigenvalues()(0))*ellipsoidScale,sqrt(es.eigenvalues()(1))*ellipsoidScale,sqrt(es.eigenvalues()(2))*ellipsoidScale);
 
     gluSphere( obj, 1,10,10);
-
+    glColor4ub(color.r,color.g,color.b, color.a);
     glPopMatrix();
 
     gluDeleteQuadric(obj);
