@@ -187,8 +187,8 @@ void QGLVisualizer::drawPointCloud(void){
 void QGLVisualizer::draw(){
     // Here we are in the world coordinate system. Draw unit size axis.
     drawAxis();
-    //drawPointCloud();
-    drawMap();
+    drawPointCloud();
+    //drawMap();
 }
 
 /// draw objects
