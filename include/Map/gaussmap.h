@@ -8,7 +8,7 @@
 #include "math.h"
 #include <unordered_map>
 
-#define MAP_SIZE 512
+#define MAP_SIZE 256
 
 namespace mapping {
     /// create a single Maping object
@@ -20,7 +20,7 @@ namespace mapping {
 class Gaussmap : public mapping::Map, public Subject {
 private:
     Octree<mapping::Voxel> map;
-    const double res = 0.02;
+    const double res = 0.05;
     PointCloud cloud;
     std::vector<Mat33> uncertinatyErrors;
 

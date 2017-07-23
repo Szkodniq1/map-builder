@@ -74,10 +74,14 @@ void Gaussmap::updateMap(bool isLast) {
         if(got == indexes.end()) {
             indexes[key] = Eigen::Vector3i(xCoor, yCoor, zCoor);
         }
-
-        map(xCoor, yCoor, zCoor).update(point, uncertinatyErrors[i], xCoor==50&&yCoor==29&&zCoor==26);
+        map(xCoor, yCoor, zCoor).insertPoint(point);
         i++;
     }
+    for( const auto& n : indexes ) {
+        Eigen::Vector3i index = n.second;
+        map(index.x(), index.y(), index.z()).update();
+    }
+
     notify(map, res, indexes, isLast);
 }
 

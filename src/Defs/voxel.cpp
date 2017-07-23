@@ -12,7 +12,7 @@ Voxel::Voxel(){
     probability = 0;
     sampNumber = 0;
     mean = Eigen::Vector3d(0, 0, 0);
-    var << 1, 0, 0, 0, 1, 0, 0, 0, 1;
+    var << 0, 0, 0, 0, 0, 0, 0, 0, 0;
     color = RGBA(255, 255, 255);
 }
 
@@ -20,7 +20,7 @@ Voxel::Voxel(int res){
     probability = 0;
     sampNumber = 0;
     mean = Eigen::Vector3d(0, 0, 0);
-    var << 1, 0, 0, 0, 1, 0, 0, 0, 1;
+    var << 0, 0, 0, 0, 0, 0, 0, 0, 0;
     color = RGBA(255, 255, 255);
 }
 
@@ -33,45 +33,54 @@ Voxel::Voxel(double prob, unsigned int samps, Eigen::Vector3d mean, Mat33 dev, R
 
 }
 
-void Voxel::update(Point3D point, Mat33 uncertaintyError, bool printlog) {
-
-    updateDistribution(point, uncertaintyError, printlog);
-    updateColor(point.color);
+void Voxel::insertPoint(Point3D point) {
+    this->points.push_back(point);
     updateOccupancy();
-
 }
 
-void Voxel::updateDistribution(Point3D point, Mat33 uncertaintyError, bool printlog) {
-
-        Mat33 priorVar;
-        priorVar = var;
-
-        Eigen::Vector3d sampleMean = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
-
-        Mat33 Inv = uncertaintyError.inverse();
-        double det = Inv.determinant();
-
-        if(det == 0)
-            return;
-
-        ++sampNumber;
-
-        Mat33 temp;
-        temp = var.inverse();
-        temp += (sampNumber * Inv);
-        var = temp.inverse();
-        mean = var * (sampNumber * Inv*sampleMean + priorVar.inverse() * mean);
+void Voxel::update() {
+    updateDistribution();
+    updateColor();
 }
 
-void Voxel::updateColor(RGBA color) {
-    if(sampNumber == 1) {
-         this->color = color;
-    } else {
-        this->color.r = ((this->color.r*(sampNumber-1)) + color.r)/sampNumber;
-        this->color.g = ((this->color.g*(sampNumber-1)) + color.g)/sampNumber;
-        this->color.b = ((this->color.b*(sampNumber-1)) + color.b)/sampNumber;
-        this->color.a = ((this->color.a*(sampNumber-1)) + color.a)/sampNumber;
+void Voxel::updateDistribution() {
+
+    for(mapping::Point3D &point : points) {
+        Eigen::Vector3d newPoint = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+        mean += newPoint;
     }
+    mean = mean / points.size();
+
+    for(mapping::Point3D &point : points) {
+        var(0,0) += pow(point.position.x() - mean(0), 2.0);
+        var(1,1) += pow(point.position.y() - mean(1), 2.0);
+        var(2,2) += pow(point.position.z() - mean(2), 2.0);
+
+        var(0,1) += (point.position.x() - mean(0)) * (point.position.y() - mean(1));
+        var(0,2) += (point.position.x() - mean(0)) * (point.position.z() - mean(2));
+
+        var(1,0) += (point.position.y() - mean(1)) * (point.position.x() - mean(0));
+        var(1,2) += (point.position.y() - mean(1)) * (point.position.z() - mean(2));
+
+        var(2,0) += (point.position.z() - mean(2)) * (point.position.x() - mean(0));
+        var(2,1) += (point.position.z() - mean(2)) * (point.position.y() - mean(1));
+    }
+
+    var = var / points.size();
+}
+
+void Voxel::updateColor() {
+    for(mapping::Point3D &point : points) {
+        this->color.r += point.color.r;
+        this->color.g += point.color.g;
+        this->color.b += point.color.b;
+        this->color.a += point.color.a;
+    }
+
+    this->color.r = this->color.r/points.size();
+    this->color.g = this->color.g/points.size();
+    this->color.b = this->color.b/points.size();
+    this->color.a = this->color.a/points.size();
 }
 
 void Voxel::updateOccupancy() {

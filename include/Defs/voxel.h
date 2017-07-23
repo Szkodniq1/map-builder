@@ -21,6 +21,7 @@ namespace mapping {
         int probability;
         unsigned int sampNumber;
         RGBA color;
+        PointCloud points;
 
         ///default constructor
         Voxel();
@@ -31,10 +32,11 @@ namespace mapping {
         ///constructor
         Voxel(double prob, unsigned int samps, Eigen::Vector3d mean, Mat33 dev, RGBA color);
 
-        void update(Point3D point, Mat33 uncertaintyError, bool printlog);
+        void insertPoint(Point3D point);
+        void update();
         void updateOccupancy();
-        void updateDistribution(Point3D point, Mat33 uncertaintyError, bool printlog);
-        void updateColor(RGBA color);
+        void updateDistribution();
+        void updateColor();
         void updateNullOccupancy();
     };
 
