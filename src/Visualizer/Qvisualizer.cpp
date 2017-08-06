@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <chrono>
 #include <GL/glut.h>
+#include "Map/gaussmap.h"
 
 using namespace mapping;
 
@@ -79,18 +80,18 @@ public:
     }
 };
 
-QGLVisualizer::QGLVisualizer(void) : map(256) {
+QGLVisualizer::QGLVisualizer(void) : map(MAP_SIZE) {
 
 }
 
 /// Construction
-QGLVisualizer::QGLVisualizer(Config _config): config(_config), map(256){
+QGLVisualizer::QGLVisualizer(Config _config): config(_config), map(MAP_SIZE){
 
 }
 
 /// Construction
 QGLVisualizer::QGLVisualizer(std::string configFile) :
-    config(configFile), map(256) {
+    config(configFile), map(MAP_SIZE) {
     tinyxml2::XMLDocument configXML;
     std::string filename = "../../resources/" + configFile;
     configXML.LoadFile(filename.c_str());
@@ -148,6 +149,16 @@ void QGLVisualizer::createMapDisplayList() {
         glPopMatrix();
         glFlush();*/
     }
+
+    glPointSize(3);
+        glBegin(GL_POINTS);
+        for(mapping::PointCloud pointCloud : pointClouds) {
+            for (size_t i = 0;i<pointCloud.size();i++) {
+                glColor3ub(pointCloud[i].color.r,pointCloud[i].color.g,pointCloud[i].color.b);
+                glVertex3d(pointCloud[i].position.x()+4, pointCloud[i].position.y(), pointCloud[i].position.z());
+            }
+        }
+    glEnd();
     glEndList();
 }
 
@@ -186,7 +197,7 @@ void QGLVisualizer::drawPointCloud(void){
 /// draw objects
 void QGLVisualizer::draw(){
     // Here we are in the world coordinate system. Draw unit size axis.
-    drawAxis();
+    //drawAxis();
     drawPointCloud();
     //drawMap();
 }
@@ -198,15 +209,24 @@ void QGLVisualizer::animate(){
 
 /// initialize visualizer
 void QGLVisualizer::init(){
-    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-    GLfloat mat_shininess[] = { 50.0 };
-    GLfloat light_position[] = { 1.0, 1.0, 1.0, 0.0 };
-    glClearColor (0.0, 0.0, 0.0, 0.0);
-    glShadeModel (GL_SMOOTH);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
 
-    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    // Create light components
+    GLfloat ambientLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat diffuseLight[] = { 0.8f, 0.8f, 0.8, 1.0f };
+    GLfloat specularLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+    GLfloat emissiveLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+    GLfloat position[] = { -1.5f, 1.0f, -4.0f, 1.0f };
+
+    // Assign created components to GL_LIGHT0
+    glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
+    glLightfv(GL_LIGHT0, GL_EMISSION, emissiveLight);
+    glLightfv(GL_LIGHT0, GL_POSITION, position);
+
+    glShadeModel(GL_SMOOTH);
 
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -337,9 +357,12 @@ void QGLVisualizer::drawPreetyEllipsoid(const Vec3& pos, const Mat33& covariance
     double ellipsoidScale = 1.0;
 
     glScalef(sqrt(es.eigenvalues()(0))*ellipsoidScale,sqrt(es.eigenvalues()(1))*ellipsoidScale,sqrt(es.eigenvalues()(2))*ellipsoidScale);
-
+    float reflectColor[] = { 0.8f, 0.8f, 0.8f, 1.0f };
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, reflectColor);
+    GLfloat emissiveLight[] = { 0.1f, 0.1f, 0.1f, 1.0f };
+    glMaterialfv(GL_FRONT, GL_EMISSION, emissiveLight);
+    glColor3ub(color.r,color.g,color.b);
     gluSphere( obj, 1,10,10);
-    glColor4ub(color.r,color.g,color.b, color.a);
     glPopMatrix();
 
     gluDeleteQuadric(obj);

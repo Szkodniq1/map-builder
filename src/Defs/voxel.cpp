@@ -38,49 +38,48 @@ void Voxel::insertPoint(Point3D point) {
     updateOccupancy();
 }
 
-void Voxel::update() {
-    updateDistribution();
+void Voxel::update(int x, int y, int z) {
+    mean = Eigen::Vector3d(0, 0, 0);
+    var << 0, 0, 0, 0, 0, 0, 0, 0, 0;
+    color = RGBA(255, 255, 255);
+    updateDistribution(x, y, z);
     updateColor();
 }
 
-void Voxel::updateDistribution() {
-
+void Voxel::updateDistribution(int x, int y, int z) {
     for(mapping::Point3D &point : points) {
         Eigen::Vector3d newPoint = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
         mean += newPoint;
     }
     mean = mean / points.size();
-
-    for(mapping::Point3D &point : points) {
-        var(0,0) += pow(point.position.x() - mean(0), 2.0);
-        var(1,1) += pow(point.position.y() - mean(1), 2.0);
-        var(2,2) += pow(point.position.z() - mean(2), 2.0);
-
-        var(0,1) += (point.position.x() - mean(0)) * (point.position.y() - mean(1));
-        var(0,2) += (point.position.x() - mean(0)) * (point.position.z() - mean(2));
-
-        var(1,0) += (point.position.y() - mean(1)) * (point.position.x() - mean(0));
-        var(1,2) += (point.position.y() - mean(1)) * (point.position.z() - mean(2));
-
-        var(2,0) += (point.position.z() - mean(2)) * (point.position.x() - mean(0));
-        var(2,1) += (point.position.z() - mean(2)) * (point.position.y() - mean(1));
+    if(points.size() > 1) {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                var(i,j) = 0.0;
+                for(mapping::Point3D &point : points){
+                    Eigen::Vector3d newPoint = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+                    var(i,j) += (mean(i) - newPoint(i)) * (mean(j) - newPoint(j));
+                }
+                var(i,j) /= points.size() - 1;
+            }
+        }
     }
-
-    var = var / points.size();
 }
 
 void Voxel::updateColor() {
+    long r,g,b,a;
+    r=g=b=a=0;
     for(mapping::Point3D &point : points) {
-        this->color.r += point.color.r;
-        this->color.g += point.color.g;
-        this->color.b += point.color.b;
-        this->color.a += point.color.a;
+        r += point.color.r;
+        g += point.color.g;
+        b += point.color.b;
+        a += point.color.a;
     }
 
-    this->color.r = this->color.r/points.size();
-    this->color.g = this->color.g/points.size();
-    this->color.b = this->color.b/points.size();
-    this->color.a = this->color.a/points.size();
+    this->color.r = (int) r/points.size();
+    this->color.g = (int) g/points.size();
+    this->color.b = (int) b/points.size();
+    this->color.a = (int) a/points.size();
 }
 
 void Voxel::updateOccupancy() {

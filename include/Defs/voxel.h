@@ -33,9 +33,9 @@ namespace mapping {
         Voxel(double prob, unsigned int samps, Eigen::Vector3d mean, Mat33 dev, RGBA color);
 
         void insertPoint(Point3D point);
-        void update();
+        void update(int x, int y, int z);
         void updateOccupancy();
-        void updateDistribution();
+        void updateDistribution(int x, int y, int z);
         void updateColor();
         void updateNullOccupancy();
     };
