@@ -126,6 +126,7 @@ public:
     void update(Octree<mapping::Voxel>& map, double res, std::unordered_map<std::string, Eigen::Vector3i> indexes, bool isLast);
 
 private:
+    double ellipsoidScale = 2.0;
     Config config;
     GLuint list;
     Octree<mapping::Voxel> map;
@@ -158,13 +159,7 @@ private:
 
     void createMapDisplayList();
 
-    Octree<mapping::Voxel> prepareTestMap();
-
     void drawMap();
-
-    void drawEllipsoid(unsigned int uiStacks, unsigned int uiSlices, double fA, double fB, double fC) const;
-
-    void drawEllipsoid(const Vec3& pos, const Mat33& covariance) const;
 
     void drawPreetyEllipsoid(const Vec3& pos, const Mat33& covariance, RGBA color) const;
 };

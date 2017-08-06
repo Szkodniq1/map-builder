@@ -13,73 +13,6 @@ using namespace mapping;
 /// A single instance of Visualizer
 QGLVisualizer::Ptr visualizer;
 
-class SolidSphere
-{
-protected:
-    std::vector<GLfloat> vertices;
-    std::vector<GLfloat> normals;
-    std::vector<GLfloat> texcoords;
-    std::vector<GLushort> indices;
-
-public:
-    SolidSphere(float radius, unsigned int rings, unsigned int sectors)
-    {
-        double const R = 1.0f/(double)(rings-1);
-        double const S = 1.0f/(double)(sectors-1);
-        unsigned int r, s;
-
-        vertices.resize(rings * sectors * 3);
-        normals.resize(rings * sectors * 3);
-        texcoords.resize(rings * sectors * 2);
-        std::vector<GLfloat>::iterator v = vertices.begin();
-        std::vector<GLfloat>::iterator n = normals.begin();
-        std::vector<GLfloat>::iterator t = texcoords.begin();
-        for(r = 0; r < rings; r++)
-            for(s = 0; s < sectors; s++) {
-                double const y = (double) sin( -M_PI_2 + M_PI * r * R );
-                double const x = (double) cos(2*M_PI * s * S) * (double) sin( M_PI * r * R );
-                double const z = (double) sin(2*M_PI * s * S) * (double) sin( M_PI * r * R );
-
-                *t++ = (double) s*S;
-                *t++ = (double) r*R;
-
-                *v++ = (double) x * radius;
-                *v++ = (double) y * radius;
-                *v++ = (double) z * radius;
-
-                *n++ = (double) x;
-                *n++ = (double) y;
-                *n++ = (double) z;
-            }
-
-        indices.resize(rings * sectors * 4);
-        std::vector<GLushort>::iterator i = indices.begin();
-        for(r = 0; r < rings-1; r++)
-            for(s = 0; s < sectors-1; s++) {
-                *i++ = (GLushort) ((double) r * (double)sectors + (double) s);
-                *i++ = (GLushort) ((double) r * (double)sectors + (double) (s+1));
-                *i++ = (GLushort) ((double) (r+1) * (double)sectors + (double) (s+1));
-                *i++ = (GLushort) ((double) (r+1) * (double)sectors + (double) s);
-            }
-    }
-
-    void draw(GLfloat x, GLfloat y, GLfloat z)
-    {
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glTranslatef(x,y,z);
-        glEnable(GL_NORMALIZE);
-
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glEnableClientState(GL_NORMAL_ARRAY);
-
-        glVertexPointer(3, GL_FLOAT, 0, &vertices[0]);
-        glNormalPointer(GL_FLOAT, 0, &normals[0]);
-        glDrawElements(GL_QUADS, (int) indices.size(), GL_UNSIGNED_SHORT, &indices[0]);
-        glPopMatrix();
-    }
-};
-
 QGLVisualizer::QGLVisualizer(void) : map(MAP_SIZE) {
 
 }
@@ -132,22 +65,6 @@ void QGLVisualizer::createMapDisplayList() {
         Eigen::Vector3i indexes = n.second;
         Voxel v = map(indexes.x(), indexes.y(), indexes.z());
         drawPreetyEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
-
-        /*glPushMatrix();
-        //Voxel v = Voxel(1, 0, mean, dev, color);
-        Voxel v = map(indexes.x(), indexes.y(), indexes.z());
-        GLfloat mat[]={
-            v.var(0,0), v.var(1,0), v.var(2,0), 0, // vecteur1
-            v.var(0,1), v.var(1,1), v.var(2,1), 0, // vecteur2
-            v.var(0,2), v.var(1,2), v.var(2,2), 0, // vecteur3
-            (v.mean.x()), (v.mean.y()), (v.mean.z()), 1
-        };
-        glMultMatrixf(mat);
-        glutSolidSphere(1,10,10);//drawCloudObj(pointsObjVox);
-        //glColor4ub(v.color.r,v.color.g,v.color.b, v.color.a);
-        glColor4ub(255,255,0,0);
-        glPopMatrix();
-        glFlush();*/
     }
 
     glPointSize(3);
@@ -155,7 +72,7 @@ void QGLVisualizer::createMapDisplayList() {
         for(mapping::PointCloud pointCloud : pointClouds) {
             for (size_t i = 0;i<pointCloud.size();i++) {
                 glColor3ub(pointCloud[i].color.r,pointCloud[i].color.g,pointCloud[i].color.b);
-                glVertex3d(pointCloud[i].position.x()+4, pointCloud[i].position.y(), pointCloud[i].position.z());
+                glVertex3d(pointCloud[i].position.x()+5, pointCloud[i].position.y(), pointCloud[i].position.z());
             }
         }
     glEnd();
@@ -252,74 +169,9 @@ void QGLVisualizer::init(){
     startAnimation();
 }
 
-Octree<mapping::Voxel> QGLVisualizer::prepareTestMap() {
-    Octree<mapping::Voxel> map(4);
-    Eigen::Vector3d mean = Eigen::Vector3d(1,1,1);
-    Mat33 dev;
-    dev <<  1, 0, 0,
-            0, 1, 0,
-            0, 0, 0.25;
-    RGBA color = RGBA(255, 255, 0);
-    map(0,0,2) = Voxel(1, 0, mean, dev, color);
-    map(0,1,2) = Voxel(1, 0, mean, dev, color);
-    map(0,1,1) = Voxel(1, 0, mean, dev, color);
-    map(0,2,2) = Voxel(1, 0, mean, dev, color);
-    map(0,3,2) = Voxel(1, 0, mean, dev, color);
-    map(1,1,2) = Voxel(1, 0, mean, dev, color);
-    map(1,2,2) = Voxel(1, 0, mean, dev, color);
-    map(1,2,3) = Voxel(1, 0, mean, dev, color);
-    map(1,3,2) = Voxel(1, 0, mean, dev, color);
-    map(2,3,2) = Voxel(1, 0, mean, dev, color);
-    map(2,2,2) = Voxel(1, 0, mean, dev, color);
-    map(3,3,2) = Voxel(1, 0, mean, dev, color);
-    return map;
-}
-
 void QGLVisualizer::drawMap() {
     glPushMatrix();
     glCallList(list);
-    glPopMatrix();
-}
-
-/// Draw ellipsoid
-void QGLVisualizer::drawEllipsoid(unsigned int uiStacks, unsigned int uiSlices, double fA, double fB, double fC) const {
-    float tStep = (M_PI) / (float)uiSlices;
-    float sStep = (M_PI) / (float)uiStacks;
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glPolygonMode(GL_FRONT_AND_BACK,GL_COLOR);
-    for(float t = -M_PI/2.0; t <= (M_PI/2.0)+.0001; t += tStep) {
-        glBegin(GL_TRIANGLE_STRIP);
-        for(float s = -M_PI; s <= M_PI+.0001; s += sStep) {
-            glVertex3f(fA * cos(t) * cos(s), fB * cos(t) * sin(s), fC *
-                       sin(t));
-            float norm = sqrt(pow(fA * cos(t) * cos(s),2.0)+pow(fB *
-                                                                cos(t) * sin(s),2.0) + pow(fC * sin(t),2.0));
-            glNormal3f((fA * cos(t) * cos(s))/norm, (fB * cos(t) *
-                                                     sin(s))/norm, (fC * sin(t))/norm);
-            glVertex3f(fA * cos(t+tStep) * cos(s), fB * cos(t+tStep) *
-                       sin(s), fC * sin(t+tStep));
-            norm = sqrt(pow(fA * cos(t+tStep) * cos(s),2.0)+pow(fB *
-                                                                cos(t+tStep) * sin(s),2.0) + pow(fC * sin(t+tStep),2.0));
-            glNormal3f((fA * cos(t+tStep) * cos(s))/norm, (fB *
-                                                           cos(t+tStep) * sin(s))/norm, (fC * sin(t+tStep))/norm);
-        }
-        glEnd();
-    }
-}
-
-/// Draw ellipsoid
-void QGLVisualizer::drawEllipsoid(const Vec3& pos, const Mat33& covariance) const{
-    Eigen::SelfAdjointEigenSolver<Mat33> es;
-    es.compute(covariance);
-    Mat33 V(es.eigenvectors());
-    double GLmat[16]={V(0,0), V(1,0), V(2,0), 0, V(0,1), V(1,1),
-                      V(2,1), 0, V(0,2), V(1,2), V(2,2), 0, pos.x(), pos.y(), pos.z(), 1};
-    glPushMatrix();
-    glMultMatrixd(GLmat);
-    double ellipsoidScale = 1.0;
-    drawEllipsoid(10,10,sqrt(es.eigenvalues()(0))*ellipsoidScale,
-                  sqrt(es.eigenvalues()(1))*ellipsoidScale,
-                  sqrt(es.eigenvalues()(2))*ellipsoidScale);
     glPopMatrix();
 }
 
@@ -354,9 +206,8 @@ void QGLVisualizer::drawPreetyEllipsoid(const Vec3& pos, const Mat33& covariance
 
     glPushMatrix();
     glMultMatrixf( mat );
-    double ellipsoidScale = 1.0;
 
-    glScalef(sqrt(es.eigenvalues()(0))*ellipsoidScale,sqrt(es.eigenvalues()(1))*ellipsoidScale,sqrt(es.eigenvalues()(2))*ellipsoidScale);
+    glScalef(sqrt(es.eigenvalues()(0))*this->ellipsoidScale,sqrt(es.eigenvalues()(1))*this->ellipsoidScale,sqrt(es.eigenvalues()(2))*this->ellipsoidScale);
     float reflectColor[] = { 0.8f, 0.8f, 0.8f, 1.0f };
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, reflectColor);
     GLfloat emissiveLight[] = { 0.1f, 0.1f, 0.1f, 1.0f };
