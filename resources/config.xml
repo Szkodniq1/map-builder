@@ -18,3 +18,6 @@
 	<path>/home/pgomola/Dokumenty/testSource/living_room_traj0_loop_rgb-d</path>
 	<fileName>scene_00_</fileName>
 </TestSource>
+
+<!-- Simple, Bayes, Kalman -->
+<OccupancyMethod>Simple</OccupancyMethod>

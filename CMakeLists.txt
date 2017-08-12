@@ -105,11 +105,30 @@ add_definitions(-DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT)
 
 ###############################################################################
 #
+#  MAPPING voxels library
+#
+###############################################################################
+
+#if(BUILD_VOXEL)
+        file(GLOB VOXEL_SOURCES
+            "${CMAKE_SOURCE_DIR}/src/Voxel/*.cpp"
+        )
+        file(GLOB VOXEL_HEADERS
+            "${CMAKE_SOURCE_DIR}/include/Voxel/*.h"
+        )
+        ADD_LIBRARY(Voxel STATIC ${VOXEL_SOURCES} ${VOXEL_HEADERS})
+        set_target_properties(Voxel PROPERTIES LINKER_LANGUAGE CXX)
+        INSTALL(FILES ${VOXEL_HEADERS} DESTINATION include/Voxel/)
+
+#endif(BUILD_VOXEL)
+
+###############################################################################
+#
 # MAPPING Utilities library
 #
 ###############################################################################
 
-#if(BUILD_WALKERS_UTILITIES)
+#if(BUILD_UTILITIES)
         file(GLOB UTILITIES_SOURCES
             "${CMAKE_SOURCE_DIR}/src/Utilities/*.cpp"
         )
@@ -119,7 +138,7 @@ add_definitions(-DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT)
         add_library(Utilities STATIC ${UTILITIES_SOURCES} ${UTILITIES_HEADERS})
 #        INSTALL(TARGETS Utilities RUNTIME DESTINATION bin LIBRARY DESTINATION bin ARCHIVE DESTINATION lib)
 #        INSTALL(FILES ${TRACKER_HEADERS} DESTINATION include/walkers/Utilities/)
-#endif(BUILD_WALKERS_UTILITIES)
+#endif(BUILD_UTILITIES)
 
 ###############################################################################
 #
@@ -127,7 +146,7 @@ add_definitions(-DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT)
 #
 ###############################################################################
 
-#if(BUILD_WALKERS_UTILITIES)
+#if(BUILD_MAP)
         file(GLOB MAP_SOURCES
             "${CMAKE_SOURCE_DIR}/src/Map/*.cpp"
         )
@@ -135,10 +154,10 @@ add_definitions(-DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT)
             "${CMAKE_SOURCE_DIR}/include/Map/*.h"
         )
         add_library(Map STATIC ${MAP_SOURCES} ${MAP_HEADERS})
-        TARGET_LINK_LIBRARIES(Map Defs tinyxml2 Utilities)
+        TARGET_LINK_LIBRARIES(Map Defs Voxel tinyxml2 Utilities)
 #        INSTALL(TARGETS Utilities RUNTIME DESTINATION bin LIBRARY DESTINATION bin ARCHIVE DESTINATION lib)
 #        INSTALL(FILES ${TRACKER_HEADERS} DESTINATION include/walkers/Utilities/)
-#endif(BUILD_WALKERS_UTILITIES)
+#endif(BUILD_MAP)
 
 ###############################################################################
 #
@@ -154,7 +173,7 @@ add_definitions(-DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT)
             "${CMAKE_SOURCE_DIR}/include/Visualizer/*.h"
         )
         ADD_LIBRARY(Visualizer STATIC ${VISUALIZER_SOURCES} ${VISUALIZER_HEADERS} ${OPENGL_LIBRARY})
-        TARGET_LINK_LIBRARIES(Visualizer tinyxml2 ${QGLVIEWER_LIBRARY} ${QT_LIBRARIES} QtCore QtXml QtOpenGL QtGui)
+        TARGET_LINK_LIBRARIES(Visualizer Voxel tinyxml2 ${QGLVIEWER_LIBRARY} ${QT_LIBRARIES} QtCore QtXml QtOpenGL QtGui)
 #        INSTALL(TARGETS Utilities RUNTIME DESTINATION bin LIBRARY DESTINATION bin ARCHIVE DESTINATION lib)
 #        INSTALL(FILES ${VISUALIZER_HEADERS} DESTINATION include/walkers/Visualizer/)
 #endif(BUILD_SIMULATOR AND BUILD_VISUALIZER)
@@ -171,7 +190,7 @@ include_directories(include ${CMAKE_CURRENT_BINARY_DIR})
         SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath ./")
         SET(DEMO_SOURCES ./main.cpp)
         ADD_EXECUTABLE(mapping ${DEMO_SOURCES})
-        TARGET_LINK_LIBRARIES(mapping tinyxml2 Defs Map Visualizer ${QGLVIEWER_LIBRARY} ${QT_LIBRARIES} ${QT_LIBRARIES} QtCore QtXml QtOpenGL QtGui ${OPENGL_LIBRARY} glut ${OpenCV_LIBS})
+        TARGET_LINK_LIBRARIES(mapping tinyxml2 Defs Voxel Map Visualizer ${QGLVIEWER_LIBRARY} ${QT_LIBRARIES} ${QT_LIBRARIES} QtCore QtXml QtOpenGL QtGui ${OPENGL_LIBRARY} glut ${OpenCV_LIBS})
         INSTALL(TARGETS mapping RUNTIME DESTINATION bin)
 
 #endif(BUILD_SIMULATOR AND BUILD_VISUALIZER AND BUILD_SIMULATOR_DEMO AND BUILD_SIMULATOR_DEMO_MAIN)

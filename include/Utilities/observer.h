@@ -3,7 +3,7 @@
 #define OBSERVER_H_
 
 #include "../include/Defs/defs.h"
-#include "../include/Defs/voxel.h"
+#include "../include/Voxel/voxel.h"
 #include <vector>
 #include <list>
 #include "3rdParty/octree/octree.h"

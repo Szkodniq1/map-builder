@@ -75,7 +75,7 @@ void Gaussmap::updateMap(bool isLast) {
             indexes[key] = Eigen::Vector3i(xCoor, yCoor, zCoor);
         }
 
-        map(xCoor, yCoor, zCoor).update(point, uncertinatyErrors[i], xCoor==50&&yCoor==29&&zCoor==26);
+        map(xCoor, yCoor, zCoor).insertPoint(point, uncertinatyErrors[i]);
         i++;
     }
     notify(map, res, indexes, isLast);

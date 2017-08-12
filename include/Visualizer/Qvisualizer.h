@@ -8,7 +8,7 @@
 #define QVISUALIZER_H_INCLUDED
 
 #include "../Defs/defs.h"
-#include "../Defs/voxel.h"
+#include "../Voxel/voxel.h"
 #include "Utilities/observer.h"
 #include "../../3rdParty/tinyXML/tinyxml2.h"
 #include <QGLViewer/qglviewer.h>

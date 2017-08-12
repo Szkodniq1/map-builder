@@ -1,12 +1,11 @@
-#include "Defs/voxel.h"
+#include "Voxel/voxel.h"
 
 
 /*
  * Voxel methods
  */
 
-
-namespace mapping{
+namespace mapping {
 
 Voxel::Voxel(){
     probability = 0;
@@ -14,6 +13,7 @@ Voxel::Voxel(){
     mean = Eigen::Vector3d(0, 0, 0);
     var << 1, 0, 0, 0, 1, 0, 0, 0, 1;
     color = RGBA(255, 255, 255);
+    this->type = TYPE_BAYES;
 }
 
 Voxel::Voxel(int res){
@@ -22,6 +22,7 @@ Voxel::Voxel(int res){
     mean = Eigen::Vector3d(0, 0, 0);
     var << 1, 0, 0, 0, 1, 0, 0, 0, 1;
     color = RGBA(255, 255, 255);
+    this->type = TYPE_BAYES;
 }
 
 Voxel::Voxel(double prob, unsigned int samps, Eigen::Vector3d mean, Mat33 dev, RGBA color) {
@@ -30,42 +31,42 @@ Voxel::Voxel(double prob, unsigned int samps, Eigen::Vector3d mean, Mat33 dev, R
     this->mean = mean;
     this->var = dev;
     this->color = color;
-
+    this->type = TYPE_BAYES;
 }
 
-void Voxel::update(Point3D point, Mat33 uncertaintyError, bool printlog) {
+void Voxel::insertPoint(Point3D point, Mat33 uncertaintyError) {
 
-    updateDistribution(point, uncertaintyError, printlog);
+    updateDistribution(point, uncertaintyError);
     updateColor(point.color);
     updateOccupancy();
 
 }
 
-void Voxel::updateDistribution(Point3D point, Mat33 uncertaintyError, bool printlog) {
+void Voxel::updateDistribution(Point3D point, Mat33 uncertaintyError) {
 
-        Mat33 priorVar;
-        priorVar = var;
+    Mat33 priorVar;
+    priorVar = var;
 
-        Eigen::Vector3d sampleMean = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+    Eigen::Vector3d sampleMean = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
 
-        Mat33 Inv = uncertaintyError.inverse();
-        double det = Inv.determinant();
+    Mat33 Inv = uncertaintyError.inverse();
+    double det = Inv.determinant();
 
-        if(det == 0)
-            return;
+    if(det == 0)
+        return;
 
-        ++sampNumber;
+    ++sampNumber;
 
-        Mat33 temp;
-        temp = var.inverse();
-        temp += (sampNumber * Inv);
-        var = temp.inverse();
-        mean = var * (sampNumber * Inv*sampleMean + priorVar.inverse() * mean);
+    Mat33 temp;
+    temp = var.inverse();
+    temp += (sampNumber * Inv);
+    var = temp.inverse();
+    mean = var * (sampNumber * Inv*sampleMean + priorVar.inverse() * mean);
 }
 
 void Voxel::updateColor(RGBA color) {
     if(sampNumber == 1) {
-         this->color = color;
+        this->color = color;
     } else {
         this->color.r = ((this->color.r*(sampNumber-1)) + color.r)/sampNumber;
         this->color.g = ((this->color.g*(sampNumber-1)) + color.g)/sampNumber;
@@ -83,6 +84,7 @@ void Voxel::updateNullOccupancy() {
     if(probability>0)
         --probability;
 }
+
 }
 
 
