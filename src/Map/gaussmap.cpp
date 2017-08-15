@@ -62,24 +62,30 @@ mapping::Map* mapping::createMapGauss(PointCloud PC) {
 void Gaussmap::updateMap(bool isLast) {
     int xCoor, yCoor, zCoor;
     int i = 0;
+    simpleMethodIndexes.clear();
     for(mapping::Point3D &point : cloud) {
         xCoor = xCoordinate(point.position.x());
         yCoor = yCoordinate(point.position.y());
         zCoor = zCoordinate(point.position.z());
 
         std::string key = std::to_string(xCoor) + std::to_string(yCoor) + std::to_string(zCoor);
-
         std::unordered_map<std::string, Eigen::Vector3i>::iterator got = indexes.find(key);
-
         if(got == indexes.end()) {
             indexes[key] = Eigen::Vector3i(xCoor, yCoor, zCoor);
+        }
+
+        if (methodType.type == MethodType::TYPE_SIMPLE) {
+            got = simpleMethodIndexes.find(key);
+            if(got == simpleMethodIndexes.end()) {
+                simpleMethodIndexes[key] = Eigen::Vector3i(xCoor, yCoor, zCoor);
+            }
         }
 
         map(xCoor, yCoor, zCoor).insertPoint(point, uncertinatyErrors[i]);
         i++;
     }
     if (methodType.type == MethodType::TYPE_SIMPLE) {
-        for( const auto& n : indexes ) {
+        for( const auto& n : simpleMethodIndexes ) {
             Eigen::Vector3i index = n.second;
             map(index.x(), index.y(), index.z()).updateWithSimpleMethod();
         }

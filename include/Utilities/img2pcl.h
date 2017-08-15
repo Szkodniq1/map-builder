@@ -3,6 +3,7 @@
 
 #include "../include/Defs/defs.h"
 #include "../include/Defs/grabbedimage.h"
+#include "Defs/occmethodtype.h"
 #include "opencv2/opencv.hpp"
 #include "../../3rdParty/Eigen/Dense"
 #include "octomap/Pointcloud.h"
@@ -18,6 +19,8 @@ namespace mapping {
 
 class img2pcl {
 private:
+    /// Method type
+    OccMethodType methodType;
     //Path of images catalog and format of their naming
     std::string path;
     std::string form;

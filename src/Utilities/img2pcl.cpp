@@ -196,8 +196,8 @@ int img2pcl::grabFrame2() {
 void img2pcl::computeCov(int u, int v, double depth, Mat33& cov) {
     Mat33 J;
     J << depth/focalLength[0], 0, ((u/focalLength[0])-(focalAxis[0]/focalLength[0])),
-         0, depth/focalLength[1], ((v/focalLength[1])-(focalAxis[1]/focalLength[1])),
-         0, 0, 1;
+            0, depth/focalLength[1], ((v/focalLength[1])-(focalAxis[1]/focalLength[1])),
+            0, 0, 1;
     Ruvd(2,2) = distVarCoefs[0]*pow(depth,3.0) + distVarCoefs[1]*pow(depth,2.0) + distVarCoefs[2]*depth + distVarCoefs[3];
     cov=J*Ruvd*J.transpose();
 }
@@ -215,8 +215,8 @@ Eigen::Translation<double,3> img2pcl::xyz0(int u, int v, double d) {
     Eigen::Vector3d point(u, v, 1);
     Eigen::Matrix<double,3,3> PHCPModel;
     PHCPModel <<1/focalLength[0],   0,                  -focalAxis[0]/focalLength[0],
-                0,                  1/focalLength[1],   -focalAxis[1]/focalLength[1],
-                0,                  0,                  1;
+            0,                  1/focalLength[1],   -focalAxis[1]/focalLength[1],
+            0,                  0,                  1;
     Eigen::Translation<double,3> xyz(d*PHCPModel*point);
     return xyz;
 }
@@ -260,7 +260,9 @@ int img2pcl::depth2cloud() {
             if(tmp>800 && tmp<60000){
                 double depthM = double(tmp)/factor;
                 Mat33 uncError;
-                computeCov(j,i,depthM,uncError);
+                if (methodType.type != MethodType::TYPE_SIMPLE) {
+                    computeCov(j,i,depthM,uncError);
+                }
                 uncertinatyErrors.push_back(uncError);
                 point = xyz0(j,i,depthM);
                 Point3D pointPCL;
@@ -287,8 +289,8 @@ int img2pcl::depth2colorcloud() {
     tempCloud.clear();
     std::vector<Mat33> uncertinatyErrors;
 
-//    Eigen::Matrix<float_type,3,3> R = Rot();
-//    Eigen::Translation<float_type,3> T = Trans();
+    //    Eigen::Matrix<float_type,3,3> R = Rot();
+    //    Eigen::Translation<float_type,3> T = Trans();
 
     uint16_t tmp;
 
@@ -298,7 +300,9 @@ int img2pcl::depth2colorcloud() {
             if(tmp>800 && tmp<60000){
                 double depthM = double(tmp)/factor;
                 Mat33 uncError;
-                computeCov(j,i,depthM,uncError);
+                if (methodType.type != MethodType::TYPE_SIMPLE) {
+                    computeCov(j,i,depthM,uncError);
+                }
                 uncertinatyErrors.push_back(uncError);
                 point = xyz0(j,i,depthM);
                 Point3D pointPCL;
