@@ -16,7 +16,7 @@ Voxel::Voxel() {
         defaultBayesInit();
         break;
     case MethodType::TYPE_KALMAN:
-        defaultSimpleInit();
+        defaultBayesInit();
         break;
     default:
         defaultSimpleInit();
@@ -33,7 +33,7 @@ Voxel::Voxel(int res) {
         defaultBayesInit();
         break;
     case MethodType::TYPE_KALMAN:
-        defaultSimpleInit();
+        defaultBayesInit();
         break;
     default:
         defaultSimpleInit();
@@ -151,7 +151,7 @@ void Voxel::updateBayesDistribution(Point3D point, Mat33 uncertaintyError) {
 }
 
 void Voxel::updateKalmanDistribution(Point3D point, Mat33 uncertaintyError) {
-    if (sampNumber == 0) {
+    /*if (sampNumber == 0) {
         mean = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
         var  = Mat33::Identity();
     } else {
@@ -173,7 +173,13 @@ void Voxel::updateKalmanDistribution(Point3D point, Mat33 uncertaintyError) {
         Mat33 Kt = K.transpose();
         mean = mean + K*e;
         var  = var - K*S*Kt;
-    }
+    }*/
+    Eigen::Vector3d sampleMean = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+    Mat33 temp = (var + uncertaintyError);
+    Mat33 tempInv = temp.inverse();
+    Mat33 K = var * tempInv;
+    mean = mean - K * (mean  - sampleMean);
+    var = (Mat33::Identity()-K)*var;
     sampNumber++;
 }
 
