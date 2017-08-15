@@ -90,6 +90,15 @@ public:
     }
 };
 
+enum class MethodType {
+    /// For simple method
+    TYPE_SIMPLE,
+    /// For bayesian update
+    TYPE_BAYES,
+    /// For kalman filter implementation
+    TYPE_KALMAN
+};
+
 }
 
 #endif

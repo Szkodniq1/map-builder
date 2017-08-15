@@ -2,21 +2,12 @@
 #define VOXEL_H
 
 #include "Defs/defs.h"
+#include "occmethodtype.h"
 #include "../../3rdParty/Eigen/Dense"
-
 
 namespace mapping {
     class Voxel {
     public:
-        /// Voxel type
-        enum Type {
-            /// For simple method
-            TYPE_SIMPLE,
-            /// For bayesian update
-            TYPE_BAYES,
-            /// For kalman filter implementation
-            TYPE_KALMAN
-        };
         // [ mean_x mean_y mean_z]
         Eigen::Vector3d mean;
         /*
@@ -30,20 +21,30 @@ namespace mapping {
         int probability;
         unsigned int sampNumber;
         RGBA color;
-        /// Voxel type
-        Type type;
+        /// Method type
+        OccMethodType methodType;
+        //For simple method
+        PointCloud points;
 
         ///default constructor
         Voxel();
         //default contructor int OcTree structure
         Voxel(int res);
-        ///constructor
-        Voxel(double prob, unsigned int samps, Eigen::Vector3d mean, mapping::Mat33 dev, mapping::RGBA color);
+
+        //default initializers for types
+        void defaultSimpleInit();
+        void defaultBayesInit();
 
         void insertPoint(Point3D point, Mat33 uncertaintyError);
+
+        void updateWithSimpleMethod();
+        void updateSimpleDistribution();
+        void updateSimpleColor();
+
+        void updateBayesDistribution(Point3D point, Mat33 uncertaintyError);
+        void updateBayesColor(RGBA color);
+
         void updateOccupancy();
-        void updateDistribution(Point3D point, Mat33 uncertaintyError);
-        void updateColor(RGBA color);
         void updateNullOccupancy();
     };
 

@@ -19,6 +19,8 @@ namespace mapping {
 
 class Gaussmap : public mapping::Map, public Subject {
 private:
+    /// Method type
+    OccMethodType methodType;
     Octree<mapping::Voxel> map;
     const double res = 0.02;
     PointCloud cloud;

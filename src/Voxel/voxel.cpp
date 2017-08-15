@@ -7,43 +7,121 @@
 
 namespace mapping {
 
-Voxel::Voxel(){
+Voxel::Voxel() {
+    switch (this->methodType.type) {
+    case MethodType::TYPE_SIMPLE:
+        defaultSimpleInit();
+        break;
+    case MethodType::TYPE_BAYES:
+        defaultBayesInit();
+        break;
+    case MethodType::TYPE_KALMAN:
+
+        break;
+    default:
+        defaultSimpleInit();
+        break;
+    }
+}
+
+Voxel::Voxel(int res) {
+    switch (this->methodType.type) {
+    case MethodType::TYPE_SIMPLE:
+        defaultSimpleInit();
+        break;
+    case MethodType::TYPE_BAYES:
+        defaultBayesInit();
+        break;
+    case MethodType::TYPE_KALMAN:
+
+        break;
+    default:
+        defaultSimpleInit();
+        break;
+    }
+}
+
+void Voxel::defaultSimpleInit() {
+    probability = 0;
+    sampNumber = 0;
+    mean = Eigen::Vector3d(0, 0, 0);
+    var << 0, 0, 0, 0, 0, 0, 0, 0, 0;
+    color = RGBA(255, 255, 255);
+}
+
+void Voxel::defaultBayesInit() {
     probability = 0;
     sampNumber = 0;
     mean = Eigen::Vector3d(0, 0, 0);
     var << 1, 0, 0, 0, 1, 0, 0, 0, 1;
     color = RGBA(255, 255, 255);
-    this->type = TYPE_BAYES;
-}
-
-Voxel::Voxel(int res){
-    probability = 0;
-    sampNumber = 0;
-    mean = Eigen::Vector3d(0, 0, 0);
-    var << 1, 0, 0, 0, 1, 0, 0, 0, 1;
-    color = RGBA(255, 255, 255);
-    this->type = TYPE_BAYES;
-}
-
-Voxel::Voxel(double prob, unsigned int samps, Eigen::Vector3d mean, Mat33 dev, RGBA color) {
-    probability = prob;
-    sampNumber = samps;
-    this->mean = mean;
-    this->var = dev;
-    this->color = color;
-    this->type = TYPE_BAYES;
 }
 
 void Voxel::insertPoint(Point3D point, Mat33 uncertaintyError) {
+    switch (this->methodType.type) {
+    case MethodType::TYPE_SIMPLE:
+        this->points.push_back(point);
+        break;
+    case MethodType::TYPE_BAYES:
+        updateBayesDistribution(point, uncertaintyError);
+        updateBayesColor(point.color);
+        break;
+    case MethodType::TYPE_KALMAN:
 
-    updateDistribution(point, uncertaintyError);
-    updateColor(point.color);
+        break;
+    default:
+        this->points.push_back(point);
+        break;
+    }
     updateOccupancy();
-
 }
 
-void Voxel::updateDistribution(Point3D point, Mat33 uncertaintyError) {
+void Voxel::updateWithSimpleMethod() {
+    mean = Eigen::Vector3d(0, 0, 0);
+    var << 0, 0, 0, 0, 0, 0, 0, 0, 0;
+    color = RGBA(255, 255, 255);
+    updateSimpleDistribution();
+    updateSimpleColor();
+}
 
+void Voxel::updateSimpleDistribution() {
+    for(mapping::Point3D &point : points) {
+        Eigen::Vector3d newPoint = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+        mean += newPoint;
+    }
+    mean = mean / points.size();
+    if(points.size() > 1) {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                var(i,j) = 0.0;
+                for(mapping::Point3D &point : points){
+                    Eigen::Vector3d newPoint = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+                    var(i,j) += (mean(i) - newPoint(i)) * (mean(j) - newPoint(j));
+                }
+                var(i,j) /= points.size() - 1;
+            }
+        }
+    }
+}
+
+void Voxel::updateSimpleColor() {
+    long r,g,b,a;
+    r=g=b=a=0;
+    for(mapping::Point3D &point : points) {
+        r += point.color.r;
+        g += point.color.g;
+        b += point.color.b;
+        a += point.color.a;
+    }
+
+    this->color.r = (int) r/points.size();
+    this->color.g = (int) g/points.size();
+    this->color.b = (int) b/points.size();
+    this->color.a = (int) a/points.size();
+}
+
+
+void Voxel::updateBayesDistribution(Point3D point, Mat33 uncertaintyError) {
     Mat33 priorVar;
     priorVar = var;
 
@@ -64,7 +142,7 @@ void Voxel::updateDistribution(Point3D point, Mat33 uncertaintyError) {
     mean = var * (sampNumber * Inv*sampleMean + priorVar.inverse() * mean);
 }
 
-void Voxel::updateColor(RGBA color) {
+void Voxel::updateBayesColor(RGBA color) {
     if(sampNumber == 1) {
         this->color = color;
     } else {

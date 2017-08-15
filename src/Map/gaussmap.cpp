@@ -78,6 +78,12 @@ void Gaussmap::updateMap(bool isLast) {
         map(xCoor, yCoor, zCoor).insertPoint(point, uncertinatyErrors[i]);
         i++;
     }
+    if (methodType.type == MethodType::TYPE_SIMPLE) {
+        for( const auto& n : indexes ) {
+            Eigen::Vector3i index = n.second;
+            map(index.x(), index.y(), index.z()).updateWithSimpleMethod();
+        }
+    }
     notify(map, res, indexes, isLast);
 }
 

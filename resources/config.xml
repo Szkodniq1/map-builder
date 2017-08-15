@@ -19,5 +19,5 @@
 	<fileName>scene_00_</fileName>
 </TestSource>
 
-<!-- Simple, Bayes, Kalman -->
-<OccupancyMethod>Simple</OccupancyMethod>
+<!-- 0 - Simple, 1 - Bayes, 2 - Kalman -->
+<OccupancyMethod>0</OccupancyMethod>

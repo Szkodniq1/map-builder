@@ -13,10 +13,11 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wconversion -std=c++11 -pthread")
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Settings
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}")
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/resources")
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/include")
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/include/Defs")
+include_directories("${CMAKE_SOURCE_DIR}")
+include_directories("${CMAKE_SOURCE_DIR}/resources")
+include_directories("${CMAKE_SOURCE_DIR}/include")
+include_directories("${CMAKE_SOURCE_DIR}/include/Defs")
+
 
 # Executable output directory
 SET(RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build/bin${OUTPUT_DIRECTORY_POSTFIX} CACHE PATH "Executable output directory")
@@ -83,6 +84,9 @@ link_directories(${QGLVIEWER_LIBRARY})
 
 add_definitions(-DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT)
 
+FILE(GLOB_RECURSE LibFiles "${CMAKE_SOURCE_DIR}/resources/*.xml")
+add_custom_target(headers SOURCES ${LibFiles})
+
 ###############################################################################
 #
 #  MAPPING defs library
@@ -117,6 +121,7 @@ add_definitions(-DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT)
             "${CMAKE_SOURCE_DIR}/include/Voxel/*.h"
         )
         ADD_LIBRARY(Voxel STATIC ${VOXEL_SOURCES} ${VOXEL_HEADERS})
+        TARGET_LINK_LIBRARIES(Voxel Defs)
         set_target_properties(Voxel PROPERTIES LINKER_LANGUAGE CXX)
         INSTALL(FILES ${VOXEL_HEADERS} DESTINATION include/Voxel/)
 
@@ -136,6 +141,7 @@ add_definitions(-DEIGEN_DONT_VECTORIZE -DEIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT)
             "${CMAKE_SOURCE_DIR}/include/Utilities/*.h"
         )
         add_library(Utilities STATIC ${UTILITIES_SOURCES} ${UTILITIES_HEADERS})
+        TARGET_LINK_LIBRARIES(Utilities Defs)
 #        INSTALL(TARGETS Utilities RUNTIME DESTINATION bin LIBRARY DESTINATION bin ARCHIVE DESTINATION lib)
 #        INSTALL(FILES ${TRACKER_HEADERS} DESTINATION include/walkers/Utilities/)
 #endif(BUILD_UTILITIES)
