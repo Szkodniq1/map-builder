@@ -43,7 +43,10 @@ namespace mapping {
         void updateSimpleColor();
 
         void updateBayesDistribution(Point3D point, Mat33 uncertaintyError);
-        void updateBayesColor(RGBA color);
+
+        void updateKalmanDistribution(Point3D point, Mat33 uncertaintyError);
+
+        void updateColor(RGBA color);
 
         void updateOccupancy();
         void updateNullOccupancy();

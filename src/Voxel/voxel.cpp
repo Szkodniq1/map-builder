@@ -16,7 +16,7 @@ Voxel::Voxel() {
         defaultBayesInit();
         break;
     case MethodType::TYPE_KALMAN:
-
+        defaultSimpleInit();
         break;
     default:
         defaultSimpleInit();
@@ -33,7 +33,7 @@ Voxel::Voxel(int res) {
         defaultBayesInit();
         break;
     case MethodType::TYPE_KALMAN:
-
+        defaultSimpleInit();
         break;
     default:
         defaultSimpleInit();
@@ -64,10 +64,11 @@ void Voxel::insertPoint(Point3D point, Mat33 uncertaintyError) {
         break;
     case MethodType::TYPE_BAYES:
         updateBayesDistribution(point, uncertaintyError);
-        updateBayesColor(point.color);
+        updateColor(point.color);
         break;
     case MethodType::TYPE_KALMAN:
-
+        updateKalmanDistribution(point, uncertaintyError);
+        updateColor(point.color);
         break;
     default:
         this->points.push_back(point);
@@ -149,7 +150,34 @@ void Voxel::updateBayesDistribution(Point3D point, Mat33 uncertaintyError) {
     mean = var * (sampNumber * Inv*sampMean + priorVar.inverse() * mean);
 }
 
-void Voxel::updateBayesColor(RGBA color) {
+void Voxel::updateKalmanDistribution(Point3D point, Mat33 uncertaintyError) {
+    if (sampNumber == 0) {
+        mean = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+        var  = Mat33::Identity();
+    } else {
+        //Mat33 A = Mat33::Identity();
+        //Mat33 At = A.transpose();
+        Eigen::Vector3d sampleMean = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+
+        //Eigen::Vector3d px = A*mean;
+        //Mat33 P = A*var*At;
+
+        Mat33 H = Mat33::Identity();
+        Mat33 Ht = H.transpose();
+
+        Eigen::Vector3d e = sampleMean - mean;
+        Mat33 R = uncertaintyError;
+        Mat33 S = var + R;
+        Mat33 Sinv = S.inverse();
+        Mat33 K = var*Ht*Sinv;
+        Mat33 Kt = K.transpose();
+        mean = mean + K*e;
+        var  = var - K*S*Kt;
+    }
+    sampNumber++;
+}
+
+void Voxel::updateColor(RGBA color) {
     if(sampNumber == 1) {
         this->color = color;
     } else {

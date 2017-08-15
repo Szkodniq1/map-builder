@@ -20,4 +20,4 @@
 </TestSource>
 
 <!-- 0 - Simple, 1 - Bayes, 2 - Kalman -->
-<OccupancyMethod>1</OccupancyMethod>
+<OccupancyMethod>2</OccupancyMethod>
