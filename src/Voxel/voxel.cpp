@@ -125,7 +125,14 @@ void Voxel::updateBayesDistribution(Point3D point, Mat33 uncertaintyError) {
     Mat33 priorVar;
     priorVar = var;
 
-    Eigen::Vector3d sampleMean = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+    if (sampNumber == 0) {
+        sampMean = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+    } else {
+        sampMean = Eigen::Vector3d(
+                    ((sampMean(0) * sampNumber) + point.position.x())/(sampNumber+1),
+                    ((sampMean(1) * sampNumber) + point.position.y())/(sampNumber+1),
+                    ((sampMean(2) * sampNumber) + point.position.z())/(sampNumber+1));
+    }
 
     Mat33 Inv = uncertaintyError.inverse();
     double det = Inv.determinant();
@@ -139,7 +146,7 @@ void Voxel::updateBayesDistribution(Point3D point, Mat33 uncertaintyError) {
     temp = var.inverse();
     temp += (sampNumber * Inv);
     var = temp.inverse();
-    mean = var * (sampNumber * Inv*sampleMean + priorVar.inverse() * mean);
+    mean = var * (sampNumber * Inv*sampMean + priorVar.inverse() * mean);
 }
 
 void Voxel::updateBayesColor(RGBA color) {

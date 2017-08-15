@@ -20,6 +20,7 @@ namespace mapping {
         Mat33 var;
         int probability;
         unsigned int sampNumber;
+        Eigen::Vector3d sampMean;
         RGBA color;
         /// Method type
         OccMethodType methodType;
