@@ -13,9 +13,11 @@ public:
     Vec3 translation;
     Quaternion orientation;
     std::vector<Mat33> uncertinatyErrors;
+    Eigen::Vector3d cameraPos;
+
 
     GrabbedImage();
-    GrabbedImage(PointCloud pc, Vec3 translation, Quaternion orientation, std::vector<Mat33> uncertinatyErrors);
+    GrabbedImage(PointCloud pc, Vec3 translation, Quaternion orientation, std::vector<Mat33> uncertinatyErrors, Eigen::Vector3d cameraPos);
     PointCloud transformedPointCloud();
 };
 
