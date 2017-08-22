@@ -23,7 +23,7 @@ private:
     OccMethodType methodType;
     Octree<mapping::Voxel> map;
     const double res = 0.15;
-    const double raytraceFactor = 100;
+    const double raytraceFactor = 50;
     PointCloud cloud;
     std::vector<Mat33> uncertinatyErrors;
     Eigen::Vector3d cameraPos;
