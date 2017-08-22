@@ -104,7 +104,7 @@ int img2pcl::grabFrame() {
 
         for(int i=0; i<3;i++)
             dataStr >> t[i];
-
+        cam = Eigen::Vector3d(t[0], t[1], t[2]);
         for(int i=0; i<4;i++)
             dataStr >> q[i];
 
@@ -177,7 +177,7 @@ int img2pcl::grabFrame2() {
 
         for(int i=0; i<3;i++)
             dataStr >> t[i];
-
+        cam = Eigen::Vector3d(t[0], t[1], t[2]);
         for(int i=0; i<4;i++)
             dataStr >> q[i];
 
@@ -326,7 +326,8 @@ int img2pcl::depth2colorcloud() {
 }
 
 mapping::GrabbedImage img2pcl::returnPC() {
-    return mapping::GrabbedImage(Cloud, Vec3(t[0],t[1],t[2]), Quaternion(q[3], q[0], q[1], q[2]), errors, Eigen::Vector3d(t[0], t[1], t[2]));
+
+    return mapping::GrabbedImage(Cloud, Vec3(t[0],t[1],t[2]), Quaternion(q[3], q[0], q[1], q[2]), errors, cam);
 }
 
 }

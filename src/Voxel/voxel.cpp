@@ -8,53 +8,24 @@
 namespace mapping {
 
 Voxel::Voxel() {
-    switch (this->methodType.type) {
-    case MethodType::TYPE_SIMPLE:
-        defaultSimpleInit();
-        break;
-    case MethodType::TYPE_BAYES:
-        defaultBayesInit();
-        break;
-    case MethodType::TYPE_KALMAN:
-        defaultBayesInit();
-        break;
-    default:
-        defaultSimpleInit();
-        break;
-    }
-}
-
-Voxel::Voxel(int res) {
-    switch (this->methodType.type) {
-    case MethodType::TYPE_SIMPLE:
-        defaultSimpleInit();
-        break;
-    case MethodType::TYPE_BAYES:
-        defaultBayesInit();
-        break;
-    case MethodType::TYPE_KALMAN:
-        defaultBayesInit();
-        break;
-    default:
-        defaultSimpleInit();
-        break;
-    }
-}
-
-void Voxel::defaultSimpleInit() {
-    probability = 0;
-    sampNumber = 0;
-    mean = Eigen::Vector3d(0, 0, 0);
-    var << 0, 0, 0, 0, 0, 0, 0, 0, 0;
-    color = RGBA(255, 255, 255);
-}
-
-void Voxel::defaultBayesInit() {
     probability = 0;
     sampNumber = 0;
     mean = Eigen::Vector3d(0, 0, 0);
     var << 1, 0, 0, 0, 1, 0, 0, 0, 1;
-    color = RGBA(255, 255, 255);
+    color = RGBA(100, 100, 100, 40);
+}
+
+Voxel::Voxel(int res) {
+    probability = 0;
+    sampNumber = 0;
+    mean = Eigen::Vector3d(0, 0, 0);
+    var << 1, 0, 0, 0, 1, 0, 0, 0, 1;
+    color = RGBA(100, 100, 100, 40);
+}
+
+void Voxel::preinitParameters(double res, Eigen::Vector3d center) {
+    this->mean = center;
+    var << res/10, 0, 0, 0, res/10, 0, 0, 0, res/10;
 }
 
 void Voxel::insertPoint(Point3D point, Mat33 uncertaintyError) {
@@ -80,7 +51,7 @@ void Voxel::insertPoint(Point3D point, Mat33 uncertaintyError) {
 void Voxel::updateWithSimpleMethod() {
     mean = Eigen::Vector3d(0, 0, 0);
     var << 0, 0, 0, 0, 0, 0, 0, 0, 0;
-    color = RGBA(255, 255, 255);
+    color = RGBA(255, 255, 255, 255);
     updateSimpleDistribution();
     updateSimpleColor();
 }
@@ -95,7 +66,7 @@ void Voxel::updateSimpleDistribution() {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 var(i,j) = 0.0;
-                for(mapping::Point3D &point : points){
+                for(mapping::Point3D &point : points) {
                     Eigen::Vector3d newPoint = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
                     var(i,j) += (mean(i) - newPoint(i)) * (mean(j) - newPoint(j));
                 }

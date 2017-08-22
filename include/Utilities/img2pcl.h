@@ -49,6 +49,7 @@ private:
     //Position and orientation of camera
     float t[3];
     float q[4];
+    Eigen::Vector3d cam;
 
 
     //Point Cloude generated from images

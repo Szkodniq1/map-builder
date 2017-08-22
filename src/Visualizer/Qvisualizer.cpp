@@ -61,20 +61,31 @@ void QGLVisualizer::update(Octree<mapping::Voxel>& map, double res, std::unorder
 void QGLVisualizer::createMapDisplayList() {
     list = glGenLists(1);
     glNewList(list, GL_COMPILE);
-    for( const auto& n : updatedVoxels ) {
+    /*for( const auto& n : updatedVoxels ) {
         Eigen::Vector3i indexes = n.second;
         Voxel v = map(indexes.x(), indexes.y(), indexes.z());
         drawPreetyEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
+    }*/
+
+    for(int i = 0 ; i < map.size();  i++) {
+        for(int j = 0 ; j < map.size();  j++) {
+            for(int k = 0 ; k < map.size();  k++) {
+                Voxel v = map(i, j, k);
+                if(v.probability > 0) {
+                    drawPreetyEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
+                }
+            }
+        }
     }
 
     glPointSize(3);
-        glBegin(GL_POINTS);
-        for(mapping::PointCloud pointCloud : pointClouds) {
-            for (size_t i = 0;i<pointCloud.size();i++) {
-                glColor3ub(pointCloud[i].color.r,pointCloud[i].color.g,pointCloud[i].color.b);
-                glVertex3d(pointCloud[i].position.x()+5, pointCloud[i].position.y(), pointCloud[i].position.z());
-            }
+    glBegin(GL_POINTS);
+    for(mapping::PointCloud pointCloud : pointClouds) {
+        for (size_t i = 0;i<pointCloud.size();i++) {
+            glColor3ub(pointCloud[i].color.r,pointCloud[i].color.g,pointCloud[i].color.b);
+            glVertex3d(pointCloud[i].position.x()+5, pointCloud[i].position.y(), pointCloud[i].position.z());
         }
+    }
     glEnd();
     glEndList();
 }
@@ -212,8 +223,8 @@ void QGLVisualizer::drawPreetyEllipsoid(const Vec3& pos, const Mat33& covariance
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, reflectColor);
     GLfloat emissiveLight[] = { 0.1f, 0.1f, 0.1f, 1.0f };
     glMaterialfv(GL_FRONT, GL_EMISSION, emissiveLight);
-    glColor3ub(color.r,color.g,color.b);
-    gluSphere( obj, 1,10,10);
+    glColor4ub(color.r,color.g,color.b, color.a);
+    gluSphere( obj, 1,5,5);
     glPopMatrix();
 
     gluDeleteQuadric(obj);

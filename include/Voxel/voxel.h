@@ -32,9 +32,7 @@ namespace mapping {
         //default contructor int OcTree structure
         Voxel(int res);
 
-        //default initializers for types
-        void defaultSimpleInit();
-        void defaultBayesInit();
+        void preinitParameters(double res, Eigen::Vector3d center);
 
         void insertPoint(Point3D point, Mat33 uncertaintyError);
 

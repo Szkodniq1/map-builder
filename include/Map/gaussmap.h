@@ -8,7 +8,7 @@
 #include "math.h"
 #include <unordered_map>
 
-#define MAP_SIZE 256
+#define MAP_SIZE 64
 
 namespace mapping {
     /// create a single Maping object
@@ -22,10 +22,11 @@ private:
     /// Method type
     OccMethodType methodType;
     Octree<mapping::Voxel> map;
-    const double res = 0.1;
-    const double raytracing_jump = res / 10;
+    const double res = 0.15;
+    const double raytraceFactor = 100;
     PointCloud cloud;
     std::vector<Mat33> uncertinatyErrors;
+    Eigen::Vector3d cameraPos;
 
     std::unordered_map<std::string, Eigen::Vector3i> indexes;
     std::unordered_map<std::string, Eigen::Vector3i> simpleMethodIndexes;
@@ -35,6 +36,11 @@ private:
     double ymin, ymax;
     double zmin, zmax;
 
+    int prevX,prevY,prevZ = -1;
+
+    void preinitVoxels();
+    void raytracePoint(mapping::Point3D point, int x, int y, int z);
+
 
 protected:
     //Protected functions
@@ -43,6 +49,9 @@ protected:
     int xCoordinate(double x);
     int yCoordinate(double y);
     int zCoordinate(double z);
+    double backwardXCoordinate(int x);
+    double backwardYCoordinate(int y);
+    double backwardZCoordinate(int z);
 
 public:
     /// Pointer

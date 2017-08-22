@@ -6,12 +6,14 @@ Gaussmap::Ptr gaussMap;
 Gaussmap::Gaussmap(void) : map(MAP_SIZE) {
     xmin = ymin = zmin = -1 * MAP_SIZE * res/2;
     xmax = ymax = zmax = -1* xmin;
+    preinitVoxels();
 }
 
 Gaussmap::Gaussmap(mapping::PointCloud PC) : map(MAP_SIZE) {
     cloud = PC;
     xmin = ymin = zmin = -1 * MAP_SIZE * res/2;
     xmax = ymax = zmax = -1* xmin;
+    preinitVoxels();
 }
 
 Gaussmap::Gaussmap(mapping::PointCloud PC, float vxmin, float vxmax, float vymin, float vymax, float vzmin, float vzmax) : map(MAP_SIZE) {
@@ -19,11 +21,23 @@ Gaussmap::Gaussmap(mapping::PointCloud PC, float vxmin, float vxmax, float vymin
     xmin = vxmin; xmax = vxmax;
     ymin = vymin; ymax = vymax;
     zmin = vzmin; zmax = vzmax;
+    preinitVoxels();
+}
+
+void Gaussmap::preinitVoxels() {
+    for(int i = 0 ; i < map.size();  i++) {
+        for(int j = 0 ; j < map.size();  j++) {
+            for(int k = 0 ; k < map.size();  k++) {
+                map(i, j, k).preinitParameters(res, Eigen::Vector3d(backwardXCoordinate(i), backwardYCoordinate(j), backwardZCoordinate(k)));
+            }
+        }
+    }
 }
 
 /// Insert point cloud into map
 void Gaussmap::insertCloud(mapping::GrabbedImage grab, bool isLast) {
     cloud = grab.transformedPointCloud();
+    cameraPos = grab.cameraPos;
     uncertinatyErrors = grab.uncertinatyErrors;
     int64 e1 = cv::getTickCount();
     updateMap(isLast);
@@ -80,7 +94,8 @@ void Gaussmap::updateMap(bool isLast) {
                 simpleMethodIndexes[key] = Eigen::Vector3i(xCoor, yCoor, zCoor);
             }
         }
-
+        raytracePoint(point, xCoor, yCoor, zCoor);
+        prevX,prevY,prevZ = -1;
         map(xCoor, yCoor, zCoor).insertPoint(point, uncertinatyErrors[i]);
         i++;
     }
@@ -91,6 +106,25 @@ void Gaussmap::updateMap(bool isLast) {
         }
     }
     notify(map, res, indexes, isLast);
+}
+
+void Gaussmap::raytracePoint(mapping::Point3D point, int x, int y, int z) {
+    Eigen::Vector3d incrementValue = Eigen::Vector3d((point.position.x() - cameraPos(0))/raytraceFactor, (point.position.y() - cameraPos(1))/raytraceFactor, (point.position.z() - cameraPos(2))/raytraceFactor);
+    Eigen::Vector3d incrementedPoint = cameraPos;
+    int i = 0;
+    while (i < (raytraceFactor - 1)) {
+        int xCoor = xCoordinate(incrementedPoint[0]);
+        int yCoor = yCoordinate(incrementedPoint[1]);
+        int zCoor = zCoordinate(incrementedPoint[2]);
+        if(xCoor != x && yCoor != y && zCoor != z && xCoor != prevX && yCoor != prevY && zCoor != prevZ) {
+            map(xCoor, yCoor, zCoor).updateNullOccupancy();
+            prevX = xCoor;
+            prevY = yCoor;
+            prevZ = zCoor;
+        }
+        incrementedPoint += incrementValue;
+        i++;
+    }
 }
 
 double Gaussmap::normalize(double p, double min) {
@@ -114,6 +148,24 @@ int Gaussmap::zCoordinate(double z) {
     double  a = MAP_SIZE/(zmax-zmin);
     double b = -1 * a*zmin;
     return a*z + b;
+}
+
+double Gaussmap::backwardXCoordinate(int x) {
+    double  a = MAP_SIZE/(xmax-xmin);
+    double b = -1 * a*xmin;
+    return (x - b) / a;
+}
+
+double Gaussmap::backwardYCoordinate(int y) {
+    double  a = MAP_SIZE/(ymax-ymin);
+    double b = -1 * a*ymin;
+    return (y - b) / a;
+}
+
+double Gaussmap::backwardZCoordinate(int z) {
+    double  a = MAP_SIZE/(zmax-zmin);
+    double b = -1 * a*zmin;
+    return (z - b) / a;
 }
 
 

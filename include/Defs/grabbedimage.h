@@ -4,6 +4,7 @@
 #include "Defs/defs.h"
 #include <iostream>
 #include <opencv2/core/core.hpp>
+#include "../../3rdParty/Eigen/Geometry"
 
 namespace mapping {
 
