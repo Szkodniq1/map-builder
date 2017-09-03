@@ -49,6 +49,8 @@ public:
     ///Attach visualizer
     void attachVisualizer(QGLVisualizer* visualizer);
 
+    void mapLoaded();
+
     /// descrutor
     ~OctoMap() {}
 

@@ -1,6 +1,6 @@
 #ifndef _GAUSSMAP_H
 #define _GAUSSMAP_H
-
+#include "main.h"
 #include "Defs/defs.h"
 #include "Voxel/voxel.h"
 #include "3rdParty/octree/octree.h"
@@ -8,12 +8,11 @@
 #include "math.h"
 #include <unordered_map>
 
-#define MAP_SIZE 64
-
 namespace mapping {
     /// create a single Maping object
     Map* createMapGauss(void);
     Map* createMapGauss(PointCloud PC);
+    Map* createMapGauss(std::string mapPath);
 }
 
 
@@ -22,8 +21,6 @@ private:
     /// Method type
     OccMethodType methodType;
     Octree<mapping::Voxel> map;
-    const double res = 0.15;
-    const double raytraceFactor = 50;
     PointCloud cloud;
     std::vector<Mat33> uncertinatyErrors;
     Eigen::Vector3d cameraPos;
@@ -59,6 +56,7 @@ public:
 
     Gaussmap(void);
     Gaussmap(mapping::PointCloud PC);
+    Gaussmap(std::string mapPath);
     Gaussmap(mapping::PointCloud PC, float vxmin, float vxmax, float vymin, float vymax, float vzmin, float vzmax);
 
     /// Name of the map
@@ -75,6 +73,8 @@ public:
 
     ///Attach visualizer
     void attachVisualizer(QGLVisualizer* visualizer);
+
+    void mapLoaded();
 
     /// descrutor
     ~Gaussmap() {}

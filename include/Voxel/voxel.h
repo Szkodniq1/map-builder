@@ -23,9 +23,10 @@ namespace mapping {
         Eigen::Vector3d sampMean;
         RGBA color;
         /// Method type
-        OccMethodType methodType;
+
         //For simple method
         PointCloud points;
+        std::vector<Mat33> uncertaintyErrors;
 
         ///default constructor
         Voxel();
@@ -39,6 +40,9 @@ namespace mapping {
         void updateWithSimpleMethod();
         void updateSimpleDistribution();
         void updateSimpleColor();
+
+        void updateNaiveDistribution();
+        void updateNaiveColor();
 
         void updateBayesDistribution(Point3D point, Mat33 uncertaintyError);
 

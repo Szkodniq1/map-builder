@@ -50,6 +50,8 @@ namespace mapping {
         ///Attach visualizer
         virtual void attachVisualizer(QGLVisualizer* visualizer) = 0;
 
+        virtual void mapLoaded() = 0;
+
         /// Virtual descrutor
         virtual ~Map() {}
 

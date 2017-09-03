@@ -6,14 +6,37 @@ Gaussmap::Ptr gaussMap;
 Gaussmap::Gaussmap(void) : map(MAP_SIZE) {
     xmin = ymin = zmin = -1 * MAP_SIZE * res/2;
     xmax = ymax = zmax = -1* xmin;
-    preinitVoxels();
+    //preinitVoxels();
+}
+
+bool exists_test1 (const std::string& name) {
+    if (FILE *file = fopen(name.c_str(), "r")) {
+        fclose(file);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+Gaussmap::Gaussmap(std::string mapPath) : map(MAP_SIZE)  {
+    if(exists_test1(mapPath)) {
+        std::cout<<"File found"<<std::endl;
+    } else {
+        std::cout<<"Map file not found"<<std::endl;
+    }
+    std::ifstream mapfile;
+    mapfile.open(mapPath.c_str(), std::ios_base::binary);
+    map.readBinary(mapfile);
+    mapfile.close();
+    xmin = ymin = zmin = -1 * MAP_SIZE * res/2;
+    xmax = ymax = zmax = -1* xmin;
 }
 
 Gaussmap::Gaussmap(mapping::PointCloud PC) : map(MAP_SIZE) {
     cloud = PC;
     xmin = ymin = zmin = -1 * MAP_SIZE * res/2;
     xmax = ymax = zmax = -1* xmin;
-    preinitVoxels();
+    //preinitVoxels();
 }
 
 Gaussmap::Gaussmap(mapping::PointCloud PC, float vxmin, float vxmax, float vymin, float vymax, float vzmin, float vzmax) : map(MAP_SIZE) {
@@ -21,7 +44,11 @@ Gaussmap::Gaussmap(mapping::PointCloud PC, float vxmin, float vxmax, float vymin
     xmin = vxmin; xmax = vxmax;
     ymin = vymin; ymax = vymax;
     zmin = vzmin; zmax = vzmax;
-    preinitVoxels();
+    //preinitVoxels();
+}
+
+void Gaussmap::mapLoaded() {
+    notify(map, res, indexes, true);
 }
 
 void Gaussmap::preinitVoxels() {
@@ -49,7 +76,12 @@ void Gaussmap::insertCloud(mapping::GrabbedImage grab, bool isLast) {
 
 /// save map in file
 void Gaussmap::saveMap(){
-
+//    std::cout<<"Map read parameters: "<<map.size()<<", "<<map.bytes()<<std::endl;
+//    std::ofstream mapfile;
+//    std::string path = "asd";
+//    mapfile.open(path.c_str(), std::ios_base::binary);
+//    map.writeBinary(mapfile);
+//    mapfile.close();
 }
 
 ///Attach visualizer
@@ -72,6 +104,11 @@ mapping::Map* mapping::createMapGauss(PointCloud PC) {
     return gaussMap.get();
 }
 
+mapping::Map* mapping::createMapGauss(std::string mapPath) {
+    gaussMap.reset(new Gaussmap(mapPath));
+    return gaussMap.get();
+}
+
 
 void Gaussmap::updateMap(bool isLast) {
     int xCoor, yCoor, zCoor;
@@ -88,7 +125,7 @@ void Gaussmap::updateMap(bool isLast) {
             indexes[key] = Eigen::Vector3i(xCoor, yCoor, zCoor);
         }
 
-        if (methodType.type == MethodType::TYPE_SIMPLE) {
+        if (methodType.type == MethodType::TYPE_SIMPLE || methodType.type == MethodType::TYPE_NAIVE) {
             got = simpleMethodIndexes.find(key);
             if(got == simpleMethodIndexes.end()) {
                 simpleMethodIndexes[key] = Eigen::Vector3i(xCoor, yCoor, zCoor);
@@ -99,7 +136,7 @@ void Gaussmap::updateMap(bool isLast) {
         map(xCoor, yCoor, zCoor).insertPoint(point, uncertinatyErrors[i]);
         i++;
     }
-    if (methodType.type == MethodType::TYPE_SIMPLE) {
+    if (methodType.type == MethodType::TYPE_SIMPLE || methodType.type == MethodType::TYPE_NAIVE) {
         for( const auto& n : simpleMethodIndexes ) {
             Eigen::Vector3i index = n.second;
             map(index.x(), index.y(), index.z()).updateWithSimpleMethod();
@@ -116,7 +153,7 @@ void Gaussmap::raytracePoint(mapping::Point3D point, int x, int y, int z) {
         int xCoor = xCoordinate(incrementedPoint[0]);
         int yCoor = yCoordinate(incrementedPoint[1]);
         int zCoor = zCoordinate(incrementedPoint[2]);
-        if(xCoor != x && yCoor != y && zCoor != z && xCoor != prevX && yCoor != prevY && zCoor != prevZ) {
+        if(xCoor != x && yCoor != y && zCoor != z ) {//&& xCoor != prevX && yCoor != prevY && zCoor != prevZ) {
             map(xCoor, yCoor, zCoor).updateNullOccupancy();
             prevX = xCoor;
             prevY = yCoor;

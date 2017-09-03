@@ -17,6 +17,9 @@
 #include <thread>
 #include <mutex>
 #include "3rdParty/octree/octree.h"
+#include <QKeyEvent>
+#include <fstream>
+#include "main.h"
 
 using namespace mapping;
 
@@ -130,7 +133,6 @@ private:
     Config config;
     GLuint list;
     Octree<mapping::Voxel> map;
-    double res;
     std::unordered_map<std::string, Eigen::Vector3i> updatedVoxels;
     std::vector<Mat33> uncertinatyErrors;
 
@@ -149,6 +151,8 @@ private:
     /// initialize visualizer
     void init();
 
+    void keyPressEvent(QKeyEvent *e);
+
     /// generate help string
     std::string help() const;
 
@@ -162,6 +166,8 @@ private:
     void drawMap();
 
     void drawPreetyEllipsoid(const Vec3& pos, const Mat33& covariance, RGBA color) const;
+
+    std::string currentDateTime();
 };
 
 #endif // QVISUALIZER_H_INCLUDED

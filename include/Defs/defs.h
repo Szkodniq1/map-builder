@@ -96,7 +96,9 @@ enum class MethodType {
     /// For bayesian update
     TYPE_BAYES,
     /// For kalman filter implementation
-    TYPE_KALMAN
+    TYPE_KALMAN,
+    /// For naive kalman method
+    TYPE_NAIVE,
 };
 
 }

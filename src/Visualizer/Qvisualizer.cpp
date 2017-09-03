@@ -7,6 +7,8 @@
 #include <chrono>
 #include <GL/glut.h>
 #include "Map/gaussmap.h"
+#include "main.h"
+
 
 using namespace mapping;
 
@@ -50,7 +52,6 @@ void QGLVisualizer::update(const mapping::PointCloud& newCloud, std::vector<Mat3
 
 void QGLVisualizer::update(Octree<mapping::Voxel>& map, double res, std::unordered_map<std::string, Eigen::Vector3i> indexes , bool isLast) {
     this->map = map;
-    this->res = res;
     //TODO trzeba t? liste gdzie? czy?ci?, albo co update przepisywa?, ogólnie trzeba si? zastanowi? jak te dane trzyma? w ogóle, bo jedne mog? nadpisa? drugie
     this->updatedVoxels = indexes;
     if(isLast) {
@@ -67,8 +68,8 @@ void QGLVisualizer::createMapDisplayList() {
         drawPreetyEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
     }*/
 
-    for(int i = 0 ; i < map.size();  i++) {
-        for(int j = 0 ; j < map.size();  j++) {
+    for(int i = 0 ; i < map.size();  i++) { //28 & 108
+        for(int j = 0 ; j < map.size();  j++) { //48 & 88
             for(int k = 0 ; k < map.size();  k++) {
                 Voxel v = map(i, j, k);
                 if(v.probability > 0) {
@@ -249,4 +250,52 @@ std::string QGLVisualizer::help() const{
     text += "See the <b>Mouse</b> tab and the documentation web pages for details.<br><br>";
     text += "Press <b>Escape</b> to exit the viewer.";
     return text;
+}
+
+void QGLVisualizer::keyPressEvent(QKeyEvent *e) {
+    // Get event modifiers key
+    const Qt::KeyboardModifiers modifiers = e->modifiers();
+
+    // A simple switch on e->key() is not sufficient if we want to take state key
+    // into account. With a switch, it would have been impossible to separate 'F'
+    // from 'CTRL+F'. That's why we use imbricated if...else and a "handled"
+    // boolean.
+    bool handled = false;
+    if ((e->key() == Qt::Key_Z) && (modifiers == Qt::CTRL)) {
+        std::string path = currentDateTime();
+        std::ofstream mapfile;
+        mapfile.open(path.c_str(), std::ios_base::binary);
+        map.writeBinary(mapfile);
+        mapfile.close();
+
+        std::cout<<MAP_SIZE<<" "<<res<<" "<<raytraceFactor<<std::endl;
+        tinyxml2::XMLDocument doc;
+        tinyxml2::XMLElement * mapSize = doc.NewElement("MapSize");
+        mapSize->SetText(MAP_SIZE);
+        doc.InsertFirstChild(mapSize);
+        tinyxml2::XMLElement * mapRes = doc.NewElement("MapRes");
+        mapRes->SetText(res);
+        doc.InsertFirstChild(mapRes);
+        tinyxml2::XMLElement * rayFactor = doc.NewElement("RaytraceFator");
+        rayFactor->SetText(raytraceFactor);
+        doc.InsertFirstChild(rayFactor);
+        std::string xmlPath = path + ".xml";
+        doc.SaveFile(xmlPath.c_str());
+
+        handled = true;
+    }
+    // ... and so on with other else/if blocks.
+
+    if (!handled)
+        QGLViewer::keyPressEvent(e);
+}
+
+std::string QGLVisualizer::currentDateTime() {
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    strftime(buf, sizeof(buf), "%Y-%m-%d-%X", &tstruct);
+
+    return buf;
 }

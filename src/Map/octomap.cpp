@@ -17,6 +17,10 @@ OctoMap::OctoMap(mapping::PointCloud PC) : map(this->MAP_RES) {
 
 }
 
+void OctoMap::mapLoaded() {
+
+}
+
 /// Insert point cloud into map
 void OctoMap::insertCloud(mapping::GrabbedImage grab, bool isLast) {
     mapping::PointCloud newPC = grab.transformedPointCloud();
