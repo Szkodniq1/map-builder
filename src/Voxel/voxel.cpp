@@ -111,6 +111,8 @@ void Voxel::updateNaiveDistribution() {
         var << 0, 0, 0, 0, 0, 0, 0, 0, 0;
         color = RGBA(255, 255, 255, 255);
         sampNumber = points.size();
+        P_pre = Eigen::MatrixXd(9,9);
+        P_pre = Eigen::MatrixXd::Identity(9, 9);
         if (sampNumber == 1) {
             mean = Eigen::Vector3d(points[0].position.x(), points[0].position.y(), points[0].position.z());
             var = uncertaintyErrors[0];
@@ -118,9 +120,6 @@ void Voxel::updateNaiveDistribution() {
             updateSimpleDistribution();
         }
     } else {
-
-        sampNumber += points.size();
-
         Eigen::Vector3d newMean = Eigen::Vector3d(0, 0, 0);
         for(mapping::Point3D &point : points) {
             Eigen::Vector3d newPoint = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
@@ -143,19 +142,182 @@ void Voxel::updateNaiveDistribution() {
             }
         }
 
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if(sqrt(pow(newVar(i,j),2.0)) < 1e-5) {
+                    newVar(i,j) = 0;
+                }
+
+                if(sqrt(pow(var(i,j), 2.0)) < 1e-5) {
+                    var(i,j) = 0;
+                }
+            }
+        }
+
         Eigen::JacobiSVD<Mat33> svdVar(var, Eigen::ComputeFullU | Eigen::ComputeFullV);
-        std::cout << "Its singular values are:" << std::endl << svdVar.singularValues() << std::endl;
-        std::cout << "Its left singular vectors are the columns of the thin U matrix:" << std::endl << svdVar.matrixU() << std::endl;
-        std::cout << "Its right singular vectors are the columns of the thin V matrix:" << std::endl << svdVar.matrixV() << std::endl;
-        Mat33 U = svdVar.matrixU();
-        Eigen::Vector3d S = svdVar.singularValues();
-        Mat33 V = svdVar.matrixV();
-        //Mat33 A = (U*S);
-        //std::cout << "Backward composition: " <<std::endl << A << std::endl;
         Eigen::JacobiSVD<Mat33> svdNewVar(newVar, Eigen::ComputeFullU | Eigen::ComputeFullV);
+        Mat33 U = svdVar.matrixU();
+        Mat33 Un = svdNewVar.matrixU();
+        Eigen::Vector3d S = svdVar.singularValues();
+        Eigen::Vector3d Sn = svdNewVar.singularValues();
+        Mat33 V = svdVar.matrixV();
+        Mat33 Vn = svdNewVar.matrixV();
 
+        U = prostuj(U);
+        Un = prostuj(Un);
+        std::tie(U, S) = changeOrder(U, S);
+        std::tie(Un, Sn) = changeOrder(Un, Sn);
+        U = prostuj(U);
+        Un = prostuj(Un);
 
+        Eigen::Vector3d u = logmap(U);
+        if(u(2)<0)
+            u = u - u/(u.norm()*2*M_PI);
+        Eigen::VectorXd x0(9);
+        x0 << mean(0), mean(1), mean(2), S(0), S(1), S(2), u(0), u(1), u(2);
+
+        Eigen::Vector3d un = logmap(Un);
+        if(un(2)<0)
+            un = un - un/(un.norm()*2*M_PI);
+        Eigen::VectorXd x0n(9);
+        x0n << newMean,Sn, un;
+        x0n << newMean(0), newMean(1), newMean(2), Sn(0), Sn(1), Sn(2), un(0), un(1), un(2);
+
+        /// Krok predykcji
+        Eigen::MatrixXd A(9,9);
+        A = Eigen::MatrixXd::Identity(9,9) * sampNumber / (sampNumber + points.size());
+        Eigen::MatrixXd B(9,9);
+        B = Eigen::MatrixXd::Identity(9,9) * points.size() / (sampNumber + points.size());
+
+        Eigen::VectorXd xp(9);
+        xp = A*x0 + B*x0n;
+        Eigen::MatrixXd P(9,9);
+        P = A*P_pre*A.transpose();
+
+        Eigen::MatrixXd K(9,9);
+        K = P*(P + Eigen::MatrixXd::Identity(9,9)).inverse();
+
+        Eigen::VectorXd postX(9);
+        postX = xp + K*(x0n - (Eigen::MatrixXd::Identity(9,9) * xp));
+        P_pre = P - K*P;
+        xp = postX;
+
+        mean << xp(0), xp(1), xp(2);
+        Eigen::Vector3d post_s;
+        post_s << xp(3),xp(4),xp(5);
+        Eigen::Vector3d post_r;
+        post_r << xp(6),xp(7),xp(8);
+
+        Mat33 postS;
+        postS << post_s(0), 0, 0, 0,  post_s(1), 0, 0, 0, post_s(2);
+        Mat33 postR;
+        postR = expmap(Vec3(post_r(0), post_r(1), post_r(2)));
+        var = postR * postS * postR.transpose();
+        sampNumber += points.size();
     }
+}
+
+Mat33 Voxel::prostuj(Mat33 R) {
+    Eigen::Vector3d tmp = R.col(2).cross(R.col(0));
+    double n = tmp.cross(R.col(1)).norm();
+    double d = tmp.dot(R.col(1));
+    double a = std::atan2(n, d) * 180/M_PI;
+
+    if(std::norm(a) > 90) {
+        R.col(1) = -R.col(1);
+    }
+
+    if (R(0,0) < 0 && R(1,1) < 0 && R(2,2) < 0)
+        R = -R;
+
+    if (R(0,0) < 0 && R(1,1) < 0) {
+        R.col(0) = -R.col(0);
+        R.col(1) = -R.col(1);
+    }
+
+    if (R(0,0) < 0 && R(2,2) < 0) {
+        R.col(0) = -R.col(0);
+        R.col(2) = -R.col(2);
+    }
+
+    if (R(2,2) < 0 && R(1,1) < 0) {
+        R.col(1) = -R.col(1);
+        R.col(2) = -R.col(2);
+    }
+
+    return R;
+}
+
+std::tuple<Mat33, Eigen::Vector3d> Voxel::changeOrder(Mat33 Rot, Eigen::Vector3d S) {
+    Mat33 I = Mat33::Identity();
+    Mat33 newRot = Mat33::Zero();
+    Eigen::Vector3d newS(0,0,0);
+    Eigen::Vector3i index(-1,-1,-1);
+
+    for(int i = 0; i < 3; i++) {
+        double angle = 190;
+        for(int j = 0; j < 3; j++) {
+            double n = I.col(j).cross(Rot.col(i)).norm();
+            double d = I.col(j).dot(Rot.col(i));
+            double a = std::atan2(n, d) * 180/M_PI;
+
+            if(std::norm(a) < angle || std::norm(a-180) < angle) {
+
+                if (index(0) != j && index(1) != j &&  index(2) != j ) {
+
+                    if (std::norm(a) < std::norm(a-180))
+                        angle = std::norm(a);
+                    else
+                        angle = std::norm(a-180);
+                    index(i) = j;
+                    newRot.col(j) = Rot.col(i);
+                    newS(j) = S(i);
+                }
+
+            }
+        }
+    }
+
+    Eigen::Vector3d tmp = newRot.col(2).cross(newRot.col(0));
+    double n = tmp.cross(newRot.col(1)).norm();
+    double d = tmp.dot(newRot.col(1));
+    double a = std::atan2(n, d) * 180/M_PI;
+
+    if(std::norm(a) > 90)
+        newRot.col(1) = -newRot.col(1);
+
+    return  std::make_tuple(newRot, newS);
+}
+Mat33 Voxel::expmap(const Vec3& omega) {
+    double theta =sqrt(pow(omega.x(),2.0)+pow(omega.y(),2.0)+pow(omega.z(),2.0));
+    Mat33 omegaRot(skewSymetric(omega));
+    if (theta<1e-5)
+        return Mat33::Identity()+(1+(pow(theta,2.0)/6.0)+(pow(theta,4.0)/120.0))*omegaRot+(0.5-(pow(theta,2.0)/24.0)+(pow(theta,4.0)/720.0))*(omegaRot*omegaRot);
+    else
+        return Mat33::Identity()+(sin(theta)/theta)*omegaRot+((1-cos(theta))/pow(theta,2.0))*(omegaRot*omegaRot);
+}
+
+Eigen::Vector3d Voxel::logmap(const Mat33& R) {
+    double theta = acos((R.trace()-1)/2);
+    double coeff=1;
+    if (theta<1e-5)
+        coeff=1.0;
+    else
+        coeff = (theta/(2*sin(theta)));
+    Mat33 lnR = coeff*(R-R.transpose());
+    return invSkewSymetric(lnR);
+}
+
+Mat33 Voxel::skewSymetric(const Vec3& omega) {
+    Mat33 R;
+    R<< 0, -omega.z(), omega.y(),
+            omega.z(), 0, -omega.x(),
+            -omega.y(), omega.x(), 0;
+    return R;
+}
+
+Eigen::Vector3d Voxel::invSkewSymetric(const Mat33& R) {
+    return Eigen::Vector3d(R(2,1), R(0,2), R(1,0));
 }
 
 void Voxel::updateNaiveColor() {

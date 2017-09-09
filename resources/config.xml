@@ -24,9 +24,9 @@
 <RaytraceFator>100.0</RaytraceFator>
 
 <!-- 0 - Simple, 1 - Bayes, 2 - Kalman, 3 - Naive -->
-<OccupancyMethod>0</OccupancyMethod>
+<OccupancyMethod>3</OccupancyMethod>
 
 <!-- 0 - Mapping, 1 - Read -->
-<MapMode>1</MapMode>
+<MapMode>0</MapMode>
 
-<ReadMapPath>2017-09-03-17:33:50</ReadMapPath>
+<ReadMapPath>2017-09-07-09:39:08</ReadMapPath>

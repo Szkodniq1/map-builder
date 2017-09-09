@@ -4,6 +4,7 @@
 #include "Defs/defs.h"
 #include "occmethodtype.h"
 #include "../../3rdParty/Eigen/Dense"
+#include <tuple>
 
 namespace mapping {
     class Voxel {
@@ -28,6 +29,8 @@ namespace mapping {
         PointCloud points;
         std::vector<Mat33> uncertaintyErrors;
 
+        Eigen::MatrixXd P_pre;
+
         ///default constructor
         Voxel();
         //default contructor int OcTree structure
@@ -42,6 +45,13 @@ namespace mapping {
         void updateSimpleColor();
 
         void updateNaiveDistribution();
+        Mat33 prostuj(Mat33 R);
+        std::tuple<Mat33, Eigen::Vector3d> changeOrder(Mat33 Rot, Eigen::Vector3d S);
+        Mat33 expmap(const Vec3& omega);
+        Eigen::Vector3d logmap(const Mat33& R);
+        Mat33 skewSymetric(const Vec3& omega);
+        Eigen::Vector3d invSkewSymetric(const Mat33& R);
+
         void updateNaiveColor();
 
         void updateBayesDistribution(Point3D point, Mat33 uncertaintyError);

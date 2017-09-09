@@ -131,7 +131,7 @@ void Gaussmap::updateMap(bool isLast) {
                 simpleMethodIndexes[key] = Eigen::Vector3i(xCoor, yCoor, zCoor);
             }
         }
-        raytracePoint(point, xCoor, yCoor, zCoor);
+        //raytracePoint(point, xCoor, yCoor, zCoor);
         prevX,prevY,prevZ = -1;
         map(xCoor, yCoor, zCoor).insertPoint(point, uncertinatyErrors[i]);
         i++;
