@@ -153,7 +153,7 @@ void Gaussmap::raytracePoint(mapping::Point3D point, int x, int y, int z) {
         int xCoor = xCoordinate(incrementedPoint[0]);
         int yCoor = yCoordinate(incrementedPoint[1]);
         int zCoor = zCoordinate(incrementedPoint[2]);
-        if(xCoor != x && yCoor != y && zCoor != z ) {//&& xCoor != prevX && yCoor != prevY && zCoor != prevZ) {
+        if(xCoor != x && yCoor != y && zCoor != z ) {
             map(xCoor, yCoor, zCoor).updateNullOccupancy();
             prevX = xCoor;
             prevY = yCoor;

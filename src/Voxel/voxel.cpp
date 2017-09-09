@@ -154,14 +154,12 @@ void Voxel::updateNaiveDistribution() {
             }
         }
 
-        Eigen::JacobiSVD<Mat33> svdVar(var, Eigen::ComputeFullU | Eigen::ComputeFullV);
-        Eigen::JacobiSVD<Mat33> svdNewVar(newVar, Eigen::ComputeFullU | Eigen::ComputeFullV);
+        Eigen::JacobiSVD<Mat33> svdVar(var, Eigen::ComputeFullU);
+        Eigen::JacobiSVD<Mat33> svdNewVar(newVar, Eigen::ComputeFullU);
         Mat33 U = svdVar.matrixU();
         Mat33 Un = svdNewVar.matrixU();
         Eigen::Vector3d S = svdVar.singularValues();
         Eigen::Vector3d Sn = svdNewVar.singularValues();
-        Mat33 V = svdVar.matrixV();
-        Mat33 Vn = svdNewVar.matrixV();
 
         U = prostuj(U);
         Un = prostuj(Un);
@@ -222,8 +220,9 @@ Mat33 Voxel::prostuj(Mat33 R) {
     double n = tmp.cross(R.col(1)).norm();
     double d = tmp.dot(R.col(1));
     double a = std::atan2(n, d) * 180/M_PI;
+    double absNorm = std::abs(a);
 
-    if(std::norm(a) > 90) {
+    if(absNorm > 90) {
         R.col(1) = -R.col(1);
     }
 
