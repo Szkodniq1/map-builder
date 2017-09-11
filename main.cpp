@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
                 troll.calcPCL();
                 PC = troll.returnPC();
 
-                if(a == 500) {
+                if(a == 100) {
                     map->insertCloud(PC, true);
                     break;
                 } else {

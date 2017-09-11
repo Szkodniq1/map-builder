@@ -194,7 +194,7 @@ void Voxel::updateNaiveDistribution() {
         C = Eigen::MatrixXd::Identity(9,9) * points.size() / (sampNumber + points.size());
 
         Eigen::VectorXd xp(9);
-        xp = A*x0 + B*x0n;
+        xp = A*x0 + B*us;
         Eigen::MatrixXd P(9,9);
         P = A*P_pre*A.transpose();
         Eigen::VectorXd y(9);
@@ -206,7 +206,7 @@ void Voxel::updateNaiveDistribution() {
         yPred << 0,0,0,0,0,0,0,0,0;
 
         Eigen::MatrixXd R(9,9);
-        R = Eigen::MatrixXd::Identity(9,9) * 0.15;
+        R = Eigen::MatrixXd::Identity(9,9) * 0.0;
         Eigen::VectorXd e(9);
         e = y - innerC*yPred;
 
@@ -234,7 +234,6 @@ void Voxel::updateNaiveDistribution() {
         postR = expmap(Vec3(post_r(0), post_r(1), post_r(2)));
         postR = U*postR;
         var = postR * postS * postR.transpose();
-        std::cout<<"done"<<std::endl;
     }
 }
 
