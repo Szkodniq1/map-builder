@@ -47,6 +47,7 @@ namespace mapping {
         void updateNaiveDistribution();
         Mat33 prostuj(Mat33 R);
         std::tuple<Mat33, Eigen::Vector3d> changeOrder(Mat33 Rot, Eigen::Vector3d S);
+        Eigen::Vector3d castVector(Mat33 Rot, Eigen::Vector3d S);
         Mat33 expmap(const Vec3& omega);
         Eigen::Vector3d logmap(const Mat33& R);
         Mat33 skewSymetric(const Vec3& omega);

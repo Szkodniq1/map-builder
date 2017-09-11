@@ -1,6 +1,5 @@
 #include "Voxel/voxel.h"
 
-
 /*
  * Voxel methods
  */
@@ -163,42 +162,65 @@ void Voxel::updateNaiveDistribution() {
 
         U = prostuj(U);
         Un = prostuj(Un);
-        std::tie(U, S) = changeOrder(U, S);
-        std::tie(Un, Sn) = changeOrder(Un, Sn);
-        U = prostuj(U);
-        Un = prostuj(Un);
+        Mat33 U0 = U.inverse()*U;
+        Mat33 Un0 = U.inverse()*Un;
+        Un0 = prostuj(Un0);
 
-        Eigen::Vector3d u = logmap(U);
+        Eigen::Vector3d u = logmap(U0);
         if(u(2)<0)
             u = u - u/(u.norm()*2*M_PI);
         Eigen::VectorXd x0(9);
         x0 << mean(0), mean(1), mean(2), S(0), S(1), S(2), u(0), u(1), u(2);
 
-        Eigen::Vector3d un = logmap(Un);
+        Eigen::Vector3d un = logmap(Un0);
         if(un(2)<0)
             un = un - un/(un.norm()*2*M_PI);
         Eigen::VectorXd x0n(9);
         x0n << newMean,Sn, un;
         x0n << newMean(0), newMean(1), newMean(2), Sn(0), Sn(1), Sn(2), un(0), un(1), un(2);
 
+        Eigen::VectorXd xxx(9);
+
+        xxx = x0 * sampNumber / (sampNumber + points.size()) + x0n * points.size() / (sampNumber + points.size());
+
         /// Krok predykcji
         Eigen::MatrixXd A(9,9);
         A = Eigen::MatrixXd::Identity(9,9) * sampNumber / (sampNumber + points.size());
         Eigen::MatrixXd B(9,9);
-        B = Eigen::MatrixXd::Identity(9,9) * points.size() / (sampNumber + points.size());
+        B = Eigen::MatrixXd::Zero(9,9);
+        Eigen::VectorXd us(9);
+        us << 0,0,0,0,0,0,0,0,0;
+        Eigen::MatrixXd C(9,9);
+        C = Eigen::MatrixXd::Identity(9,9) * points.size() / (sampNumber + points.size());
 
         Eigen::VectorXd xp(9);
         xp = A*x0 + B*x0n;
         Eigen::MatrixXd P(9,9);
         P = A*P_pre*A.transpose();
+        Eigen::VectorXd y(9);
+        y = C*x0n;
 
+        Eigen::MatrixXd innerC(9,9);
+        innerC = Eigen::MatrixXd::Identity(9,9);
+        Eigen::VectorXd yPred(9);
+        yPred << 0,0,0,0,0,0,0,0,0;
+
+        Eigen::MatrixXd R(9,9);
+        R = Eigen::MatrixXd::Identity(9,9) * 0.15;
+        Eigen::VectorXd e(9);
+        e = y - innerC*yPred;
+
+        Eigen::MatrixXd SS(9,9);
+        SS = innerC*P*innerC.transpose() + R;
         Eigen::MatrixXd K(9,9);
-        K = P*(P + Eigen::MatrixXd::Identity(9,9)).inverse();
+        K = P*innerC.transpose()*SS.inverse();
 
         Eigen::VectorXd postX(9);
-        postX = xp + K*(x0n - (Eigen::MatrixXd::Identity(9,9) * xp));
-        P_pre = P - K*P;
+        postX = xp + K*e;
+        P_pre = P - K*SS*K.transpose();
         xp = postX;
+
+        sampNumber += points.size();
 
         mean << xp(0), xp(1), xp(2);
         Eigen::Vector3d post_s;
@@ -210,8 +232,9 @@ void Voxel::updateNaiveDistribution() {
         postS << post_s(0), 0, 0, 0,  post_s(1), 0, 0, 0, post_s(2);
         Mat33 postR;
         postR = expmap(Vec3(post_r(0), post_r(1), post_r(2)));
+        postR = U*postR;
         var = postR * postS * postR.transpose();
-        sampNumber += points.size();
+        std::cout<<"done"<<std::endl;
     }
 }
 
@@ -287,6 +310,20 @@ std::tuple<Mat33, Eigen::Vector3d> Voxel::changeOrder(Mat33 Rot, Eigen::Vector3d
 
     return  std::make_tuple(newRot, newS);
 }
+
+Eigen::Vector3d Voxel::castVector(Mat33 Rot, Eigen::Vector3d S) {
+    Eigen::Vector3d newS;
+    newS << 0,0,0;
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 3; j++) {
+            if (std::norm(newS(i)) < std::norm(Rot(i,j)*S(j)))
+                newS(i) = std::norm(Rot(i,j)*S(j));
+        }
+    }
+
+    return newS;
+}
+
 Mat33 Voxel::expmap(const Vec3& omega) {
     double theta =sqrt(pow(omega.x(),2.0)+pow(omega.y(),2.0)+pow(omega.z(),2.0));
     Mat33 omegaRot(skewSymetric(omega));
@@ -297,7 +334,14 @@ Mat33 Voxel::expmap(const Vec3& omega) {
 }
 
 Eigen::Vector3d Voxel::logmap(const Mat33& R) {
-    double theta = acos((R.trace()-1)/2);
+    double trace = (R.trace()-1)/2;
+    if(trace > 1.0) {
+        trace = 1.0;
+    }
+    if(trace < -1.0) {
+        trace = -1.0;
+    }
+    double theta = acos(trace);
     double coeff=1;
     if (theta<1e-5)
         coeff=1.0;

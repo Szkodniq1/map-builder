@@ -139,6 +139,9 @@ void Gaussmap::updateMap(bool isLast) {
     if (methodType.type == MethodType::TYPE_SIMPLE || methodType.type == MethodType::TYPE_NAIVE) {
         for( const auto& n : simpleMethodIndexes ) {
             Eigen::Vector3i index = n.second;
+            if(index.x() == 58 && index.y() == 57 && index.z() == 61) {
+                std::cout<<"Here!"<<std::endl;
+            }
             map(index.x(), index.y(), index.z()).updateWithSimpleMethod();
         }
     }
