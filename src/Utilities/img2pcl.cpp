@@ -34,7 +34,11 @@ img2pcl::img2pcl(std::string xmlPath) {
 
 
         path = xmlDoc.FirstChildElement( "Path" )->GetText();
-        form = xmlDoc.FirstChildElement( "Form" )->GetText();
+        rgbSubDir = xmlDoc.FirstChildElement( "RGBSubDir" )->GetText();
+        depthSubDir = xmlDoc.FirstChildElement( "DepthSubDir" )->GetText();
+        rgbForm = xmlDoc.FirstChildElement( "RGBForm" )->GetText();
+        depthForm = xmlDoc.FirstChildElement( "DepthForm" )->GetText();
+
         fileName = xmlDoc.FirstChildElement( "stateFile" )->GetText();;
         stateFile.open(path + fileName, std::ios::in);
 
@@ -108,10 +112,12 @@ int img2pcl::grabFrame() {
         for(int i=0; i<4;i++)
             dataStr >> q[i];
 
-        char buff[100];
-        std::sprintf(buff, form.c_str(), Timestamp.c_str());
-        depth = cv::imread(path + "depth/" + buff, CV_LOAD_IMAGE_ANYDEPTH);
-        bgr = cv::imread(path + "rgb/" + buff);
+        char rgbBuff[100], depthBuff[100];
+        int timeS = std::atoi(Timestamp.c_str());
+        std::sprintf(rgbBuff, rgbForm.c_str(), timeS);
+        std::sprintf(depthBuff, depthForm.c_str(), timeS);
+        depth = cv::imread(path + depthSubDir + depthBuff, CV_LOAD_IMAGE_ANYDEPTH);
+        bgr = cv::imread(path + rgbSubDir + rgbBuff);
         //        cv::imshow("troll", depth);
         //        cv::imshow("troll2", bgr);
         //        cv::waitKey(0);
@@ -146,13 +152,13 @@ int img2pcl::grabFrame2() {
         std::getline(dataStr, Timestamp,' ');
 
         char buff[100];
-        std::sprintf(buff, form.c_str(), Timestamp.c_str());
-        depth = cv::imread(path + "depth/" + buff, CV_LOAD_IMAGE_ANYDEPTH);
+        std::sprintf(buff, depthForm.c_str(), std::atoi(Timestamp.c_str()));
+        depth = cv::imread(path + depthSubDir + buff, CV_LOAD_IMAGE_ANYDEPTH);
 
         dataStr.str(rgbName);
         std::getline(dataStr, rgbName,' ');
-        std::sprintf(buff, form.c_str(), rgbName.c_str());
-        bgr = cv::imread(path + "rgb/" + buff);
+        std::sprintf(buff, rgbForm.c_str(), std::atoi(Timestamp.c_str()));
+        bgr = cv::imread(path + rgbSubDir + buff);
         //        cv::imshow("troll", depth);
         //        cv::imshow("troll2", bgr);
         //        cv::waitKey(30);

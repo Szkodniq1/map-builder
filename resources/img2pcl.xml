@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
   <!-- Image Grabber-->
 
-<Path>../../img/The_Test/</Path>
-  <Form>%s.png</Form>
+<Path>../../../../../Dokumenty/testSource/datasets/tripodFreeVel0p35/</Path>
+  <DepthSubDir>depth/</DepthSubDir>
+  <RGBSubDir>rgb/</RGBSubDir>
+  <DepthForm>depth_%05d.png</DepthForm>
+  <RGBForm>rgb_%05d.png</RGBForm>
   <Color>1</Color>
   <Association>0</Association>
-  <stateFile>livingRoom0.gt.freiburg</stateFile>
+  <stateFile>groundtruth.txt</stateFile>
   <fx>480.6</fx>
   <fy>-480.6</fy>
   <cx>319.5</cx>

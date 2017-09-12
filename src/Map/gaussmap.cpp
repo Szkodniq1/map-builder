@@ -71,17 +71,17 @@ void Gaussmap::insertCloud(mapping::GrabbedImage grab, bool isLast) {
     int64 e2 = cv::getTickCount();
     double time = ((e2 - e1)/ cv::getTickFrequency());
     std::cout<<"Gaussmap insert time and update: "<<time<<std::endl;
-    //notify(grab.transformedPointCloud(),grab.uncertinatyErrors, isLast);
+    notify(grab.transformedPointCloud(),grab.uncertinatyErrors, isLast);
 }
 
 /// save map in file
 void Gaussmap::saveMap(){
-//    std::cout<<"Map read parameters: "<<map.size()<<", "<<map.bytes()<<std::endl;
-//    std::ofstream mapfile;
-//    std::string path = "asd";
-//    mapfile.open(path.c_str(), std::ios_base::binary);
-//    map.writeBinary(mapfile);
-//    mapfile.close();
+    //    std::cout<<"Map read parameters: "<<map.size()<<", "<<map.bytes()<<std::endl;
+    //    std::ofstream mapfile;
+    //    std::string path = "asd";
+    //    mapfile.open(path.c_str(), std::ios_base::binary);
+    //    map.writeBinary(mapfile);
+    //    mapfile.close();
 }
 
 ///Attach visualizer
@@ -119,22 +119,27 @@ void Gaussmap::updateMap(bool isLast) {
         yCoor = yCoordinate(point.position.y());
         zCoor = zCoordinate(point.position.z());
 
-        std::string key = std::to_string(xCoor) + std::to_string(yCoor) + std::to_string(zCoor);
-        std::unordered_map<std::string, Eigen::Vector3i>::iterator got = indexes.find(key);
-        if(got == indexes.end()) {
-            indexes[key] = Eigen::Vector3i(xCoor, yCoor, zCoor);
-        }
+        if(xCoor >= map.size() || yCoor >=map.size() || zCoor>= map.size()) {
+            std::cout<<"Point out of bounds"<<std::endl;
+        } else {
 
-        if (methodType.type == MethodType::TYPE_SIMPLE || methodType.type == MethodType::TYPE_NAIVE) {
-            got = simpleMethodIndexes.find(key);
-            if(got == simpleMethodIndexes.end()) {
-                simpleMethodIndexes[key] = Eigen::Vector3i(xCoor, yCoor, zCoor);
+            std::string key = std::to_string(xCoor) + std::to_string(yCoor) + std::to_string(zCoor);
+            std::unordered_map<std::string, Eigen::Vector3i>::iterator got = indexes.find(key);
+            if(got == indexes.end()) {
+                indexes[key] = Eigen::Vector3i(xCoor, yCoor, zCoor);
             }
+
+            if (methodType.type == MethodType::TYPE_SIMPLE || methodType.type == MethodType::TYPE_NAIVE) {
+                got = simpleMethodIndexes.find(key);
+                if(got == simpleMethodIndexes.end()) {
+                    simpleMethodIndexes[key] = Eigen::Vector3i(xCoor, yCoor, zCoor);
+                }
+            }
+            raytracePoint(point, xCoor, yCoor, zCoor);
+            prevX,prevY,prevZ = -1;
+            map(xCoor, yCoor, zCoor).insertPoint(point, uncertinatyErrors[i]);
+            i++;
         }
-        //raytracePoint(point, xCoor, yCoor, zCoor);
-        prevX,prevY,prevZ = -1;
-        map(xCoor, yCoor, zCoor).insertPoint(point, uncertinatyErrors[i]);
-        i++;
     }
     if (methodType.type == MethodType::TYPE_SIMPLE || methodType.type == MethodType::TYPE_NAIVE) {
         for( const auto& n : simpleMethodIndexes ) {
@@ -142,7 +147,7 @@ void Gaussmap::updateMap(bool isLast) {
             map(index.x(), index.y(), index.z()).updateWithSimpleMethod();
         }
     }
-    notify(map, res, indexes, isLast);
+    //notify(map, res, indexes, isLast);
 }
 
 void Gaussmap::raytracePoint(mapping::Point3D point, int x, int y, int z) {

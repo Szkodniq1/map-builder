@@ -23,7 +23,10 @@ private:
     OccMethodType methodType;
     //Path of images catalog and format of their naming
     std::string path;
-    std::string form;
+    std::string depthForm;
+    std::string rgbForm;
+    std::string depthSubDir;
+    std::string rgbSubDir;
 
     //File containing camera parameters
     std::string fileName;

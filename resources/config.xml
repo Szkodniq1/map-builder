@@ -19,8 +19,8 @@
 	<fileName>scene_00_</fileName>
 </TestSource>
 
-<MapSize>128</MapSize>
-<MapRes>0.15</MapRes>
+<MapSize>256</MapSize>
+<MapRes>0.1</MapRes>
 <RaytraceFator>100.0</RaytraceFator>
 
 <!-- 0 - Simple, 1 - Bayes, 2 - Kalman, 3 - Naive -->

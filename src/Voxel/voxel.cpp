@@ -200,20 +200,20 @@ void Voxel::updateNaiveDistribution() {
         Eigen::VectorXd y(9);
         y = C*x0n;
 
-        Eigen::MatrixXd innerC(9,9);
-        innerC = Eigen::MatrixXd::Identity(9,9);
+        Eigen::MatrixXd inneC(9,9);
+        inneC = Eigen::MatrixXd::Identity(9,9);
         Eigen::VectorXd yPred(9);
         yPred << 0,0,0,0,0,0,0,0,0;
 
         Eigen::MatrixXd R(9,9);
         R = Eigen::MatrixXd::Identity(9,9) * 0.0;
         Eigen::VectorXd e(9);
-        e = y - innerC*yPred;
+        e = y - inneC*yPred;
 
         Eigen::MatrixXd SS(9,9);
-        SS = innerC*P*innerC.transpose() + R;
+        SS = inneC*P*inneC.transpose() + R;
         Eigen::MatrixXd K(9,9);
-        K = P*innerC.transpose()*SS.inverse();
+        K = P*inneC.transpose()*SS.inverse();
 
         Eigen::VectorXd postX(9);
         postX = xp + K*e;
