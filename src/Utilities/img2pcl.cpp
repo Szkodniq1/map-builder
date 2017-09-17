@@ -255,8 +255,8 @@ int img2pcl::depth2cloud() {
     tempCloud.clear();
     std::vector<Mat33> uncertinatyErrors;
 
-    Eigen::Matrix<double,3,3> R = Rot();
-    Eigen::Translation<double,3> T = Trans();
+    //Eigen::Matrix<double,3,3> R = Rot();
+    //Eigen::Translation<double,3> T = Trans();
 
     uint16_t tmp;
 
@@ -266,7 +266,7 @@ int img2pcl::depth2cloud() {
             if(tmp>800 && tmp<60000){
                 double depthM = double(tmp)/factor;
                 Mat33 uncError;
-                if (methodType.type != MethodType::TYPE_SIMPLE) {
+                if (methodType.type != MethodType::TYPE_SIMPLE && methodType.type != MethodType::TYPE_NAIVE) {
                     computeCov(j,i,depthM,uncError);
                 }
                 uncertinatyErrors.push_back(uncError);
@@ -300,29 +300,32 @@ int img2pcl::depth2colorcloud() {
 
     uint16_t tmp;
 
-    for (unsigned int i=0;i<depth.rows;i++) {
-        for (unsigned int j=0;j<depth.cols;j++) {
-            tmp = (depth.at<uint16_t>(i,j));
-            if(tmp>800 && tmp<60000){
+    int w = bgr.cols;
+    int h = bgr.rows;
+
+    for (unsigned int u=0;u<w;u++) {
+        for (unsigned int v=0;v<h;v++) {
+            tmp = (depth.at<uint16_t>(v,u));
+            if (tmp != 0)
+            {
+                const cv::Vec3b& c = bgr.at<cv::Vec3b>(v, u);
                 double depthM = double(tmp)/factor;
                 Mat33 uncError;
-                if (methodType.type != MethodType::TYPE_SIMPLE) {
-                    computeCov(j,i,depthM,uncError);
+                if (methodType.type != MethodType::TYPE_SIMPLE && methodType.type != MethodType::TYPE_NAIVE) {
+                    computeCov(u,v,depthM,uncError);
                 }
                 uncertinatyErrors.push_back(uncError);
-                point = xyz0(j,i,depthM);
+                point = Eigen::Translation<double, 3>(depthM * ((u - focalAxis[0]) * 1/focalLength[0]), depthM * ((v - focalAxis[1]) * 1/focalLength[1]), depthM); //xyz0(u,v,depthM);
                 Point3D pointPCL;
                 pointPCL.position.x() = point.x();
                 pointPCL.position.y() = point.y();
                 pointPCL.position.z() = point.z();
-                pointPCL.color.r = bgr.at<uint8_t>(i,3*j+2);
-                pointPCL.color.g = bgr.at<uint8_t>(i,3*j+1);
-                pointPCL.color.b = bgr.at<uint8_t>(i,3*j);
+                pointPCL.color.r = c[2];
+                pointPCL.color.g = c[1];
+                pointPCL.color.b = c[0];
                 pointPCL.color.a = 255;
                 //std::cout << "depth: " << depthM << " u: " << i << " v: " <<  j << " x y z " << pointPCL.position.position.x() << ", " << pointPCL.position.position.y() << "," << pointPCL.position.position.z() << "\n";
                 tempCloud.push_back(pointPCL);
-
-
             }
         }
     }

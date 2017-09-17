@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
     if(mode == 0) {
         config.FirstChildElement("MapSize")->QueryIntText(&MAP_SIZE);
         config.FirstChildElement("MapRes")->QueryDoubleText(&res);
-        config.FirstChildElement("RaytraceFator")->QueryDoubleText(&raytraceFactor);
+        config.FirstChildElement("RaytraceFactor")->QueryDoubleText(&raytraceFactor);
     } else {
          std::string mapSettingsPath = config.FirstChildElement( "ReadMapPath" )->GetText();
          mapSettingsPath += ".xml";
@@ -36,12 +36,12 @@ int main(int argc, char** argv) {
          mapSettings.LoadFile(mapSettingsPath.c_str());
          mapSettings.FirstChildElement("MapSize")->QueryIntText(&MAP_SIZE);
          mapSettings.FirstChildElement("MapRes")->QueryDoubleText(&res);
-         mapSettings.FirstChildElement("RaytraceFator")->QueryDoubleText(&raytraceFactor);
+         mapSettings.FirstChildElement("RaytraceFactor")->QueryDoubleText(&raytraceFactor);
     }
 
     int a=0;
     mapping::GrabbedImage PC;
-    mapping::img2pcl troll("../../resources/img2pcl.xml");
+    mapping::img2pcl img2pcl("../../resources/img2pcl.xml");
 
     QApplication application(argc,argv);
     setlocale(LC_NUMERIC,"C");
@@ -59,16 +59,17 @@ int main(int argc, char** argv) {
         std::string path = config.FirstChildElement( "ReadMapPath" )->GetText();
         map = mapping::createMapGauss(path);
         map->attachVisualizer(&visu);
+        std::cout<<MAP_SIZE<<" "<<res<<" "<<raytraceFactor<<std::endl;
         map->mapLoaded();
     }
     std::cout << map->getName() << "\n";
 
     if(mode == 0) {
 
-        while(troll.grabFrame()) {
+        while(img2pcl.grabFrame()) {
             if(a%100 == 0) {
-                troll.calcPCL();
-                PC = troll.returnPC();
+                img2pcl.calcPCL();
+                PC = img2pcl.returnPC();
 
                 if(a == 100) {
                     map->insertCloud(PC, true);

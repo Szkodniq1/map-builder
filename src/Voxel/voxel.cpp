@@ -7,7 +7,7 @@
 namespace mapping {
 
 Voxel::Voxel() {
-    probability = 0;
+    probability = 1;
     sampNumber = 0;
     mean = Eigen::Vector3d(0, 0, 0);
     var << 1, 0, 0, 0, 1, 0, 0, 0, 1;
@@ -15,7 +15,7 @@ Voxel::Voxel() {
 }
 
 Voxel::Voxel(int res) {
-    probability = 0;
+    probability = 1;
     sampNumber = 0;
     mean = Eigen::Vector3d(0, 0, 0);
     var << 1, 0, 0, 0, 1, 0, 0, 0, 1;
@@ -192,33 +192,35 @@ void Voxel::updateNaiveDistribution() {
         us << 0,0,0,0,0,0,0,0,0;
         Eigen::MatrixXd C(9,9);
         C = Eigen::MatrixXd::Identity(9,9) * points.size() / (sampNumber + points.size());
+        Eigen::MatrixXd Q(9,9);
+        Q = Eigen::MatrixXd::Identity(9,9);
 
         Eigen::VectorXd xp(9);
         xp = A*x0 + B*us;
         Eigen::MatrixXd P(9,9);
-        P = A*P_pre*A.transpose();
+        P = A*P_pre*A.transpose() + Q;
         Eigen::VectorXd y(9);
         y = C*x0n;
 
         Eigen::MatrixXd inneC(9,9);
-        inneC = Eigen::MatrixXd::Identity(9,9);
+        inneC = Eigen::MatrixXd::Identity(9,9);//* sampNumber / (sampNumber + points.size());
         Eigen::VectorXd yPred(9);
         yPred << 0,0,0,0,0,0,0,0,0;
 
         Eigen::MatrixXd R(9,9);
-        R = Eigen::MatrixXd::Identity(9,9) * 0.0;
+        R = Eigen::MatrixXd::Identity(9,9) *  0.1;// * points.size() / (sampNumber + points.size());
         Eigen::VectorXd e(9);
-        e = y - inneC*yPred;
+        e = y - C*xp;
 
         Eigen::MatrixXd SS(9,9);
-        SS = inneC*P*inneC.transpose() + R;
+        SS = C*P*C.transpose() + R;
         Eigen::MatrixXd K(9,9);
-        K = P*inneC.transpose()*SS.inverse();
+        K = P*C.transpose()*SS.inverse();
 
         Eigen::VectorXd postX(9);
         postX = xp + K*e;
-        P_pre = P - K*SS*K.transpose();
-        xp = postX;
+        P_pre = (Eigen::MatrixXd::Identity(9,9) - K*C) * P_pre;
+        xp = xxx;
 
         sampNumber += points.size();
 

@@ -28,7 +28,8 @@ PointCloud GrabbedImage::transformedPointCloud() {
                 newPC.push_back(mapping::Point3D(
                             static_cast<double> (transform (0, 0) * pt.coeffRef (0) + transform (0, 1) * pt.coeffRef (1) + transform (0, 2) * pt.coeffRef (2) + transform (0, 3)),
                             static_cast<double> (transform (1, 0) * pt.coeffRef (0) + transform (1, 1) * pt.coeffRef (1) + transform (1, 2) * pt.coeffRef (2) + transform (1, 3)),
-                            static_cast<double> (transform (2, 0) * pt.coeffRef (0) + transform (2, 1) * pt.coeffRef (1) + transform (2, 2) * pt.coeffRef (2) + transform (2, 3)),point.color.r,
+                            static_cast<double> (transform (2, 0) * pt.coeffRef (0) + transform (2, 1) * pt.coeffRef (1) + transform (2, 2) * pt.coeffRef (2) + transform (2, 3)),
+                            point.color.r,
                             point.color.g,
                             point.color.b,
                             point.color.a));
@@ -47,18 +48,25 @@ PointCloud GrabbedImage::transformedPointCloud() {
 //        newPC.push_back(mapping::Point3D(
 //                            rotatedPt[0],
 //                            rotatedPt[1],
-//                            rotatedPt[2],
+//                            -rotatedPt[2],
 //                            point.color.r,
 //                            point.color.g,
 //                            point.color.b,
 //                            point.color.a));
 
-        /// Performance +/- 0,6s
-//        Eigen::Vector3f pt (point.position.x(), point.position.y(), point.position.z());
+        /// Performance +/- 0,87s
+//        Eigen::Matrix<double, 3, 1> pt (point.position.x(), point.position.y(), point.position.z());
+//        Quaternion pos = orientation;
+//        Eigen::Matrix4d transform;
+//        transform<<     (1-2*pos.y()*pos.y()-2*pos.z()*pos.z()), 2*(pos.x()*pos.y() - pos.w()*pos.z()), 2*(pos.x()*pos.z() + pos.w()*pos.y()), translation.x(),
+//                2*(pos.x()*pos.y() + pos.w()*pos.z()), (1-2*pos.x()*pos.x()-2*pos.z()*pos.z()), 2*(pos.y()*pos.z() + pos.w()*pos.x()), translation.y(),
+//                2*(pos.x()*pos.z() - pos.w()*pos.y()), 2*(pos.y()*pos.z() - pos.w()*pos.x()), (1-2*pos.x()*pos.x()-2*pos.y()*pos.y()), translation.z(),
+//                0, 0, 0, 1;
+
 //        newPC.push_back(mapping::Point3D(
-//                            (1-2*pos.y()*pos.y()-2*pos.z()*pos.z())*point.position.x() + 2*(pos.x()*pos.y() - pos.w()*pos.z())*point.position.y() + 2*(pos.x()*pos.z() + pos.w()*pos.y())*point.position.z() + translation.x(),
-//                            2*(pos.x()*pos.y() + pos.w()*pos.z())*point.position.x() + (1-2*pos.x()*pos.x()-2*pos.z()*pos.z())*point.position.y() + 2*(pos.y()*pos.z() + pos.w()*pos.x())*point.position.z() + translation.y(),
-//                            2*(pos.x()*pos.z() - pos.w()*pos.y())*point.position.x() + 2*(pos.y()*pos.z() - pos.w()*pos.x())*point.position.y() + (1-2*pos.x()*pos.x()-2*pos.y()*pos.y())*point.position.z() + translation.z(),
+//                            static_cast<double> (transform (0, 0) * pt.coeffRef (0) + transform (0, 1) * pt.coeffRef (1) + transform (0, 2) * pt.coeffRef (2) + transform (0, 3)),
+//                            static_cast<double> (transform (1, 0) * pt.coeffRef (0) + transform (1, 1) * pt.coeffRef (1) + transform (1, 2) * pt.coeffRef (2) + transform (1, 3)),
+//                            static_cast<double> (transform (2, 0) * pt.coeffRef (0) + transform (2, 1) * pt.coeffRef (1) + transform (2, 2) * pt.coeffRef (2) + transform (2, 3)),
 //                            point.color.r,
 //                            point.color.g,
 //                            point.color.b,

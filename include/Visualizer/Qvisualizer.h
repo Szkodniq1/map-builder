@@ -32,6 +32,7 @@ public:
     class Config{
       public:
         Config() {
+            this->backgroundColor = QColor(255,255,255);
         }
         Config(std::string configFilename){
 //            tinyxml2::XMLDocument config;

@@ -68,7 +68,7 @@ include_directories(${OCTOMAP_INCLUDE_DIRS})
 link_libraries(${OCTOMAP_LIBRARIES})
 
 # BOOST
-find_package(Boost COMPONENTS system)
+#find_package(Boost COMPONENTS system)
 
 # OpenGL
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)

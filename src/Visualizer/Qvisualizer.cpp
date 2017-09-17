@@ -51,6 +51,7 @@ void QGLVisualizer::update(const mapping::PointCloud& newCloud, std::vector<Mat3
 }
 
 void QGLVisualizer::update(Octree<mapping::Voxel>& map, double res, std::unordered_map<std::string, Eigen::Vector3i> indexes , bool isLast) {
+    std::cout<<MAP_SIZE<<" "<<res<<" "<<raytraceFactor<<std::endl;
     this->map = map;
     //TODO trzeba t? liste gdzie? czy?ci?, albo co update przepisywa?, ogólnie trzeba si? zastanowi? jak te dane trzyma? w ogóle, bo jedne mog? nadpisa? drugie
     this->updatedVoxels = indexes;
@@ -65,11 +66,13 @@ void QGLVisualizer::createMapDisplayList() {
     /*for( const auto& n : updatedVoxels ) {
         Eigen::Vector3i indexes = n.second;
         Voxel v = map(indexes.x(), indexes.y(), indexes.z());
-        drawPreetyEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
+        if(v.probability > 0) {
+            drawPreetyEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
+        }
     }*/
 
-    for(int i = 0 ; i < map.size();  i++) { //28 & 108
-        for(int j = 0 ; j < map.size();  j++) { //48 & 88
+    for(int i = 28 ; i < 108;  i++) { //28 & 108
+        for(int j = 48 ; j < 88;  j++) { //48 & 88
             for(int k = 0 ; k < map.size();  k++) {
                 Voxel v = map(i, j, k);
                 if(v.probability > 0) {
@@ -103,14 +106,6 @@ void QGLVisualizer::createDisplayList() {
         }
     }
     glEnd();
-    //uncertainity ellipses
-    for(mapping::PointCloud pointCloud : pointClouds) {
-        for (size_t i = 0;i<pointCloud.size();i++) {
-            if(i%1000==0) {
-                drawPreetyEllipsoid(pointCloud[i].position,this->uncertinatyErrors[i], RGBA(255, 255, 255));
-            }
-        }
-    }
     glEndList();
 }
 
@@ -126,9 +121,9 @@ void QGLVisualizer::drawPointCloud(void){
 /// draw objects
 void QGLVisualizer::draw(){
     // Here we are in the world coordinate system. Draw unit size axis.
-    //drawAxis();
-    drawPointCloud();
-    //drawMap();
+    drawAxis();
+    //drawPointCloud();
+    drawMap();
 }
 
 /// draw objects
@@ -276,7 +271,7 @@ void QGLVisualizer::keyPressEvent(QKeyEvent *e) {
         tinyxml2::XMLElement * mapRes = doc.NewElement("MapRes");
         mapRes->SetText(res);
         doc.InsertFirstChild(mapRes);
-        tinyxml2::XMLElement * rayFactor = doc.NewElement("RaytraceFator");
+        tinyxml2::XMLElement * rayFactor = doc.NewElement("RaytraceFactor");
         rayFactor->SetText(raytraceFactor);
         doc.InsertFirstChild(rayFactor);
         std::string xmlPath = path + ".xml";
