@@ -7,19 +7,19 @@
 namespace mapping {
 
 Voxel::Voxel() {
-    probability = 1;
+    probability = 0;
     sampNumber = 0;
     mean = Eigen::Vector3d(0, 0, 0);
     var << 1, 0, 0, 0, 1, 0, 0, 0, 1;
-    color = RGBA(100, 100, 100, 40);
+    color = RGBA(80, 80, 80, 80);
 }
 
 Voxel::Voxel(int res) {
-    probability = 1;
+    probability = 0;
     sampNumber = 0;
     mean = Eigen::Vector3d(0, 0, 0);
     var << 1, 0, 0, 0, 1, 0, 0, 0, 1;
-    color = RGBA(100, 100, 100, 40);
+    color = RGBA(80, 80, 80, 80);
 }
 
 void Voxel::preinitParameters(double res, Eigen::Vector3d center) {

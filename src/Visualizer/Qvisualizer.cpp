@@ -63,24 +63,24 @@ void QGLVisualizer::update(Octree<mapping::Voxel>& map, double res, std::unorder
 void QGLVisualizer::createMapDisplayList() {
     list = glGenLists(1);
     glNewList(list, GL_COMPILE);
-    /*for( const auto& n : updatedVoxels ) {
+    for( const auto& n : updatedVoxels ) {
         Eigen::Vector3i indexes = n.second;
         Voxel v = map(indexes.x(), indexes.y(), indexes.z());
         if(v.probability > 0) {
             drawPreetyEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
         }
-    }*/
+    }
 
-    for(int i = 28 ; i < 108;  i++) { //28 & 108
+    /*for(int i = 38 ; i < 108;  i++) { //28 & 108
         for(int j = 48 ; j < 88;  j++) { //48 & 88
-            for(int k = 0 ; k < map.size();  k++) {
+            for(int k = 40 ; k < 70;  k++) {
                 Voxel v = map(i, j, k);
                 if(v.probability > 0) {
                     drawPreetyEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
                 }
             }
         }
-    }
+    }*/
 
     glPointSize(3);
     glBegin(GL_POINTS);
@@ -121,7 +121,7 @@ void QGLVisualizer::drawPointCloud(void){
 /// draw objects
 void QGLVisualizer::draw(){
     // Here we are in the world coordinate system. Draw unit size axis.
-    drawAxis();
+    //drawAxis();
     //drawPointCloud();
     drawMap();
 }
