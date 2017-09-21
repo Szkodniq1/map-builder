@@ -80,6 +80,8 @@ public:
     ~Gaussmap() {}
 
     std::string currentDateTime();
+
+    std::vector<std::string> split(const std::string &s, char delim);
 };
 
 #endif //_GAUSSMAP_H

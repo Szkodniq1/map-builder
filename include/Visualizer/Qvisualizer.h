@@ -152,8 +152,6 @@ private:
     /// initialize visualizer
     void init();
 
-    void keyPressEvent(QKeyEvent *e);
-
     /// generate help string
     std::string help() const;
 
@@ -167,8 +165,6 @@ private:
     void drawMap();
 
     void drawEllipsoid(const Vec3& pos, const Mat33& covariance, RGBA color) const;
-
-    std::string currentDateTime();
 };
 
 #endif // QVISUALIZER_H_INCLUDED

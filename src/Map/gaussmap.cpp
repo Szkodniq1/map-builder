@@ -82,8 +82,9 @@ void Gaussmap::saveMap(){
     map.writeBinary(mapfile);
     mapfile.close();
 
-    std::cout<<MAP_SIZE<<" "<<res<<" "<<raytraceFactor<<std::endl;
-    tinyxml2::XMLDocument doc;
+    tinyxml2::XMLDocument doc, config, img2pcl;
+    config.LoadFile("../../resources/config.xml");
+    img2pcl.LoadFile("../../resources/img2pcl.xml");
     tinyxml2::XMLElement * mapSize = doc.NewElement("MapSize");
     mapSize->SetText(MAP_SIZE);
     doc.InsertFirstChild(mapSize);
@@ -93,9 +94,29 @@ void Gaussmap::saveMap(){
     tinyxml2::XMLElement * rayFactor = doc.NewElement("RaytraceFactor");
     rayFactor->SetText(raytraceFactor);
     doc.InsertFirstChild(rayFactor);
+
+    std::string datasetPath;
+    datasetPath = img2pcl.FirstChildElement( "Path" )->GetText();
+    std::vector<std::string> splitString = split(datasetPath, '/');
+    tinyxml2::XMLElement * datasetDir = doc.NewElement("DatasetDirectory");
+    datasetDir->SetText(splitString[splitString.size()-1].c_str());
+    doc.InsertFirstChild(datasetDir);
+
+    int method, every, until;
+    config.FirstChildElement("OccupancyMethod")->QueryIntText(&method);
+    config.FirstChildElement("CalculateEvery")->QueryIntText(&every);
+    config.FirstChildElement("CalculateUntil")->QueryIntText(&until);
+    tinyxml2::XMLElement * methodField = doc.NewElement("OccupancyMethod");
+    methodField->SetText(method);
+    doc.InsertFirstChild(methodField);
+    tinyxml2::XMLElement * everyField = doc.NewElement("CalculateEvery");
+    everyField->SetText(every);
+    doc.InsertFirstChild(everyField);
+    tinyxml2::XMLElement * untilField = doc.NewElement("CalculateUntil");
+    untilField->SetText(until);
+    doc.InsertFirstChild(untilField);
     std::string xmlPath = path + ".xml";
     doc.SaveFile(xmlPath.c_str());
-
 }
 
 ///Attach visualizer
@@ -231,6 +252,17 @@ std::string Gaussmap::currentDateTime() {
     strftime(buf, sizeof(buf), "%Y-%m-%d-%X", &tstruct);
 
     return buf;
+}
+
+std::vector<std::string> Gaussmap::split(const std::string &s, char delim) {
+  std::stringstream ss(s);
+  std::string item;
+  std::vector<std::string> elems;
+  while (std::getline(ss, item, delim)) {
+    elems.push_back(item);
+    // elems.push_back(std::move(item)); // if C++11 (based on comment from @mchiasson)
+  }
+  return elems;
 }
 
 

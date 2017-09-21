@@ -1,39 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Grabber>
-        <name>Kinect</name>
-        <calibrationFile>KinectModel.xml</calibrationFile>
-</Grabber>
-
-<Visualizer>
-        <name>Visualizer</name>
-        <parametersFile>visualizerConfig.xml</parametersFile>
-</Visualizer>
-
-<MapLib>
-        <name>Octomap</name>
-        <configFile>octomapConfig.xml</configFile>
-</MapLib>
-
-<TestSource>
-        <path>/home/pgomola/Dokumenty/testSource/living_room_traj0_loop_rgb-d</path>
-        <fileName>scene_00_</fileName>
-</TestSource>
-
 <MapSize>128</MapSize>
 <MapRes>0.15</MapRes>
 <RaytraceFactor>50.0</RaytraceFactor>
 
 <!-- 0 - Simple, 1 - Bayes, 2 - Kalman, 3 - NDT-OM-->
-<OccupancyMethod>3</OccupancyMethod>
+<OccupancyMethod>1</OccupancyMethod>
 
 <!-- 0 - Mapping, 1 - Read -->
 <MapMode>0</MapMode>
 
 <ReadMapPath>2017-09-21-16:39:07</ReadMapPath>
 
-<SaveMap>0</SaveMap>
+<SaveMap>1</SaveMap>
 
-<CalculateEvery>100</CalculateEvery>
+<CalculateEvery>50</CalculateEvery>
 
-<CalculateUntil>100</CalculateUntil>
+<CalculateUntil>0</CalculateUntil>
 

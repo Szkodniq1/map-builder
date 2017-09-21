@@ -39,7 +39,7 @@ img2pcl::img2pcl(std::string xmlPath) {
         rgbForm = xmlDoc.FirstChildElement( "RGBForm" )->GetText();
         depthForm = xmlDoc.FirstChildElement( "DepthForm" )->GetText();
 
-        fileName = xmlDoc.FirstChildElement( "stateFile" )->GetText();;
+        fileName = xmlDoc.FirstChildElement( "stateFile" )->GetText();
         stateFile.open(path + fileName, std::ios::in);
 
         if(!stateFile.is_open()) {

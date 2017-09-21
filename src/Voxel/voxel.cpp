@@ -290,6 +290,7 @@ void Voxel::updateBayesDistribution() {
         } else {
             updateSimpleDistribution();
         }
+        var = 4*var;
     } else {
         Eigen::Vector3d newMean = Eigen::Vector3d(0, 0, 0);
         for(mapping::Point3D &point : points) {
@@ -312,6 +313,7 @@ void Voxel::updateBayesDistribution() {
                 }
             }
         }
+        newVar = 4*newVar;
 
         Eigen::JacobiSVD<Mat33> svdVar(var, Eigen::ComputeFullU);
         Eigen::JacobiSVD<Mat33> svdNewVar(newVar, Eigen::ComputeFullU);
@@ -393,6 +395,7 @@ void Voxel::updateKalmanDistribution() {
         } else {
             updateSimpleDistribution();
         }
+        var = 4*var;
     } else {
         Eigen::Vector3d newMean = Eigen::Vector3d(0, 0, 0);
         for(mapping::Point3D &point : points) {
@@ -415,7 +418,7 @@ void Voxel::updateKalmanDistribution() {
                 }
             }
         }
-
+        newVar = 4*newVar;
         Eigen::JacobiSVD<Mat33> svdVar(var, Eigen::ComputeFullU);
         Eigen::JacobiSVD<Mat33> svdNewVar(newVar, Eigen::ComputeFullU);
         Mat33 U = svdVar.matrixU();
