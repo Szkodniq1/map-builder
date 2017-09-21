@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
                 img2pcl.calcPCL();
                 PC = img2pcl.returnPC();
 
-                if(a == 100) {
+                if(a == 1000) {
                     map->insertCloud(PC, true);
                     break;
                 } else {

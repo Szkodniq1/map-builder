@@ -166,7 +166,7 @@ private:
 
     void drawMap();
 
-    void drawPreetyEllipsoid(const Vec3& pos, const Mat33& covariance, RGBA color) const;
+    void drawEllipsoid(const Vec3& pos, const Mat33& covariance, RGBA color) const;
 
     std::string currentDateTime();
 };

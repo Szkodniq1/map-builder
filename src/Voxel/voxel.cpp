@@ -112,9 +112,12 @@ void Voxel::updateNaiveDistribution() {
         sampNumber = points.size();
         P_pre = Eigen::MatrixXd(9,9);
         P_pre = Eigen::MatrixXd::Identity(9, 9);
+        //        P_pre(0,1) = points.size();
+        //        P_pre(1,2) = points.size();
+        //        P_pre(2,3) = points.size();
         if (sampNumber == 1) {
             mean = Eigen::Vector3d(points[0].position.x(), points[0].position.y(), points[0].position.z());
-            var = uncertaintyErrors[0];
+            //var = uncertaintyErrors[0];
         } else {
             updateSimpleDistribution();
         }
@@ -141,17 +144,17 @@ void Voxel::updateNaiveDistribution() {
             }
         }
 
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if(sqrt(pow(newVar(i,j),2.0)) < 1e-5) {
-                    newVar(i,j) = 0;
-                }
+        //        for (int i = 0; i < 3; i++) {
+        //            for (int j = 0; j < 3; j++) {
+        //                if(sqrt(pow(newVar(i,j),2.0)) < 1e-5) {
+        //                    newVar(i,j) = 0;
+        //                }
 
-                if(sqrt(pow(var(i,j), 2.0)) < 1e-5) {
-                    var(i,j) = 0;
-                }
-            }
-        }
+        //                if(sqrt(pow(var(i,j), 2.0)) < 1e-5) {
+        //                    var(i,j) = 0;
+        //                }
+        //            }
+        //        }
 
         Eigen::JacobiSVD<Mat33> svdVar(var, Eigen::ComputeFullU);
         Eigen::JacobiSVD<Mat33> svdNewVar(newVar, Eigen::ComputeFullU);
@@ -166,6 +169,17 @@ void Voxel::updateNaiveDistribution() {
         Mat33 Un0 = U.inverse()*Un;
         Un0 = prostuj(Un0);
 
+        Eigen::Vector3d newSn;
+        newSn <<0,0,0;
+
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (std::norm(newSn(i)) < std::norm(Un0(i,j)*Sn(j))) {
+                   newSn(i) = std::norm(Un0(i,j)*Sn(j));
+                }
+            }
+        }
+
         Eigen::Vector3d u = logmap(U0);
         if(u(2)<0)
             u = u - u/(u.norm()*2*M_PI);
@@ -177,7 +191,7 @@ void Voxel::updateNaiveDistribution() {
             un = un - un/(un.norm()*2*M_PI);
         Eigen::VectorXd x0n(9);
         x0n << newMean,Sn, un;
-        x0n << newMean(0), newMean(1), newMean(2), Sn(0), Sn(1), Sn(2), un(0), un(1), un(2);
+        x0n << newMean(0), newMean(1), newMean(2), newSn(0), newSn(1), newSn(2), un(0), un(1), un(2);
 
         Eigen::VectorXd xxx(9);
 
@@ -185,30 +199,26 @@ void Voxel::updateNaiveDistribution() {
 
         /// Krok predykcji
         Eigen::MatrixXd A(9,9);
-        A = Eigen::MatrixXd::Identity(9,9) * sampNumber / (sampNumber + points.size());
+        A = Eigen::MatrixXd::Identity(9,9);
         Eigen::MatrixXd B(9,9);
         B = Eigen::MatrixXd::Zero(9,9);
         Eigen::VectorXd us(9);
         us << 0,0,0,0,0,0,0,0,0;
         Eigen::MatrixXd C(9,9);
-        C = Eigen::MatrixXd::Identity(9,9) * points.size() / (sampNumber + points.size());
-        Eigen::MatrixXd Q(9,9);
-        Q = Eigen::MatrixXd::Identity(9,9);
+        C = Eigen::MatrixXd::Identity(9,9);
 
         Eigen::VectorXd xp(9);
         xp = A*x0 + B*us;
         Eigen::MatrixXd P(9,9);
-        P = A*P_pre*A.transpose() + Q;
+        P = A*P_pre*A.transpose();
         Eigen::VectorXd y(9);
-        y = C*x0n;
+        y = x0n;
 
-        Eigen::MatrixXd inneC(9,9);
-        inneC = Eigen::MatrixXd::Identity(9,9);//* sampNumber / (sampNumber + points.size());
         Eigen::VectorXd yPred(9);
         yPred << 0,0,0,0,0,0,0,0,0;
 
         Eigen::MatrixXd R(9,9);
-        R = Eigen::MatrixXd::Identity(9,9) *  0.1;// * points.size() / (sampNumber + points.size());
+        R = Eigen::MatrixXd::Identity(9,9);
         Eigen::VectorXd e(9);
         e = y - C*xp;
 
@@ -219,7 +229,7 @@ void Voxel::updateNaiveDistribution() {
 
         Eigen::VectorXd postX(9);
         postX = xp + K*e;
-        P_pre = (Eigen::MatrixXd::Identity(9,9) - K*C) * P_pre;
+        P_pre = P - K*SS*K.transpose();
         xp = xxx;
 
         sampNumber += points.size();

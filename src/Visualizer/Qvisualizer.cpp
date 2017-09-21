@@ -67,7 +67,7 @@ void QGLVisualizer::createMapDisplayList() {
         Eigen::Vector3i indexes = n.second;
         Voxel v = map(indexes.x(), indexes.y(), indexes.z());
         if(v.probability > 0) {
-            drawPreetyEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
+            drawEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
         }
     }
 
@@ -76,7 +76,7 @@ void QGLVisualizer::createMapDisplayList() {
             for(int k = 40 ; k < 70;  k++) {
                 Voxel v = map(i, j, k);
                 if(v.probability > 0) {
-                    drawPreetyEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
+                    drawEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
                 }
             }
         }
@@ -182,7 +182,7 @@ void QGLVisualizer::drawMap() {
     glPopMatrix();
 }
 
-void QGLVisualizer::drawPreetyEllipsoid(const Vec3& pos, const Mat33& covariance, RGBA color) const{
+void QGLVisualizer::drawEllipsoid(const Vec3& pos, const Mat33& covariance, RGBA color) const{
     // ---------------------
     //    3D ellipsoid
     // ---------------------
