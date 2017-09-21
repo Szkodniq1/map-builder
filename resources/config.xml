@@ -9,8 +9,12 @@
 <!-- 0 - Mapping, 1 - Read -->
 <MapMode>0</MapMode>
 
+<!-- 0 - Octo, 1 - Gauss -->
+<MapType>1</MapType>
+
 <ReadMapPath>2017-09-21-16:39:07</ReadMapPath>
 
+<!-- 0 - Not saving, 1 - Saving -->
 <SaveMap>1</SaveMap>
 
 <CalculateEvery>50</CalculateEvery>

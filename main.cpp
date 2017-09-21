@@ -21,8 +21,9 @@ int main(int argc, char** argv) {
 
     tinyxml2::XMLDocument config;
     config.LoadFile("../../resources/config.xml");
-    int mode;
+    int mode, mapType;
     config.FirstChildElement("MapMode")->QueryIntText(&mode);
+    config.FirstChildElement("MapType")->QueryIntText(&mapType);
     std::cout << "Start\n";
 
     if(mode == 0) {
@@ -53,7 +54,11 @@ int main(int argc, char** argv) {
 
     mapping::Map* map;
     if(mode == 0) {
-        map = mapping::createMapGauss(PC.pointCloud);
+        if(mapType != 0) {
+            map = mapping::createMapGauss(PC.pointCloud);
+        } else {
+            map = mapping::createMapOcto(PC.pointCloud);
+        }
         map->attachVisualizer(&visu);
     } else {
         std::string path = config.FirstChildElement( "ReadMapPath" )->GetText();

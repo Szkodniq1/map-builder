@@ -45,7 +45,7 @@ void OctoMap::insertCloud(mapping::GrabbedImage grab, bool isLast) {
 /// save map in file
 void OctoMap::saveMap(){
     std::stringstream stream;
-    stream <<"tree10.bt";
+    stream <<currentDateTime()<<".bt";
     this->map.writeBinary(stream.str());
 }
 
@@ -67,4 +67,14 @@ mapping::Map* mapping::createMapOcto(void) {
 mapping::Map* mapping::createMapOcto(PointCloud PC) {
     octoMap.reset(new OctoMap(PC));
     return octoMap.get();
+}
+
+std::string OctoMap::currentDateTime() {
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    strftime(buf, sizeof(buf), "%Y-%m-%d-%X", &tstruct);
+
+    return buf;
 }
