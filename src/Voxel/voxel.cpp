@@ -59,6 +59,10 @@ void Voxel::insertPoint(Point3D point, Mat33 uncertaintyError) {
         this->points.push_back(point);
         //this->uncertaintyErrors.push_back(uncertaintyError);
         break;
+    case MethodType::TYPE_NDTOM:
+        this->points.push_back(point);
+        //this->uncertaintyErrors.push_back(uncertaintyError);
+        break;
     default:
         this->points.push_back(point);
         break;
@@ -84,6 +88,10 @@ void Voxel::updateWithSimpleMethod() {
         updateNaiveColor();
         points.clear();
         //uncertaintyErrors.clear();
+    } else if (methodType.type == MethodType::TYPE_NDTOM) {
+        updateNDTOM();
+        updateNaiveColor();
+        points.clear();
     }
 }
 
@@ -309,7 +317,7 @@ void Voxel::updateBayesDistribution() {
         Eigen::JacobiSVD<Mat33> svdNewVar(newVar, Eigen::ComputeFullU);
         Mat33 U = svdVar.matrixU();
         Mat33 Un = svdNewVar.matrixU();
-        Eigen::Vector3d S = 2*svdVar.singularValues();
+        Eigen::Vector3d S = svdVar.singularValues();
         Eigen::Vector3d Sn = svdNewVar.singularValues();
 
         U = prostuj(U);
@@ -498,6 +506,55 @@ void Voxel::updateKalmanDistribution() {
         postR = expmap(Vec3(post_r(0), post_r(1), post_r(2)));
         postR = U*postR;
         var = postR * postS * postR.transpose();
+    }
+}
+
+void Voxel::updateNDTOM() {
+    if (sampNumber == 0) {
+        Eigen::Vector3d newMean = Eigen::Vector3d(0, 0, 0);
+        for(mapping::Point3D &point : points) {
+            Eigen::Vector3d newPoint = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+            newMean += newPoint;
+        }
+        meanSum = newMean;
+        mean = meanSum / points.size();
+
+        Mat33 newVar;
+        newVar << 0, 0, 0, 0, 0, 0, 0, 0, 0;
+        if(points.size() > 1) {
+
+            for(mapping::Point3D &point : points) {
+                Eigen::Vector3d newPoint = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+                newVar += (newPoint - mean) * (newPoint - mean).transpose();
+            }
+
+        }
+        varSum = newVar;
+        var = varSum / (points.size() - 1);
+        sampNumber = points.size();
+    } else {
+        Eigen::Vector3d newMeanSum = Eigen::Vector3d(0, 0, 0);
+        for(mapping::Point3D &point : points) {
+            Eigen::Vector3d newPoint = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+            newMeanSum += newPoint;
+        }
+
+        Eigen::Vector3d newMean = newMeanSum / points.size();
+
+        Mat33 newVarSum;
+        newVarSum << 0, 0, 0, 0, 0, 0, 0, 0, 0;
+        if(points.size() > 1) {
+            for(mapping::Point3D &point : points) {
+                Eigen::Vector3d newPoint = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+                newVarSum += (newPoint - newMean) * (newPoint - newMean).transpose();
+            }
+        }
+
+        varSum= varSum + newVarSum + (sampNumber/(points.size()*(points.size() + sampNumber)))*((points.size()/sampNumber)*meanSum - newMeanSum)*((points.size()/sampNumber)*meanSum - newMeanSum).transpose();
+        meanSum += newMeanSum;
+        mean = meanSum / (sampNumber + points.size());
+        var = varSum / (sampNumber + points.size() - 1);
+        sampNumber += points.size();
     }
 }
 

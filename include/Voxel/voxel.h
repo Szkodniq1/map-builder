@@ -31,6 +31,9 @@ namespace mapping {
 
         double P_values [81] = { };
 
+        Eigen::Vector3d meanSum;
+        Mat33 varSum;
+
         ///default constructor
         Voxel();
         //default contructor int OcTree structure
@@ -57,6 +60,8 @@ namespace mapping {
         void updateBayesDistribution();
 
         void updateKalmanDistribution();
+
+        void updateNDTOM();
 
         void updateColor(RGBA color);
 

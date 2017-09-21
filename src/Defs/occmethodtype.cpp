@@ -29,6 +29,9 @@ void OccMethodType::assignType(int typeNum) {
     case 2:
         this->type = MethodType::TYPE_KALMAN;
         break;
+    case 3:
+        this->type = MethodType::TYPE_NDTOM;
+        break;
     default:
         this->type = MethodType::TYPE_SIMPLE;
         break;

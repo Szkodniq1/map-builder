@@ -97,6 +97,8 @@ enum class MethodType {
     TYPE_BAYES,
     /// For kalman filter implementation
     TYPE_KALMAN,
+    /// NDT-OM implementation,
+    TYPE_NDTOM,
 };
 
 }
