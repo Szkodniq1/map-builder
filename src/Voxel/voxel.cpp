@@ -11,7 +11,16 @@ Voxel::Voxel() {
     sampNumber = 0;
     mean = Eigen::Vector3d(0, 0, 0);
     var << 1, 0, 0, 0, 1, 0, 0, 0, 1;
+    sampMean = Eigen::Vector3d(0, 0, 0);
     color = RGBA(80, 80, 80, 80);
+    points = {};
+    for(int i =0; i<9;i++) {
+        for(int j =0; j<9;j++) {
+            if(i==j) {
+                P_values[9*i+j] = 1;
+            }
+        }
+    }
 }
 
 Voxel::Voxel(int res) {
@@ -19,7 +28,16 @@ Voxel::Voxel(int res) {
     sampNumber = 0;
     mean = Eigen::Vector3d(0, 0, 0);
     var << 1, 0, 0, 0, 1, 0, 0, 0, 1;
+    sampMean = Eigen::Vector3d(0, 0, 0);
     color = RGBA(80, 80, 80, 80);
+    points = {};
+    for(int i =0; i<9;i++) {
+        for(int j =0; j<9;j++) {
+            if(i==j) {
+                P_values[9*i+j] = 1;
+            }
+        }
+    }
 }
 
 void Voxel::preinitParameters(double res, Eigen::Vector3d center) {
@@ -34,16 +52,12 @@ void Voxel::insertPoint(Point3D point, Mat33 uncertaintyError) {
         this->points.push_back(point);
         break;
     case MethodType::TYPE_BAYES:
-        updateBayesDistribution(point, uncertaintyError);
-        updateColor(point.color);
+        this->points.push_back(point);
+        //this->uncertaintyErrors.push_back(uncertaintyError);
         break;
     case MethodType::TYPE_KALMAN:
-        updateKalmanDistribution(point, uncertaintyError);
-        updateColor(point.color);
-        break;
-    case MethodType::TYPE_NAIVE:
         this->points.push_back(point);
-        this->uncertaintyErrors.push_back(uncertaintyError);
+        //this->uncertaintyErrors.push_back(uncertaintyError);
         break;
     default:
         this->points.push_back(point);
@@ -60,11 +74,16 @@ void Voxel::updateWithSimpleMethod() {
         color = RGBA(255, 255, 255, 255);
         updateSimpleDistribution();
         updateSimpleColor();
-    } else if (methodType.type == MethodType::TYPE_NAIVE) {
-        updateNaiveDistribution();
+    } else if (methodType.type == MethodType::TYPE_BAYES) {
+        updateBayesDistribution();
         updateNaiveColor();
         points.clear();
-        uncertaintyErrors.clear();
+        //uncertaintyErrors.clear();
+    } else if (methodType.type == MethodType::TYPE_KALMAN) {
+        updateKalmanDistribution();
+        updateNaiveColor();
+        points.clear();
+        //uncertaintyErrors.clear();
     }
 }
 
@@ -102,151 +121,6 @@ void Voxel::updateSimpleColor() {
     this->color.g = (int) g/points.size();
     this->color.b = (int) b/points.size();
     this->color.a = (int) a/points.size();
-}
-
-void Voxel::updateNaiveDistribution() {
-    if (sampNumber == 0) {
-        mean = Eigen::Vector3d(0, 0, 0);
-        var << 0, 0, 0, 0, 0, 0, 0, 0, 0;
-        color = RGBA(255, 255, 255, 255);
-        sampNumber = points.size();
-        P_pre = Eigen::MatrixXd(9,9);
-        P_pre = Eigen::MatrixXd::Identity(9, 9);
-        //        P_pre(0,1) = points.size();
-        //        P_pre(1,2) = points.size();
-        //        P_pre(2,3) = points.size();
-        if (sampNumber == 1) {
-            mean = Eigen::Vector3d(points[0].position.x(), points[0].position.y(), points[0].position.z());
-            //var = uncertaintyErrors[0];
-        } else {
-            updateSimpleDistribution();
-        }
-    } else {
-        Eigen::Vector3d newMean = Eigen::Vector3d(0, 0, 0);
-        for(mapping::Point3D &point : points) {
-            Eigen::Vector3d newPoint = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
-            newMean += newPoint;
-        }
-        newMean = newMean / points.size();
-
-        Mat33 newVar;
-        newVar << 0, 0, 0, 0, 0, 0, 0, 0, 0;
-        if(points.size() > 1) {
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    newVar(i,j) = 0.0;
-                    for(mapping::Point3D &point : points) {
-                        Eigen::Vector3d newPoint = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
-                        newVar(i,j) += (newMean(i) - newPoint(i)) * (newMean(j) - newPoint(j));
-                    }
-                    newVar(i,j) /= points.size() - 1;
-                }
-            }
-        }
-
-        //        for (int i = 0; i < 3; i++) {
-        //            for (int j = 0; j < 3; j++) {
-        //                if(sqrt(pow(newVar(i,j),2.0)) < 1e-5) {
-        //                    newVar(i,j) = 0;
-        //                }
-
-        //                if(sqrt(pow(var(i,j), 2.0)) < 1e-5) {
-        //                    var(i,j) = 0;
-        //                }
-        //            }
-        //        }
-
-        Eigen::JacobiSVD<Mat33> svdVar(var, Eigen::ComputeFullU);
-        Eigen::JacobiSVD<Mat33> svdNewVar(newVar, Eigen::ComputeFullU);
-        Mat33 U = svdVar.matrixU();
-        Mat33 Un = svdNewVar.matrixU();
-        Eigen::Vector3d S = svdVar.singularValues();
-        Eigen::Vector3d Sn = svdNewVar.singularValues();
-
-        U = prostuj(U);
-        Un = prostuj(Un);
-        Mat33 U0 = U.inverse()*U;
-        Mat33 Un0 = U.inverse()*Un;
-        Un0 = prostuj(Un0);
-
-        Eigen::Vector3d newSn;
-        newSn <<0,0,0;
-
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (std::norm(newSn(i)) < std::norm(Un0(i,j)*Sn(j))) {
-                   newSn(i) = std::norm(Un0(i,j)*Sn(j));
-                }
-            }
-        }
-
-        Eigen::Vector3d u = logmap(U0);
-        if(u(2)<0)
-            u = u - u/(u.norm()*2*M_PI);
-        Eigen::VectorXd x0(9);
-        x0 << mean(0), mean(1), mean(2), S(0), S(1), S(2), u(0), u(1), u(2);
-
-        Eigen::Vector3d un = logmap(Un0);
-        if(un(2)<0)
-            un = un - un/(un.norm()*2*M_PI);
-        Eigen::VectorXd x0n(9);
-        x0n << newMean,Sn, un;
-        x0n << newMean(0), newMean(1), newMean(2), newSn(0), newSn(1), newSn(2), un(0), un(1), un(2);
-
-        Eigen::VectorXd xxx(9);
-
-        xxx = x0 * sampNumber / (sampNumber + points.size()) + x0n * points.size() / (sampNumber + points.size());
-
-        /// Krok predykcji
-        Eigen::MatrixXd A(9,9);
-        A = Eigen::MatrixXd::Identity(9,9);
-        Eigen::MatrixXd B(9,9);
-        B = Eigen::MatrixXd::Zero(9,9);
-        Eigen::VectorXd us(9);
-        us << 0,0,0,0,0,0,0,0,0;
-        Eigen::MatrixXd C(9,9);
-        C = Eigen::MatrixXd::Identity(9,9);
-
-        Eigen::VectorXd xp(9);
-        xp = A*x0 + B*us;
-        Eigen::MatrixXd P(9,9);
-        P = A*P_pre*A.transpose();
-        Eigen::VectorXd y(9);
-        y = x0n;
-
-        Eigen::VectorXd yPred(9);
-        yPred << 0,0,0,0,0,0,0,0,0;
-
-        Eigen::MatrixXd R(9,9);
-        R = Eigen::MatrixXd::Identity(9,9);
-        Eigen::VectorXd e(9);
-        e = y - C*xp;
-
-        Eigen::MatrixXd SS(9,9);
-        SS = C*P*C.transpose() + R;
-        Eigen::MatrixXd K(9,9);
-        K = P*C.transpose()*SS.inverse();
-
-        Eigen::VectorXd postX(9);
-        postX = xp + K*e;
-        P_pre = P - K*SS*K.transpose();
-        xp = xxx;
-
-        sampNumber += points.size();
-
-        mean << xp(0), xp(1), xp(2);
-        Eigen::Vector3d post_s;
-        post_s << xp(3),xp(4),xp(5);
-        Eigen::Vector3d post_r;
-        post_r << xp(6),xp(7),xp(8);
-
-        Mat33 postS;
-        postS << post_s(0), 0, 0, 0,  post_s(1), 0, 0, 0, post_s(2);
-        Mat33 postR;
-        postR = expmap(Vec3(post_r(0), post_r(1), post_r(2)));
-        postR = U*postR;
-        var = postR * postS * postR.transpose();
-    }
 }
 
 Mat33 Voxel::prostuj(Mat33 R) {
@@ -395,65 +269,236 @@ void Voxel::updateNaiveColor() {
 }
 
 
-void Voxel::updateBayesDistribution(Point3D point, Mat33 uncertaintyError) {
-    Mat33 priorVar;
-    priorVar = var;
+void Voxel::updateBayesDistribution() {
 
     if (sampNumber == 0) {
-        sampMean = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+        mean = Eigen::Vector3d(0, 0, 0);
+        var << 0, 0, 0, 0, 0, 0, 0, 0, 0;
+        color = RGBA(255, 255, 255, 255);
+        sampNumber = points.size();
+        if (sampNumber == 1) {
+            mean = Eigen::Vector3d(points[0].position.x(), points[0].position.y(), points[0].position.z());
+            //var = uncertaintyErrors[0];
+        } else {
+            updateSimpleDistribution();
+        }
     } else {
-        sampMean = Eigen::Vector3d(
-                    ((sampMean(0) * sampNumber) + point.position.x())/(sampNumber+1),
-                    ((sampMean(1) * sampNumber) + point.position.y())/(sampNumber+1),
-                    ((sampMean(2) * sampNumber) + point.position.z())/(sampNumber+1));
+        Eigen::Vector3d newMean = Eigen::Vector3d(0, 0, 0);
+        for(mapping::Point3D &point : points) {
+            Eigen::Vector3d newPoint = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+            newMean += newPoint;
+        }
+        newMean = newMean / points.size();
+
+        Mat33 newVar;
+        newVar << 0, 0, 0, 0, 0, 0, 0, 0, 0;
+        if(points.size() > 1) {
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    newVar(i,j) = 0.0;
+                    for(mapping::Point3D &point : points) {
+                        Eigen::Vector3d newPoint = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+                        newVar(i,j) += (newMean(i) - newPoint(i)) * (newMean(j) - newPoint(j));
+                    }
+                    newVar(i,j) /= points.size() - 1;
+                }
+            }
+        }
+
+        Eigen::JacobiSVD<Mat33> svdVar(var, Eigen::ComputeFullU);
+        Eigen::JacobiSVD<Mat33> svdNewVar(newVar, Eigen::ComputeFullU);
+        Mat33 U = svdVar.matrixU();
+        Mat33 Un = svdNewVar.matrixU();
+        Eigen::Vector3d S = 2*svdVar.singularValues();
+        Eigen::Vector3d Sn = svdNewVar.singularValues();
+
+        U = prostuj(U);
+        Un = prostuj(Un);
+        Mat33 U0 = U.inverse()*U;
+        Mat33 Un0 = U.inverse()*Un;
+        Un0 = prostuj(Un0);
+
+        Eigen::Vector3d u = logmap(U0);
+        if(u(2)<0)
+            u = u - u/(u.norm()*2*M_PI);
+        Eigen::VectorXd x0(9);
+        x0 << mean(0), mean(1), mean(2), S(0), S(1), S(2), u(0), u(1), u(2);
+
+        Eigen::Vector3d un = logmap(Un0);
+        if(un(2)<0)
+            un = un - un/(un.norm()*2*M_PI);
+        Eigen::VectorXd x0n(9);
+        x0n << newMean,Sn, un;
+        x0n << newMean(0), newMean(1), newMean(2), Sn(0), Sn(1), Sn(2), un(0), un(1), un(2);
+
+        Eigen::VectorXd xxx(9);
+
+        xxx = x0 * sampNumber / (sampNumber + points.size()) + x0n * points.size() / (sampNumber + points.size());
+
+        Eigen::MatrixXd c = Eigen::MatrixXd::Identity(9, 9);
+        sampNumber += points.size();
+        Eigen::VectorXd ux(9);
+        ux = xxx;
+
+
+        Eigen::VectorXd mp(9);
+        Eigen::MatrixXd cp = Eigen::MatrixXd::Identity(9, 9);
+        Eigen::MatrixXd P_pre(9,9);
+        for(int i =0; i<9;i++) {
+            for(int j =0; j<9;j++) {
+                P_pre(i,j) = P_values[9*i+j];
+            }
+        }
+        cp = (P_pre.inverse() + sampNumber*(c.inverse())).inverse();
+        mp = cp*(sampNumber*(c.inverse())*ux + (P_pre.inverse())*x0);
+        for(int i =0; i<9;i++) {
+            for(int j =0; j<9;j++) {
+                P_values[9*i+j] = cp(i,j);
+            }
+        }
+
+        mean << mp(0), mp(1), mp(2);
+        Eigen::Vector3d post_s;
+        post_s << mp(3),mp(4),mp(5);
+        Eigen::Vector3d post_r;
+        post_r << mp(6),mp(7),mp(8);
+
+        Mat33 postS;
+        postS << post_s(0), 0, 0, 0,  post_s(1), 0, 0, 0, post_s(2);
+        Mat33 postR;
+        postR = expmap(Vec3(post_r(0), post_r(1), post_r(2)));
+        postR = U*postR;
+        var = postR * postS * postR.transpose();
+
     }
-
-    Mat33 Inv = uncertaintyError.inverse();
-    double det = Inv.determinant();
-
-    if(det == 0)
-        return;
-
-    ++sampNumber;
-
-    Mat33 temp;
-    temp = var.inverse();
-    temp += (sampNumber * Inv);
-    var = temp.inverse();
-    mean = var * (sampNumber * Inv*sampMean + priorVar.inverse() * mean);
 }
 
-void Voxel::updateKalmanDistribution(Point3D point, Mat33 uncertaintyError) {
-    /*if (sampNumber == 0) {
-        mean = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
-        var  = Mat33::Identity();
+void Voxel::updateKalmanDistribution() {
+    if (sampNumber == 0) {
+        mean = Eigen::Vector3d(0, 0, 0);
+        var << 0, 0, 0, 0, 0, 0, 0, 0, 0;
+        color = RGBA(255, 255, 255, 255);
+        sampNumber = points.size();
+        if (sampNumber == 1) {
+            mean = Eigen::Vector3d(points[0].position.x(), points[0].position.y(), points[0].position.z());
+            //var = uncertaintyErrors[0];
+        } else {
+            updateSimpleDistribution();
+        }
     } else {
-        //Mat33 A = Mat33::Identity();
-        //Mat33 At = A.transpose();
-        Eigen::Vector3d sampleMean = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+        Eigen::Vector3d newMean = Eigen::Vector3d(0, 0, 0);
+        for(mapping::Point3D &point : points) {
+            Eigen::Vector3d newPoint = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+            newMean += newPoint;
+        }
+        newMean = newMean / points.size();
 
-        //Eigen::Vector3d px = A*mean;
-        //Mat33 P = A*var*At;
+        Mat33 newVar;
+        newVar << 0, 0, 0, 0, 0, 0, 0, 0, 0;
+        if(points.size() > 1) {
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    newVar(i,j) = 0.0;
+                    for(mapping::Point3D &point : points) {
+                        Eigen::Vector3d newPoint = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+                        newVar(i,j) += (newMean(i) - newPoint(i)) * (newMean(j) - newPoint(j));
+                    }
+                    newVar(i,j) /= points.size() - 1;
+                }
+            }
+        }
 
-        Mat33 H = Mat33::Identity();
-        Mat33 Ht = H.transpose();
+        Eigen::JacobiSVD<Mat33> svdVar(var, Eigen::ComputeFullU);
+        Eigen::JacobiSVD<Mat33> svdNewVar(newVar, Eigen::ComputeFullU);
+        Mat33 U = svdVar.matrixU();
+        Mat33 Un = svdNewVar.matrixU();
+        Eigen::Vector3d S = svdVar.singularValues();
+        Eigen::Vector3d Sn = svdNewVar.singularValues();
 
-        Eigen::Vector3d e = sampleMean - mean;
-        Mat33 R = uncertaintyError;
-        Mat33 S = var + R;
-        Mat33 Sinv = S.inverse();
-        Mat33 K = var*Ht*Sinv;
-        Mat33 Kt = K.transpose();
-        mean = mean + K*e;
-        var  = var - K*S*Kt;
-    }*/
-    Eigen::Vector3d sampleMean = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
-    Mat33 temp = (var + uncertaintyError);
-    Mat33 tempInv = temp.inverse();
-    Mat33 K = var * tempInv;
-    mean = mean - K * (mean  - sampleMean);
-    var = (Mat33::Identity()-K)*var;
-    sampNumber++;
+        U = prostuj(U);
+        Un = prostuj(Un);
+        Mat33 U0 = U.inverse()*U;
+        Mat33 Un0 = U.inverse()*Un;
+        Un0 = prostuj(Un0);
+
+        Eigen::Vector3d u = logmap(U0);
+        if(u(2)<0)
+            u = u - u/(u.norm()*2*M_PI);
+        Eigen::VectorXd x0(9);
+        x0 << mean(0), mean(1), mean(2), S(0), S(1), S(2), u(0), u(1), u(2);
+
+        Eigen::Vector3d un = logmap(Un0);
+        if(un(2)<0)
+            un = un - un/(un.norm()*2*M_PI);
+        Eigen::VectorXd x0n(9);
+        x0n << newMean,Sn, un;
+        x0n << newMean(0), newMean(1), newMean(2), Sn(0), Sn(1), Sn(2), un(0), un(1), un(2);
+
+        Eigen::VectorXd xxx(9);
+
+        xxx = x0 * sampNumber / (sampNumber + points.size()) + x0n * points.size() / (sampNumber + points.size());
+
+        /// Krok predykcji
+        Eigen::MatrixXd A(9,9);
+        A = Eigen::MatrixXd::Identity(9,9);
+        Eigen::MatrixXd B(9,9);
+        B = Eigen::MatrixXd::Zero(9,9);
+        Eigen::VectorXd us(9);
+        us << 0,0,0,0,0,0,0,0,0;
+        Eigen::MatrixXd C(9,9);
+        C = Eigen::MatrixXd::Identity(9,9);
+
+        Eigen::VectorXd xp(9);
+        xp = A*x0 + B*us;
+        Eigen::MatrixXd P(9,9);
+        Eigen::MatrixXd P_pre(9,9);
+        for(int i =0; i<9;i++) {
+            for(int j =0; j<9;j++) {
+                P_pre(i,j) = P_values[9*i+j];
+            }
+        }
+        P = A*P_pre*A.transpose();
+        Eigen::VectorXd y(9);
+        y = x0n;
+
+        Eigen::VectorXd yPred(9);
+        yPred << 0,0,0,0,0,0,0,0,0;
+
+        Eigen::MatrixXd R(9,9);
+        R = Eigen::MatrixXd::Identity(9,9);
+        Eigen::VectorXd e(9);
+        e = y - C*xp;
+
+        Eigen::MatrixXd SS(9,9);
+        SS = C*P*C.transpose() + R;
+        Eigen::MatrixXd K(9,9);
+        K = P*C.transpose()*SS.inverse();
+
+        Eigen::VectorXd postX(9);
+        postX = xp + K*e;
+        P_pre = P - K*SS*K.transpose();
+        for(int i =0; i<9;i++) {
+            for(int j =0; j<9;j++) {
+                P_values[9*i+j] = P_pre(i,j);
+            }
+        }
+        xp = postX;
+
+        sampNumber += points.size();
+
+        mean << xp(0), xp(1), xp(2);
+        Eigen::Vector3d post_s;
+        post_s << xp(3),xp(4),xp(5);
+        Eigen::Vector3d post_r;
+        post_r << xp(6),xp(7),xp(8);
+
+        Mat33 postS;
+        postS << post_s(0), 0, 0, 0,  post_s(1), 0, 0, 0, post_s(2);
+        Mat33 postR;
+        postR = expmap(Vec3(post_r(0), post_r(1), post_r(2)));
+        postR = U*postR;
+        var = postR * postS * postR.transpose();
+    }
 }
 
 void Voxel::updateColor(RGBA color) {

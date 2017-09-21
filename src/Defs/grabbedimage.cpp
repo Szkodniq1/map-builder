@@ -20,11 +20,25 @@ PointCloud GrabbedImage::transformedPointCloud() {
     Eigen::Transform<double, 3, Eigen::Affine> transform (translation * orientation);
     newPC.reserve(this->pointCloud.size());
     this->orientation.normalize();
+    Quaternion invOrientation = Quaternion(orientation.w(), -orientation.x(), -orientation.y(), -orientation.z());
 
     int64 e1 = cv::getTickCount();
     for(mapping::Point3D point : this->pointCloud) {
+        Quaternion qPoint = Quaternion(0, point.position.x(), point.position.y(), point.position.z());
+        Quaternion q = orientation * qPoint * invOrientation;
+        Vec3(q.x() + translation.x(), q.y() + translation.y(), q.z() + translation.z());
+
+        newPC.push_back(mapping::Point3D(
+                    q.x() + translation.x(),
+                    q.y() + translation.y(),
+                    q.z() + translation.z(),
+                    point.color.r,
+                    point.color.g,
+                    point.color.b,
+                    point.color.a));
+
         /// Performance +/- 0,6s left as it more readable solution
-        Eigen::Matrix<double, 3, 1> pt (point.position.x(), point.position.y(), point.position.z());
+        /*Eigen::Matrix<double, 3, 1> pt (point.position.x(), point.position.y(), point.position.z());
                 newPC.push_back(mapping::Point3D(
                             static_cast<double> (transform (0, 0) * pt.coeffRef (0) + transform (0, 1) * pt.coeffRef (1) + transform (0, 2) * pt.coeffRef (2) + transform (0, 3)),
                             static_cast<double> (transform (1, 0) * pt.coeffRef (0) + transform (1, 1) * pt.coeffRef (1) + transform (1, 2) * pt.coeffRef (2) + transform (1, 3)),
@@ -32,7 +46,8 @@ PointCloud GrabbedImage::transformedPointCloud() {
                             point.color.r,
                             point.color.g,
                             point.color.b,
-                            point.color.a));
+                            point.color.a));*/
+
 
         /// Performance +/- 1,5s
 //        Eigen::Vector3f pt (point.position.x(), point.position.y(), point.position.z());

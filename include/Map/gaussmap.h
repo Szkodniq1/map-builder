@@ -78,6 +78,8 @@ public:
 
     /// descrutor
     ~Gaussmap() {}
+
+    std::string currentDateTime();
 };
 
 #endif //_GAUSSMAP_H

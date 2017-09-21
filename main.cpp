@@ -30,13 +30,13 @@ int main(int argc, char** argv) {
         config.FirstChildElement("MapRes")->QueryDoubleText(&res);
         config.FirstChildElement("RaytraceFactor")->QueryDoubleText(&raytraceFactor);
     } else {
-         std::string mapSettingsPath = config.FirstChildElement( "ReadMapPath" )->GetText();
-         mapSettingsPath += ".xml";
-         tinyxml2::XMLDocument mapSettings;
-         mapSettings.LoadFile(mapSettingsPath.c_str());
-         mapSettings.FirstChildElement("MapSize")->QueryIntText(&MAP_SIZE);
-         mapSettings.FirstChildElement("MapRes")->QueryDoubleText(&res);
-         mapSettings.FirstChildElement("RaytraceFactor")->QueryDoubleText(&raytraceFactor);
+        std::string mapSettingsPath = config.FirstChildElement( "ReadMapPath" )->GetText();
+        mapSettingsPath += ".xml";
+        tinyxml2::XMLDocument mapSettings;
+        mapSettings.LoadFile(mapSettingsPath.c_str());
+        mapSettings.FirstChildElement("MapSize")->QueryIntText(&MAP_SIZE);
+        mapSettings.FirstChildElement("MapRes")->QueryDoubleText(&res);
+        mapSettings.FirstChildElement("RaytraceFactor")->QueryDoubleText(&raytraceFactor);
     }
 
     int a=0;
@@ -59,19 +59,20 @@ int main(int argc, char** argv) {
         std::string path = config.FirstChildElement( "ReadMapPath" )->GetText();
         map = mapping::createMapGauss(path);
         map->attachVisualizer(&visu);
-        std::cout<<MAP_SIZE<<" "<<res<<" "<<raytraceFactor<<std::endl;
-        map->mapLoaded();
     }
-    std::cout << map->getName() << "\n";
 
     if(mode == 0) {
 
+        int calcEvery, calcUntil;
+        config.FirstChildElement("CalculateEvery")->QueryIntText(&calcEvery);
+        config.FirstChildElement("CalculateUntil")->QueryIntText(&calcUntil);
+
         while(img2pcl.grabFrame()) {
-            if(a%100 == 0) {
+            if(a%calcEvery == 0) {
                 img2pcl.calcPCL();
                 PC = img2pcl.returnPC();
 
-                if(a == 1000) {
+                if(a == calcUntil) {
                     map->insertCloud(PC, true);
                     break;
                 } else {
@@ -81,7 +82,13 @@ int main(int argc, char** argv) {
             }
             a++;
         }
-        map->saveMap();
+        int shouldSave;
+        config.FirstChildElement("SaveMap")->QueryIntText(&shouldSave);
+        if(shouldSave != 0) {
+            map->saveMap();
+        }
+    } else {
+        map->mapLoaded();
     }
 
     application.exec();

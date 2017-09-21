@@ -27,9 +27,9 @@ namespace mapping {
 
         //For simple method
         PointCloud points;
-        std::vector<Mat33> uncertaintyErrors;
+        //std::vector<Mat33> uncertaintyErrors;
 
-        Eigen::MatrixXd P_pre;
+        double P_values [81] = { };
 
         ///default constructor
         Voxel();
@@ -44,7 +44,6 @@ namespace mapping {
         void updateSimpleDistribution();
         void updateSimpleColor();
 
-        void updateNaiveDistribution();
         Mat33 prostuj(Mat33 R);
         std::tuple<Mat33, Eigen::Vector3d> changeOrder(Mat33 Rot, Eigen::Vector3d S);
         Eigen::Vector3d castVector(Mat33 Rot, Eigen::Vector3d S);
@@ -55,9 +54,9 @@ namespace mapping {
 
         void updateNaiveColor();
 
-        void updateBayesDistribution(Point3D point, Mat33 uncertaintyError);
+        void updateBayesDistribution();
 
-        void updateKalmanDistribution(Point3D point, Mat33 uncertaintyError);
+        void updateKalmanDistribution();
 
         void updateColor(RGBA color);
 

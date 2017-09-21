@@ -266,9 +266,9 @@ int img2pcl::depth2cloud() {
             if(tmp>800 && tmp<60000){
                 double depthM = double(tmp)/factor;
                 Mat33 uncError;
-                if (methodType.type != MethodType::TYPE_SIMPLE && methodType.type != MethodType::TYPE_NAIVE) {
-                    computeCov(j,i,depthM,uncError);
-                }
+
+                //computeCov(j,i,depthM,uncError);
+
                 uncertinatyErrors.push_back(uncError);
                 point = xyz0(j,i,depthM);
                 Point3D pointPCL;
@@ -311,11 +311,11 @@ int img2pcl::depth2colorcloud() {
                 const cv::Vec3b& c = bgr.at<cv::Vec3b>(v, u);
                 double depthM = double(tmp)/factor;
                 Mat33 uncError;
-                if (methodType.type != MethodType::TYPE_SIMPLE && methodType.type != MethodType::TYPE_NAIVE) {
-                    computeCov(u,v,depthM,uncError);
-                }
+
+                //computeCov(u,v,depthM,uncError);
+
                 uncertinatyErrors.push_back(uncError);
-                point = Eigen::Translation<double, 3>(depthM * ((u - focalAxis[0]) * 1/focalLength[0]), depthM * ((v - focalAxis[1]) * 1/focalLength[1]), depthM); //xyz0(u,v,depthM);
+                point = xyz0(u,v,depthM);
                 Point3D pointPCL;
                 pointPCL.position.x() = point.x();
                 pointPCL.position.y() = point.y();

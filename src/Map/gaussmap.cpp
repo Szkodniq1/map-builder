@@ -76,12 +76,26 @@ void Gaussmap::insertCloud(mapping::GrabbedImage grab, bool isLast) {
 
 /// save map in file
 void Gaussmap::saveMap(){
-    //    std::cout<<"Map read parameters: "<<map.size()<<", "<<map.bytes()<<std::endl;
-    //    std::ofstream mapfile;
-    //    std::string path = "asd";
-    //    mapfile.open(path.c_str(), std::ios_base::binary);
-    //    map.writeBinary(mapfile);
-    //    mapfile.close();
+    std::string path = currentDateTime();
+    std::ofstream mapfile;
+    mapfile.open(path.c_str(), std::ios_base::binary);
+    map.writeBinary(mapfile);
+    mapfile.close();
+
+    std::cout<<MAP_SIZE<<" "<<res<<" "<<raytraceFactor<<std::endl;
+    tinyxml2::XMLDocument doc;
+    tinyxml2::XMLElement * mapSize = doc.NewElement("MapSize");
+    mapSize->SetText(MAP_SIZE);
+    doc.InsertFirstChild(mapSize);
+    tinyxml2::XMLElement * mapRes = doc.NewElement("MapRes");
+    mapRes->SetText(res);
+    doc.InsertFirstChild(mapRes);
+    tinyxml2::XMLElement * rayFactor = doc.NewElement("RaytraceFactor");
+    rayFactor->SetText(raytraceFactor);
+    doc.InsertFirstChild(rayFactor);
+    std::string xmlPath = path + ".xml";
+    doc.SaveFile(xmlPath.c_str());
+
 }
 
 ///Attach visualizer
@@ -129,23 +143,22 @@ void Gaussmap::updateMap(bool isLast) {
                 indexes[key] = Eigen::Vector3i(xCoor, yCoor, zCoor);
             }
 
-            if (methodType.type == MethodType::TYPE_SIMPLE || methodType.type == MethodType::TYPE_NAIVE) {
-                got = simpleMethodIndexes.find(key);
-                if(got == simpleMethodIndexes.end()) {
-                    simpleMethodIndexes[key] = Eigen::Vector3i(xCoor, yCoor, zCoor);
-                }
+
+            got = simpleMethodIndexes.find(key);
+            if(got == simpleMethodIndexes.end()) {
+                simpleMethodIndexes[key] = Eigen::Vector3i(xCoor, yCoor, zCoor);
             }
+
             raytracePoint(point, xCoor, yCoor, zCoor);
             prevX,prevY,prevZ = -1;
             map(xCoor, yCoor, zCoor).insertPoint(point, uncertinatyErrors[i]);
             i++;
         }
     }
-    if (methodType.type == MethodType::TYPE_SIMPLE || methodType.type == MethodType::TYPE_NAIVE) {
-        for( const auto& n : simpleMethodIndexes ) {
-            Eigen::Vector3i index = n.second;
-            map(index.x(), index.y(), index.z()).updateWithSimpleMethod();
-        }
+
+    for( const auto& n : simpleMethodIndexes ) {
+        Eigen::Vector3i index = n.second;
+        map(index.x(), index.y(), index.z()).updateWithSimpleMethod();
     }
     notify(map, res, indexes, isLast);
 }
@@ -208,6 +221,16 @@ double Gaussmap::backwardZCoordinate(int z) {
     double  a = MAP_SIZE/(zmax-zmin);
     double b = -1 * a*zmin;
     return (z - b) / a;
+}
+
+std::string Gaussmap::currentDateTime() {
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    strftime(buf, sizeof(buf), "%Y-%m-%d-%X", &tstruct);
+
+    return buf;
 }
 
 

@@ -51,36 +51,37 @@ void QGLVisualizer::update(const mapping::PointCloud& newCloud, std::vector<Mat3
 }
 
 void QGLVisualizer::update(Octree<mapping::Voxel>& map, double res, std::unordered_map<std::string, Eigen::Vector3i> indexes , bool isLast) {
-    std::cout<<MAP_SIZE<<" "<<res<<" "<<raytraceFactor<<std::endl;
-    this->map = map;
-    //TODO trzeba t? liste gdzie? czy?ci?, albo co update przepisywa?, ogólnie trzeba si? zastanowi? jak te dane trzyma? w ogóle, bo jedne mog? nadpisa? drugie
-    this->updatedVoxels = indexes;
-    if(isLast) {
-        createMapDisplayList();
-    }
+
+        this->map = map;
+        //TODO trzeba t? liste gdzie? czy?ci?, albo co update przepisywa?, ogólnie trzeba si? zastanowi? jak te dane trzyma? w ogóle, bo jedne mog? nadpisa? drugie
+        this->updatedVoxels = indexes;
+        if(isLast) {
+            createMapDisplayList();
+        }
+
 }
 
 void QGLVisualizer::createMapDisplayList() {
     list = glGenLists(1);
     glNewList(list, GL_COMPILE);
-    for( const auto& n : updatedVoxels ) {
-        Eigen::Vector3i indexes = n.second;
-        Voxel v = map(indexes.x(), indexes.y(), indexes.z());
-        if(v.probability > 0) {
-            drawEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
-        }
-    }
+//    for( const auto& n : updatedVoxels ) {
+//        Eigen::Vector3i indexes = n.second;
+//        Voxel v = map(indexes.x(), indexes.y(), indexes.z());
+//        if(v.probability > 0) {
+//            drawEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
+//        }
+//    }
 
-    /*for(int i = 38 ; i < 108;  i++) { //28 & 108
-        for(int j = 48 ; j < 88;  j++) { //48 & 88
-            for(int k = 40 ; k < 70;  k++) {
+    for(int i = 0 ; i < map.size();  i++) { //28 & 108
+        for(int j = 0 ; j < map.size();  j++) { //48 & 88
+            for(int k = 0 ; k < map.size();  k++) {
                 Voxel v = map(i, j, k);
                 if(v.probability > 0) {
                     drawEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
                 }
             }
         }
-    }*/
+    }
 
     glPointSize(3);
     glBegin(GL_POINTS);
@@ -263,7 +264,6 @@ void QGLVisualizer::keyPressEvent(QKeyEvent *e) {
         map.writeBinary(mapfile);
         mapfile.close();
 
-        std::cout<<MAP_SIZE<<" "<<res<<" "<<raytraceFactor<<std::endl;
         tinyxml2::XMLDocument doc;
         tinyxml2::XMLElement * mapSize = doc.NewElement("MapSize");
         mapSize->SetText(MAP_SIZE);

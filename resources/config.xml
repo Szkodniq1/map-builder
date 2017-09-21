@@ -23,10 +23,17 @@
 <MapRes>0.15</MapRes>
 <RaytraceFactor>50.0</RaytraceFactor>
 
-<!-- 0 - Simple, 1 - Bayes, 2 - Kalman, 3 - Naive -->
-<OccupancyMethod>3</OccupancyMethod>
+<!-- 0 - Simple, 1 - Bayes, 2 - Kalman-->
+<OccupancyMethod>1</OccupancyMethod>
 
 <!-- 0 - Mapping, 1 - Read -->
 <MapMode>0</MapMode>
 
-<ReadMapPath>2017-09-13-20:37:46</ReadMapPath>
+<ReadMapPath>2017-09-21-16:39:07</ReadMapPath>
+
+<SaveMap>0</SaveMap>
+
+<CalculateEvery>100</CalculateEvery>
+
+<CalculateUntil>100</CalculateUntil>
+

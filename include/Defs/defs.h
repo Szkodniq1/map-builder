@@ -97,8 +97,6 @@ enum class MethodType {
     TYPE_BAYES,
     /// For kalman filter implementation
     TYPE_KALMAN,
-    /// For naive kalman method
-    TYPE_NAIVE,
 };
 
 }

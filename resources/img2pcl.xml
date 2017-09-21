@@ -11,8 +11,8 @@
   <Color>1</Color>
   <Association>0</Association>
   <stateFile>livingRoom0.gt.freiburg</stateFile>
-  <fx>480.6</fx>
-  <fy>-480.6</fy>
+  <fx>480.6</fx> <!-- 480.6 -->
+  <fy>-480.6</fy><!-- 480.6 -->
   <cx>319.5</cx>
   <cy>239.5</cy>
 <factor>5000</factor>
