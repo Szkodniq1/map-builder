@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<MapSize>128</MapSize>
-<MapRes>0.15</MapRes>
+<MapSize>512</MapSize>
+<MapRes>0.05</MapRes>
 <RaytraceFactor>50.0</RaytraceFactor>
 
 <!-- 0 - Simple, 1 - Bayes, 2 - Kalman, 3 - NDT-OM-->
-<OccupancyMethod>1</OccupancyMethod>
+<OccupancyMethod>2</OccupancyMethod>
 
 <!-- 0 - Mapping, 1 - Read -->
 <MapMode>0</MapMode>
@@ -17,7 +17,10 @@
 <!-- 0 - Not saving, 1 - Saving -->
 <SaveMap>1</SaveMap>
 
-<CalculateEvery>50</CalculateEvery>
+<CalculateEvery>200</CalculateEvery>
 
-<CalculateUntil>0</CalculateUntil>
+<CalculateUntil>400</CalculateUntil>
 
+<LoadCamera>1</LoadCamera>
+
+<CameraPath>The_Test-2017-09-22-14:52:20</CameraPath>

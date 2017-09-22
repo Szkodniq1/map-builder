@@ -79,18 +79,30 @@ void Voxel::updateWithSimpleMethod() {
         updateSimpleDistribution();
         updateSimpleColor();
     } else if (methodType.type == MethodType::TYPE_BAYES) {
-        updateBayesDistribution();
-        updateNaiveColor();
+        if(points.size() > 25) {
+            updateBayesDistribution();
+            updateNaiveColor();
+        } else {
+            probability = 0;
+        }
         points.clear();
         //uncertaintyErrors.clear();
     } else if (methodType.type == MethodType::TYPE_KALMAN) {
-        updateKalmanDistribution();
-        updateNaiveColor();
+        if(points.size() > 25) {
+            updateKalmanDistribution();
+            updateNaiveColor();
+        } else {
+            probability = 0;
+        }
         points.clear();
         //uncertaintyErrors.clear();
     } else if (methodType.type == MethodType::TYPE_NDTOM) {
-        updateNDTOM();
-        updateNaiveColor();
+        if(points.size() > 25) {
+            updateNDTOM();
+            updateNaiveColor();
+        } else {
+            probability = 0;
+        }
         points.clear();
     }
 }

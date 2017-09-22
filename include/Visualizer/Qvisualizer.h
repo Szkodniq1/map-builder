@@ -154,6 +154,7 @@ private:
 
     /// generate help string
     std::string help() const;
+    void keyPressEvent(QKeyEvent *e);
 
     /// Draw point clouds
     void drawPointCloud(void);
@@ -165,6 +166,10 @@ private:
     void drawMap();
 
     void drawEllipsoid(const Vec3& pos, const Mat33& covariance, RGBA color) const;
+
+    std::string currentDateTime();
+
+    std::vector<std::string> split(const std::string &s, char delim);
 };
 
 #endif // QVISUALIZER_H_INCLUDED

@@ -3,16 +3,16 @@
 <!--../../../../../Dokumenty/testSource/datasets/tripodFreeVel0p35/-->
 <!--../../img/The_Test/-->
 <!--depth_%05d.png-->
-<Path>../../img/The_Test2/</Path>
+<Path>/media/pgomola/DATA/testSource/datasets/tripodSquareRotVel1p0/</Path>
   <DepthSubDir>depth/</DepthSubDir>
   <RGBSubDir>rgb/</RGBSubDir>
-  <DepthForm>%d.png</DepthForm>
-  <RGBForm>%d.png</RGBForm>
+  <DepthForm>depth_%05d.png</DepthForm>
+  <RGBForm>rgb_%05d.png</RGBForm>
   <Color>1</Color>
   <Association>0</Association>
-  <stateFile>traj2.gt.freiburg</stateFile>
+  <stateFile>groundtruth.txt</stateFile>
   <fx>480.6</fx> <!-- 480.6 -->
-  <fy>-480.6</fy><!-- 480.6 -->
+  <fy>-480.6</fy><!-- -480.6 -->
   <cx>319.5</cx>
   <cy>239.5</cy>
 <factor>5000</factor>

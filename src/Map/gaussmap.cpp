@@ -6,6 +6,7 @@ Gaussmap::Ptr gaussMap;
 Gaussmap::Gaussmap(void) : map(MAP_SIZE) {
     xmin = ymin = zmin = -1 * MAP_SIZE * res/2;
     xmax = ymax = zmax = -1* xmin;
+    indexes.clear();
     //preinitVoxels();
 }
 
@@ -30,12 +31,14 @@ Gaussmap::Gaussmap(std::string mapPath) : map(MAP_SIZE)  {
     mapfile.close();
     xmin = ymin = zmin = -1 * MAP_SIZE * res/2;
     xmax = ymax = zmax = -1* xmin;
+    indexes.clear();
 }
 
 Gaussmap::Gaussmap(mapping::PointCloud PC) : map(MAP_SIZE) {
     cloud = PC;
     xmin = ymin = zmin = -1 * MAP_SIZE * res/2;
     xmax = ymax = zmax = -1* xmin;
+    indexes.clear();
     //preinitVoxels();
 }
 
@@ -44,6 +47,7 @@ Gaussmap::Gaussmap(mapping::PointCloud PC, float vxmin, float vxmax, float vymin
     xmin = vxmin; xmax = vxmax;
     ymin = vymin; ymax = vymax;
     zmin = vzmin; zmax = vzmax;
+    indexes.clear();
     //preinitVoxels();
 }
 

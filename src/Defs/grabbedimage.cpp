@@ -19,26 +19,39 @@ PointCloud GrabbedImage::transformedPointCloud() {
     PointCloud newPC;
     Eigen::Transform<double, 3, Eigen::Affine> transform (translation * orientation);
     newPC.reserve(this->pointCloud.size());
-    this->orientation.normalize();
-    Quaternion invOrientation = Quaternion(orientation.w(), -orientation.x(), -orientation.y(), -orientation.z());
 
     int64 e1 = cv::getTickCount();
     for(mapping::Point3D point : this->pointCloud) {
-        Quaternion qPoint = Quaternion(0, point.position.x(), point.position.y(), point.position.z());
-        Quaternion q = orientation * qPoint * invOrientation;
-        Vec3(q.x() + translation.x(), q.y() + translation.y(), q.z() + translation.z());
+        /*Eigen::Matrix4d T;
+        Mat33 R = orientation.normalized().toRotationMatrix();
+        T << R(0,0), R(0,1), R(0,2), translation.x(),
+             R(1,0), R(1,1), R(1,2), translation.y(),
+             R(2,0), R(2,1), R(2,2), translation.z(),
+             0, 0, 0, 1;
+
+        Eigen::Matrix4d Tp;
+        Tp << 1, 0, 0, point.position.x(),
+              0, 1, 0, point.position.y(),
+              0, 0, 1, point.position.z(),
+              0, 0, 0, 1;
+
+        Eigen::Matrix4d wynik = T.inverse() * Tp;
+
+        /*Eigen::Vector3d q = Eigen::Vector3d(point.position.x(), point.position.y(), point.position.z());
+        q = transform.inverse() * q;
+        Vec3(q(0), q(1), q(2));
 
         newPC.push_back(mapping::Point3D(
-                    q.x() + translation.x(),
-                    q.y() + translation.y(),
-                    q.z() + translation.z(),
+                    wynik(0,3),
+                    wynik(1,3),
+                    wynik(2,3),
                     point.color.r,
                     point.color.g,
                     point.color.b,
-                    point.color.a));
+                    point.color.a));*/
 
         /// Performance +/- 0,6s left as it more readable solution
-        /*Eigen::Matrix<double, 3, 1> pt (point.position.x(), point.position.y(), point.position.z());
+        Eigen::Matrix<double, 3, 1> pt (point.position.x(), point.position.y(), point.position.z());
                 newPC.push_back(mapping::Point3D(
                             static_cast<double> (transform (0, 0) * pt.coeffRef (0) + transform (0, 1) * pt.coeffRef (1) + transform (0, 2) * pt.coeffRef (2) + transform (0, 3)),
                             static_cast<double> (transform (1, 0) * pt.coeffRef (0) + transform (1, 1) * pt.coeffRef (1) + transform (1, 2) * pt.coeffRef (2) + transform (1, 3)),
@@ -46,7 +59,7 @@ PointCloud GrabbedImage::transformedPointCloud() {
                             point.color.r,
                             point.color.g,
                             point.color.b,
-                            point.color.a));*/
+                            point.color.a));
 
 
         /// Performance +/- 1,5s

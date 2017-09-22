@@ -8,6 +8,8 @@
 #include <GL/glut.h>
 #include "Map/gaussmap.h"
 #include "main.h"
+#include <QFile>
+#include <QTextStream>
 
 
 using namespace mapping;
@@ -52,27 +54,27 @@ void QGLVisualizer::update(const mapping::PointCloud& newCloud, std::vector<Mat3
 
 void QGLVisualizer::update(Octree<mapping::Voxel>& map, double res, std::unordered_map<std::string, Eigen::Vector3i> indexes , bool isLast) {
 
-        this->map = map;
-        //TODO trzeba t? liste gdzie? czy?ci?, albo co update przepisywa?, ogólnie trzeba si? zastanowi? jak te dane trzyma? w ogóle, bo jedne mog? nadpisa? drugie
-        this->updatedVoxels = indexes;
-        if(isLast) {
-            createMapDisplayList();
-        }
+    this->map = map;
+    //TODO trzeba t? liste gdzie? czy?ci?, albo co update przepisywa?, ogólnie trzeba si? zastanowi? jak te dane trzyma? w ogóle, bo jedne mog? nadpisa? drugie
+    this->updatedVoxels = indexes;
+    if(isLast) {
+        createMapDisplayList();
+    }
 
 }
 
 void QGLVisualizer::createMapDisplayList() {
     list = glGenLists(1);
     glNewList(list, GL_COMPILE);
-//    for( const auto& n : updatedVoxels ) {
-//        Eigen::Vector3i indexes = n.second;
-//        Voxel v = map(indexes.x(), indexes.y(), indexes.z());
-//        if(v.probability > 0) {
-//            drawEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
-//        }
-//    }
+        for( const auto& n : updatedVoxels ) {
+            Eigen::Vector3i indexes = n.second;
+            Voxel v = map(indexes.x(), indexes.y(), indexes.z());
+            if(v.probability > 10) {
+                drawEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
+            }
+        }
 
-    for(int i = 0 ; i < map.size();  i++) { //28 & 108
+    /*for(int i = 0 ; i < map.size();  i++) { //28 & 108
         for(int j = 0 ; j < map.size();  j++) { //48 & 88
             for(int k = 0 ; k < map.size();  k++) {
                 Voxel v = map(i, j, k);
@@ -81,7 +83,7 @@ void QGLVisualizer::createMapDisplayList() {
                 }
             }
         }
-    }
+    }*/
 
     glPointSize(3);
     glBegin(GL_POINTS);
@@ -164,6 +166,31 @@ void QGLVisualizer::init(){
     camera()->setZNearCoefficient(0.00001f);
     camera()->setZClippingCoefficient(100.0);
 
+    tinyxml2::XMLDocument configFile;
+    configFile.LoadFile("../../resources/config.xml");
+
+    int shouldLoadCamera;
+
+    configFile.FirstChildElement("LoadCamera")->QueryIntText(&shouldLoadCamera);
+
+    if(shouldLoadCamera == 1) {
+        std::string path;
+        path = configFile.FirstChildElement( "CameraPath" )->GetText();
+        path += ".xml";
+
+        // Load DOM from file
+        QDomDocument document;
+        QFile f(path.c_str());
+        if (f.open(QIODevice::ReadOnly))
+        {
+            document.setContent(&f);
+            f.close();
+        }
+        // Parse the DOM tree
+        QDomElement main = document.documentElement();
+        camera()->initFromDOMElement(main);
+    }
+
     setBackgroundColor(config.backgroundColor);
 
     glEnable(GL_LINE_SMOOTH);
@@ -221,10 +248,37 @@ void QGLVisualizer::drawEllipsoid(const Vec3& pos, const Mat33& covariance, RGBA
     GLfloat emissiveLight[] = { 0.1f, 0.1f, 0.1f, 1.0f };
     glMaterialfv(GL_FRONT, GL_EMISSION, emissiveLight);
     glColor4ub(color.r,color.g,color.b, color.a);
-    gluSphere( obj, 1,5,5);
+    gluSphere( obj, 1,20,20);
     glPopMatrix();
 
     gluDeleteQuadric(obj);
+}
+
+void QGLVisualizer::keyPressEvent(QKeyEvent *e) {
+    const Qt::KeyboardModifiers modifiers = e->modifiers();
+
+    bool handled = false;
+    if ((e->key() == Qt::Key_Z) && (modifiers == Qt::CTRL)) {
+
+        tinyxml2::XMLDocument img2pcl;
+        img2pcl.LoadFile("../../resources/img2pcl.xml");
+        std::string datasetPath;
+        datasetPath = img2pcl.FirstChildElement( "Path" )->GetText();
+        std::vector<std::string> splitString = split(datasetPath, '/');
+        std::string filename = splitString[splitString.size()-1] + "-" + currentDateTime() + ".xml";
+        QDomDocument document(filename.c_str());
+        document.appendChild( camera()->domElement("Camera", document) );
+        QFile f(filename.c_str());
+        if (f.open(QIODevice::WriteOnly))
+        {
+            QTextStream out(&f);
+            document.save(out, 2);
+        }
+        handled = true;
+    }
+
+    if (!handled)
+        QGLViewer::keyPressEvent(e);
 }
 
 
@@ -246,4 +300,25 @@ std::string QGLVisualizer::help() const{
     text += "See the <b>Mouse</b> tab and the documentation web pages for details.<br><br>";
     text += "Press <b>Escape</b> to exit the viewer.";
     return text;
+}
+
+std::string QGLVisualizer::currentDateTime() {
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    strftime(buf, sizeof(buf), "%Y-%m-%d-%X", &tstruct);
+
+    return buf;
+}
+
+std::vector<std::string> QGLVisualizer::split(const std::string &s, char delim) {
+    std::stringstream ss(s);
+    std::string item;
+    std::vector<std::string> elems;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+        // elems.push_back(std::move(item)); // if C++11 (based on comment from @mchiasson)
+    }
+    return elems;
 }
