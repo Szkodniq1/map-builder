@@ -69,14 +69,14 @@ void QGLVisualizer::createMapDisplayList() {
         for( const auto& n : updatedVoxels ) {
             Eigen::Vector3i indexes = n.second;
             Voxel v = map(indexes.x(), indexes.y(), indexes.z());
-            if(v.probability > 10) {
+            if(v.probability > 5) {
                 drawEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
             }
         }
 
-    /*for(int i = 0 ; i < map.size();  i++) { //28 & 108
-        for(int j = 0 ; j < map.size();  j++) { //48 & 88
-            for(int k = 0 ; k < map.size();  k++) {
+    /*for(int i = 28 ; i < 108;  i++) { //28 & 108
+        for(int j = 48 ; j < 88;  j++) { //48 & 88
+            for(int k = 48 ; k < 88;  k++) {
                 Voxel v = map(i, j, k);
                 if(v.probability > 0) {
                     drawEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
@@ -248,7 +248,7 @@ void QGLVisualizer::drawEllipsoid(const Vec3& pos, const Mat33& covariance, RGBA
     GLfloat emissiveLight[] = { 0.1f, 0.1f, 0.1f, 1.0f };
     glMaterialfv(GL_FRONT, GL_EMISSION, emissiveLight);
     glColor4ub(color.r,color.g,color.b, color.a);
-    gluSphere( obj, 1,20,20);
+    gluSphere( obj, 1,5,5);
     glPopMatrix();
 
     gluDeleteQuadric(obj);

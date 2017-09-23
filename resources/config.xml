@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <MapSize>512</MapSize>
-<MapRes>0.05</MapRes>
+
+<MapRes>0.1</MapRes>
+
 <RaytraceFactor>50.0</RaytraceFactor>
 
 <!-- 0 - Simple, 1 - Bayes, 2 - Kalman, 3 - NDT-OM-->
-<OccupancyMethod>2</OccupancyMethod>
+<OccupancyMethod>1</OccupancyMethod>
 
 <!-- 0 - Mapping, 1 - Read -->
 <MapMode>0</MapMode>
@@ -15,12 +18,23 @@
 <ReadMapPath>2017-09-21-16:39:07</ReadMapPath>
 
 <!-- 0 - Not saving, 1 - Saving -->
-<SaveMap>1</SaveMap>
+<SaveMap>0</SaveMap>
 
-<CalculateEvery>200</CalculateEvery>
+<CalculateEvery>100</CalculateEvery>
 
-<CalculateUntil>400</CalculateUntil>
+<CalculateUntil>100</CalculateUntil>
 
-<LoadCamera>1</LoadCamera>
+<LoadCamera>0</LoadCamera>
 
 <CameraPath>The_Test-2017-09-22-14:52:20</CameraPath>
+
+<!--ICL-NUIM-->
+<TransformCameraScale>-1</TransformCameraScale>
+<TransformCamera>0</TransformCamera>
+
+<!--PP-->
+<!--<TransformCameraScale>1</TransformCameraScale>
+<TransformCamera>1</TransformCamera>-->
+<TransformCameraMatrix a00="0.241761029007299"  a01="-0.156482265388292" a02="0.957635058606503" a03="0.078542236056188"
+                       a10="-0.159587283912986"  a11="-0.979884124280077" a12="-0.119829052391907"  a13="-0.078052590612562"
+                       a20="0.957122512360151"  a21="-0.123856382971628" a22="-0.261870373907737"  a23="-0.061252007077847"/>

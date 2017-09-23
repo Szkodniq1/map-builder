@@ -1,20 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-  <!-- Image Grabber-->
-<!--../../../../../Dokumenty/testSource/datasets/tripodFreeVel0p35/-->
-<!--../../img/The_Test/-->
-<!--depth_%05d.png-->
-<Path>/media/pgomola/DATA/testSource/datasets/tripodSquareRotVel1p0/</Path>
-  <DepthSubDir>depth/</DepthSubDir>
-  <RGBSubDir>rgb/</RGBSubDir>
-  <DepthForm>depth_%05d.png</DepthForm>
-  <RGBForm>rgb_%05d.png</RGBForm>
-  <Color>1</Color>
-  <Association>0</Association>
-  <stateFile>groundtruth.txt</stateFile>
-  <fx>480.6</fx> <!-- 480.6 -->
-  <fy>-480.6</fy><!-- -480.6 -->
-  <cx>319.5</cx>
-  <cy>239.5</cy>
-<factor>5000</factor>
+
+<Color>1</Color>
+<Association>0</Association>
+<DepthSubDir>depth/</DepthSubDir>
+<RGBSubDir>rgb/</RGBSubDir>
 <variance sigmaU="1.1046" sigmaV="0.64160"/>
 <varianceDepth c3="-8.9997e-06" c2="3.069e-003" c1="3.6512e-006" c0="-0.0017512e-3"/>
+
+<!--ICL-NUIM-->
+<Path>../../img/Living_Room_0/</Path>
+<DepthForm>%d.png</DepthForm>
+<RGBForm>%d.png</RGBForm>
+<stateFile>livingRoom0.gt.freiburg</stateFile>
+<fx>481.2</fx>
+<fy>-480.0</fy>
+<cx>319.5</cx>
+<cy>239.5</cy>
+<factor>5000</factor>
+
+<!--PP-->
+<!--<Path>/media/pgomola/DATA/testSource/datasets/tripodSquareRotVel1p0/</Path>
+<DepthForm>depth_%05d.png</DepthForm>
+<RGBForm>rgb_%05d.png</RGBForm>
+<stateFile>groundtruth.txt</stateFile>
+<fx>538.54212</fx>
+<fy>539.06647</fy>
+<cx>312.08948</cx>
+<cy>234.75962</cy>
+<factor>1000</factor>-->
+

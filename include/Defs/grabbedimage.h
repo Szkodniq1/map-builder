@@ -5,6 +5,7 @@
 #include <iostream>
 #include <opencv2/core/core.hpp>
 #include "../../3rdParty/Eigen/Geometry"
+#include "3rdParty/tinyXML/tinyxml2.h"
 
 namespace mapping {
 

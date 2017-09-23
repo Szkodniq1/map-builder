@@ -79,7 +79,7 @@ void Voxel::updateWithSimpleMethod() {
         updateSimpleDistribution();
         updateSimpleColor();
     } else if (methodType.type == MethodType::TYPE_BAYES) {
-        if(points.size() > 25) {
+        if(points.size() > 10) {
             updateBayesDistribution();
             updateNaiveColor();
         } else {
@@ -88,7 +88,7 @@ void Voxel::updateWithSimpleMethod() {
         points.clear();
         //uncertaintyErrors.clear();
     } else if (methodType.type == MethodType::TYPE_KALMAN) {
-        if(points.size() > 25) {
+        if(points.size() > 10) {
             updateKalmanDistribution();
             updateNaiveColor();
         } else {
@@ -97,7 +97,7 @@ void Voxel::updateWithSimpleMethod() {
         points.clear();
         //uncertaintyErrors.clear();
     } else if (methodType.type == MethodType::TYPE_NDTOM) {
-        if(points.size() > 25) {
+        if(points.size() > 10) {
             updateNDTOM();
             updateNaiveColor();
         } else {
@@ -125,6 +125,7 @@ void Voxel::updateSimpleDistribution() {
             }
         }
     }
+    var = 4*var;
 }
 
 void Voxel::updateSimpleColor() {
@@ -302,7 +303,6 @@ void Voxel::updateBayesDistribution() {
         } else {
             updateSimpleDistribution();
         }
-        var = 4*var;
     } else {
         Eigen::Vector3d newMean = Eigen::Vector3d(0, 0, 0);
         for(mapping::Point3D &point : points) {
@@ -407,7 +407,6 @@ void Voxel::updateKalmanDistribution() {
         } else {
             updateSimpleDistribution();
         }
-        var = 4*var;
     } else {
         Eigen::Vector3d newMean = Eigen::Vector3d(0, 0, 0);
         for(mapping::Point3D &point : points) {
@@ -545,7 +544,7 @@ void Voxel::updateNDTOM() {
 
         }
         varSum = newVar;
-        var = varSum / (points.size() - 1);
+        var =4*( varSum / (points.size() - 1));
         sampNumber = points.size();
     } else {
         Eigen::Vector3d newMeanSum = Eigen::Vector3d(0, 0, 0);
@@ -568,7 +567,7 @@ void Voxel::updateNDTOM() {
         varSum= varSum + newVarSum + (sampNumber/(points.size()*(points.size() + sampNumber)))*((points.size()/sampNumber)*meanSum - newMeanSum)*((points.size()/sampNumber)*meanSum - newMeanSum).transpose();
         meanSum += newMeanSum;
         mean = meanSum / (sampNumber + points.size());
-        var = varSum / (sampNumber + points.size() - 1);
+        var = 4*(varSum / (sampNumber + points.size() - 1));
         sampNumber += points.size();
     }
 }
