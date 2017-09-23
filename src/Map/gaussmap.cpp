@@ -32,6 +32,49 @@ Gaussmap::Gaussmap(std::string mapPath) : map(MAP_SIZE)  {
     xmin = ymin = zmin = -1 * MAP_SIZE * res/2;
     xmax = ymax = zmax = -1* xmin;
     indexes.clear();
+    loadIndexes(mapPath);
+}
+
+void Gaussmap::loadIndexes(std::string mapPath) {
+    tinyxml2::XMLDocument doc;
+    std::string xmlPath = mapPath + ".xml";
+    doc.LoadFile(xmlPath.c_str());
+    tinyxml2::XMLElement* parent = doc.FirstChildElement("indexes");
+    tinyxml2::XMLElement *row = parent->FirstChildElement();
+    while (row != NULL) {
+        tinyxml2::XMLElement *col = row->FirstChildElement();
+        Eigen::Vector3i index;
+        while (col != NULL) {
+            std::string sKey;
+            int sVal;
+            char *sTemp1 = (char *)col->Value();
+            if (sTemp1 != NULL) {
+                sKey = static_cast<std::string>(sTemp1);
+            } else {
+                sKey = "";
+            }
+            char *sTemp2 = (char *)col->GetText();
+            if (sTemp2 != NULL) {
+                std::string temp = static_cast<std::string>(sTemp2);
+                sVal = std::stoi(temp);
+            } else {
+                sVal = 0;
+            }
+            if (sKey == "x") {
+                index(0) = sVal;
+            }
+            if (sKey == "y") {
+                index(1) = sVal;
+            }
+            if (sKey == "z") {
+                index(2) = sVal;
+            }
+            col = col->NextSiblingElement();
+        }
+        std::string key = std::to_string(index(0)) + std::to_string(index(1)) + std::to_string(index(2));
+        indexes[key] = index;
+        row = row->NextSiblingElement();
+    }
 }
 
 Gaussmap::Gaussmap(mapping::PointCloud PC) : map(MAP_SIZE) {
@@ -119,6 +162,26 @@ void Gaussmap::saveMap(){
     tinyxml2::XMLElement * untilField = doc.NewElement("CalculateUntil");
     untilField->SetText(until);
     doc.InsertFirstChild(untilField);
+
+    tinyxml2::XMLElement* indexes = doc.NewElement("indexes");
+
+    for( const auto& n : this->indexes ) {
+        Eigen::Vector3i index = n.second;
+        tinyxml2::XMLElement* item = doc.NewElement("item");
+        tinyxml2::XMLElement* x = doc.NewElement("x");
+        tinyxml2::XMLElement* y = doc.NewElement("y");
+        tinyxml2::XMLElement* z = doc.NewElement("z");
+        x->SetText(index.x());
+        y->SetText(index.y());
+        z->SetText(index.z());
+        item->LinkEndChild(x);
+        item->LinkEndChild(y);
+        item->LinkEndChild(z);
+        indexes->LinkEndChild(item);
+    }
+
+    doc.InsertEndChild(indexes);
+
     std::string xmlPath = path + ".xml";
     doc.SaveFile(xmlPath.c_str());
 }
@@ -259,14 +322,14 @@ std::string Gaussmap::currentDateTime() {
 }
 
 std::vector<std::string> Gaussmap::split(const std::string &s, char delim) {
-  std::stringstream ss(s);
-  std::string item;
-  std::vector<std::string> elems;
-  while (std::getline(ss, item, delim)) {
-    elems.push_back(item);
-    // elems.push_back(std::move(item)); // if C++11 (based on comment from @mchiasson)
-  }
-  return elems;
+    std::stringstream ss(s);
+    std::string item;
+    std::vector<std::string> elems;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+        // elems.push_back(std::move(item)); // if C++11 (based on comment from @mchiasson)
+    }
+    return elems;
 }
 
 

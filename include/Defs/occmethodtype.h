@@ -11,6 +11,7 @@ private:
     std::string configPath = "../../resources/config.xml";
 public:
     MethodType type;
+    int pointTreshold;
 
     OccMethodType();
 

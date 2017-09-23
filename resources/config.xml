@@ -10,12 +10,12 @@
 <OccupancyMethod>1</OccupancyMethod>
 
 <!-- 0 - Mapping, 1 - Read -->
-<MapMode>0</MapMode>
+<MapMode>1</MapMode>
 
 <!-- 0 - Octo, 1 - Gauss -->
 <MapType>1</MapType>
 
-<ReadMapPath>2017-09-21-16:39:07</ReadMapPath>
+<ReadMapPath>2017-09-23-17:11:38</ReadMapPath>
 
 <!-- 0 - Not saving, 1 - Saving -->
 <SaveMap>0</SaveMap>
@@ -38,3 +38,7 @@
 <TransformCameraMatrix a00="0.241761029007299"  a01="-0.156482265388292" a02="0.957635058606503" a03="0.078542236056188"
                        a10="-0.159587283912986"  a11="-0.979884124280077" a12="-0.119829052391907"  a13="-0.078052590612562"
                        a20="0.957122512360151"  a21="-0.123856382971628" a22="-0.261870373907737"  a23="-0.061252007077847"/>
+
+<ProbabilityTreshold>5</ProbabilityTreshold>
+
+<PointsTreshold>5</PointsTreshold>

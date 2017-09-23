@@ -64,12 +64,16 @@ void QGLVisualizer::update(Octree<mapping::Voxel>& map, double res, std::unorder
 }
 
 void QGLVisualizer::createMapDisplayList() {
+    int probabilityTreshold;
+    tinyxml2::XMLDocument xmlDoc;
+    xmlDoc.LoadFile("../../resources/config.xml");
+    xmlDoc.FirstChildElement("ProbabilityTreshold")->QueryIntText(&probabilityTreshold);
     list = glGenLists(1);
     glNewList(list, GL_COMPILE);
         for( const auto& n : updatedVoxels ) {
             Eigen::Vector3i indexes = n.second;
             Voxel v = map(indexes.x(), indexes.y(), indexes.z());
-            if(v.probability > 5) {
+            if(v.probability > probabilityTreshold) {
                 drawEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
             }
         }

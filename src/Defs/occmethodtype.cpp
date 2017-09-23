@@ -11,6 +11,7 @@ void OccMethodType::initMethodType() {
     int typeNum;
     if(Result == tinyxml2::XML_SUCCESS) {
         xmlDoc.FirstChildElement("OccupancyMethod")->QueryIntText(&typeNum);
+        xmlDoc.FirstChildElement("PointsTreshold")->QueryIntText(&pointTreshold);
         this->assignType(typeNum);
     } else {
         std::cout << "Loading configuration file failed!\n" << std::endl << configPath;
