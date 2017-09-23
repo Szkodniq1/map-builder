@@ -83,7 +83,7 @@ void Voxel::updateWithSimpleMethod() {
             updateBayesDistribution();
             updateNaiveColor();
         } else {
-            probability = 0;
+            probability -= points.size();
         }
         points.clear();
         //uncertaintyErrors.clear();
@@ -92,7 +92,7 @@ void Voxel::updateWithSimpleMethod() {
             updateKalmanDistribution();
             updateNaiveColor();
         } else {
-            probability = 0;
+            probability -= points.size();
         }
         points.clear();
         //uncertaintyErrors.clear();
@@ -101,7 +101,7 @@ void Voxel::updateWithSimpleMethod() {
             updateNDTOM();
             updateNaiveColor();
         } else {
-            probability = 0;
+            probability -= points.size();
         }
         points.clear();
     }

@@ -2,27 +2,27 @@
 
 <MapSize>512</MapSize>
 
-<MapRes>0.1</MapRes>
+<MapRes>0.05</MapRes>
 
 <RaytraceFactor>50.0</RaytraceFactor>
 
 <!-- 0 - Simple, 1 - Bayes, 2 - Kalman, 3 - NDT-OM-->
-<OccupancyMethod>1</OccupancyMethod>
+<OccupancyMethod>3</OccupancyMethod>
 
 <!-- 0 - Mapping, 1 - Read -->
-<MapMode>1</MapMode>
+<MapMode>0</MapMode>
 
 <!-- 0 - Octo, 1 - Gauss -->
 <MapType>1</MapType>
 
-<ReadMapPath>2017-09-23-17:11:38</ReadMapPath>
+<ReadMapPath>2017-09-23-18:24:33</ReadMapPath>
 
 <!-- 0 - Not saving, 1 - Saving -->
-<SaveMap>0</SaveMap>
+<SaveMap>1</SaveMap>
 
-<CalculateEvery>100</CalculateEvery>
+<CalculateEvery>10</CalculateEvery>
 
-<CalculateUntil>100</CalculateUntil>
+<CalculateUntil>1500</CalculateUntil>
 
 <LoadCamera>0</LoadCamera>
 
@@ -39,6 +39,6 @@
                        a10="-0.159587283912986"  a11="-0.979884124280077" a12="-0.119829052391907"  a13="-0.078052590612562"
                        a20="0.957122512360151"  a21="-0.123856382971628" a22="-0.261870373907737"  a23="-0.061252007077847"/>
 
-<ProbabilityTreshold>5</ProbabilityTreshold>
+<ProbabilityTreshold>0</ProbabilityTreshold>
 
-<PointsTreshold>5</PointsTreshold>
+<PointsTreshold>0</PointsTreshold>
