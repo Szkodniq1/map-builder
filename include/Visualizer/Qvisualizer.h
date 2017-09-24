@@ -129,6 +129,8 @@ public:
 
     void update(Octree<mapping::Voxel>& map, double res, std::unordered_map<std::string, Eigen::Vector3i> indexes, bool isLast);
 
+    void update(mapping::Quaternion orientation, mapping::Vec3 translation);
+
 private:
     double ellipsoidScale = 1.0;
     Config config;

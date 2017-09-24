@@ -63,6 +63,11 @@ void QGLVisualizer::update(Octree<mapping::Voxel>& map, double res, std::unorder
 
 }
 
+void QGLVisualizer::update(mapping::Quaternion orientation, mapping::Vec3 translation) {
+    camera()->setOrientation(qglviewer::Quaternion(orientation.x(), orientation.y(), orientation.z(), orientation.w()));
+    camera()->setPosition(qglviewer::Vec(translation.x(), translation.y(), translation.z()));
+}
+
 void QGLVisualizer::createMapDisplayList() {
     int probabilityTreshold;
     tinyxml2::XMLDocument xmlDoc;
@@ -144,7 +149,7 @@ void QGLVisualizer::init(){
     glEnable(GL_LIGHT0);
 
     // Create light components
-    GLfloat ambientLight[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat ambientLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
     GLfloat diffuseLight[] = { 0.8f, 0.8f, 0.8, 1.0f };
     GLfloat specularLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
     GLfloat emissiveLight[] = { 0.5f, 0.5f, 0.5f, 1.0f };
@@ -153,9 +158,9 @@ void QGLVisualizer::init(){
     // Assign created components to GL_LIGHT0
     glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
-    glLightfv(GL_LIGHT0, GL_EMISSION, emissiveLight);
-    glLightfv(GL_LIGHT0, GL_POSITION, position);
+    //glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
+    //glLightfv(GL_LIGHT0, GL_EMISSION, emissiveLight);
+    //glLightfv(GL_LIGHT0, GL_POSITION, position);
 
     glShadeModel(GL_SMOOTH);
 
@@ -246,13 +251,13 @@ void QGLVisualizer::drawEllipsoid(const Vec3& pos, const Mat33& covariance, RGBA
     glPushMatrix();
     glMultMatrixf( mat );
 
-    glScalef(sqrt(es.eigenvalues()(0))*this->ellipsoidScale,sqrt(es.eigenvalues()(1))*this->ellipsoidScale,sqrt(es.eigenvalues()(2))*this->ellipsoidScale);
+    glScalef(sqrt(es.eigenvalues()(0)),sqrt(es.eigenvalues()(1)),sqrt(es.eigenvalues()(2)));
     float reflectColor[] = { 0.8f, 0.8f, 0.8f, 1.0f };
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, reflectColor);
+    //glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, reflectColor);
     GLfloat emissiveLight[] = { 0.1f, 0.1f, 0.1f, 1.0f };
-    glMaterialfv(GL_FRONT, GL_EMISSION, emissiveLight);
+    //glMaterialfv(GL_FRONT, GL_EMISSION, emissiveLight);
     glColor4ub(color.r,color.g,color.b, color.a);
-    gluSphere( obj, 1,5,5);
+    gluSphere( obj, 1,15,15);
     glPopMatrix();
 
     gluDeleteQuadric(obj);

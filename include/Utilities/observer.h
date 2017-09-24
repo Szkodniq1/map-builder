@@ -15,6 +15,7 @@ class Observer
 public:
     virtual void update(const mapping::PointCloud& newCloud,std::vector<mapping::Mat33> uncertinatyErrors, bool isLast) = 0;
     virtual void update(Octree<mapping::Voxel>& map, double res, std::unordered_map<std::string, Eigen::Vector3i> indexes , bool isLast) = 0;
+    virtual void update(mapping::Quaternion orientation, mapping::Vec3 translation) = 0;
 };
 
 class Subject
@@ -26,6 +27,7 @@ public:
     void detach(Observer *observer);
     void notify(const mapping::PointCloud& newCloud,std::vector<mapping::Mat33> uncertinatyErrors, bool isLast);
     void notify(Octree<mapping::Voxel>& map, double res, std::unordered_map<std::string, Eigen::Vector3i> indexes , bool isLast);
+    void notify(mapping::Quaternion orientation, mapping::Vec3 translation);
 };
 
 #endif // OBSERVER_H_

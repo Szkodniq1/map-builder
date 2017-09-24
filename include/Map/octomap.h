@@ -57,7 +57,6 @@ public:
     std::string currentDateTime();
 
 private:
-    const double MAP_RES = 0.2;
     octomap::Pointcloud octoCloud;
     octomap::OcTree map;
 };

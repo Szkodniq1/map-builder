@@ -29,3 +29,12 @@ void Subject::notify(Octree<mapping::Voxel>& map, double res, std::unordered_map
         }
     }
 }
+
+void Subject::notify(mapping::Quaternion orientation, mapping::Vec3 translation){
+    for(vector<Observer*>::const_iterator iter = list.begin(); iter != list.end(); ++iter)
+    {
+        if(*iter != 0) {
+           (*iter)->update(orientation, translation);
+        }
+    }
+}

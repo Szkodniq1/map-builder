@@ -9,11 +9,11 @@
 /// A single instance of Octomap
 OctoMap::Ptr octoMap;
 
-OctoMap::OctoMap(void) : map(this->MAP_RES) {
+OctoMap::OctoMap(void) : map(res) {
 
 }
 
-OctoMap::OctoMap(mapping::PointCloud PC) : map(this->MAP_RES) {
+OctoMap::OctoMap(mapping::PointCloud PC) : map(res) {
 
 }
 

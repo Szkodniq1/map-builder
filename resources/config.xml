@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<MapSize>512</MapSize>
+<MapSize>2048</MapSize>
 
 <MapRes>0.05</MapRes>
 
@@ -15,30 +15,41 @@
 <!-- 0 - Octo, 1 - Gauss -->
 <MapType>1</MapType>
 
-<ReadMapPath>2017-09-23-18:24:33</ReadMapPath>
+<ReadMapPath>/media/pgomola/DATA/MAPY/Living_Room_0/Simple/2/map</ReadMapPath>
 
 <!-- 0 - Not saving, 1 - Saving -->
 <SaveMap>1</SaveMap>
 
-<CalculateEvery>10</CalculateEvery>
+<CalculateEvery>400</CalculateEvery>
 
-<CalculateUntil>1500</CalculateUntil>
+<CalculateUntil>0</CalculateUntil>
 
-<LoadCamera>0</LoadCamera>
+<LoadCamera>1</LoadCamera>
 
-<CameraPath>The_Test-2017-09-22-14:52:20</CameraPath>
+<CameraPath>tripodSquareRotVel0p35-2017-09-23-22:31:32</CameraPath>
 
 <!--ICL-NUIM-->
-<TransformCameraScale>-1</TransformCameraScale>
-<TransformCamera>0</TransformCamera>
+<!--<TransformCameraScale>-1</TransformCameraScale>
+<TransformCamera>0</TransformCamera>-->
 
 <!--PP-->
-<!--<TransformCameraScale>1</TransformCameraScale>
-<TransformCamera>1</TransformCamera>-->
-<TransformCameraMatrix a00="0.241761029007299"  a01="-0.156482265388292" a02="0.957635058606503" a03="0.078542236056188"
-                       a10="-0.159587283912986"  a11="-0.979884124280077" a12="-0.119829052391907"  a13="-0.078052590612562"
-                       a20="0.957122512360151"  a21="-0.123856382971628" a22="-0.261870373907737"  a23="-0.061252007077847"/>
+<TransformCameraScale>1</TransformCameraScale>
+<TransformCamera>1</TransformCamera>
+<TransformCameraMatrix>
+    <a00>0.241761029007299</a00>
+    <a01>-0.156482265388292</a01>
+    <a02>0.957635058606503</a02>
+    <a03>0.078542236056188</a03>
+    <a10>-0.159587283912986</a10>
+    <a11>-0.979884124280077</a11>
+    <a12>-0.119829052391907</a12>
+    <a13>-0.078052590612562</a13>
+    <a20>0.957122512360151</a20>
+    <a21>-0.123856382971628</a21>
+    <a22>-0.261870373907737</a22>
+    <a23>-0.061252007077847</a23>
+</TransformCameraMatrix>
 
-<ProbabilityTreshold>0</ProbabilityTreshold>
+<ProbabilityTreshold>10</ProbabilityTreshold>
 
-<PointsTreshold>0</PointsTreshold>
+<PointsTreshold>10</PointsTreshold>

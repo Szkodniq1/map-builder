@@ -6,7 +6,7 @@
 
 #ifndef _MAP_H_
 #define _MAP_H_
-
+#include "main.h"
 #include "../Defs/defs.h"
 #include "grabbedimage.h"
 #include "octomap/Pointcloud.h"

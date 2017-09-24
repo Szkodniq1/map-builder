@@ -112,6 +112,7 @@ void Gaussmap::preinitVoxels() {
 void Gaussmap::insertCloud(mapping::GrabbedImage grab, bool isLast) {
     cloud = grab.transformedPointCloud();
     cameraPos = grab.cameraPos;
+    //notify(grab.orientation, grab.translation);
     uncertinatyErrors = grab.uncertinatyErrors;
     int64 e1 = cv::getTickCount();
     updateMap(isLast);
@@ -217,10 +218,11 @@ void Gaussmap::updateMap(bool isLast) {
     int i = 0;
     simpleMethodIndexes.clear();
     for(mapping::Point3D &point : cloud) {
+        //std::cout<<"Point size "<<point.position.x()<<" "<<point.position.y()<<" "<<point.position.z()<<std::endl;
         xCoor = xCoordinate(point.position.x());
         yCoor = yCoordinate(point.position.y());
         zCoor = zCoordinate(point.position.z());
-
+        //std::cout<<"Point size "<<xCoor<<yCoor<<zCoor<<std::endl;
         if(xCoor >= map.size() || yCoor >=map.size() || zCoor>= map.size()) {
             std::cout<<"Point out of bounds"<<std::endl;
         } else {
@@ -230,7 +232,6 @@ void Gaussmap::updateMap(bool isLast) {
             if(got == indexes.end()) {
                 indexes[key] = Eigen::Vector3i(xCoor, yCoor, zCoor);
             }
-
 
             got = simpleMethodIndexes.find(key);
             if(got == simpleMethodIndexes.end()) {
@@ -243,6 +244,7 @@ void Gaussmap::updateMap(bool isLast) {
             i++;
         }
     }
+
 
     for( const auto& n : simpleMethodIndexes ) {
         Eigen::Vector3i index = n.second;
