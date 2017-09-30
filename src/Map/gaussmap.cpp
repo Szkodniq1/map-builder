@@ -116,10 +116,25 @@ void Gaussmap::insertCloud(mapping::GrabbedImage grab, bool isLast) {
     uncertinatyErrors = grab.uncertinatyErrors;
     int64 e1 = cv::getTickCount();
     updateMap(isLast);
+    //notify(cloud,grab.uncertinatyErrors, false);
+    notify(map, res, indexes, isLast);
     int64 e2 = cv::getTickCount();
     double time = ((e2 - e1)/ cv::getTickFrequency());
     std::cout<<"Gaussmap insert time and update: "<<time<<std::endl;
-    //notify(grab.transformedPointCloud(),grab.uncertinatyErrors, isLast);
+    sceneCounter ++;
+    timeSum += time;
+    times.push_back(time);
+    if(isLast) {
+        double mean = (timeSum/sceneCounter);
+        double variance = 0;
+        std::cout<<"Average update time :"<<mean<<std::endl;
+        for(auto const& value: times) {
+            variance += pow(value - mean,2.0);
+            variance = variance / sceneCounter;
+        }
+        std::cout<<"Variance update time :"<<variance<<std::endl;
+    }
+
 }
 
 /// save map in file
@@ -218,11 +233,9 @@ void Gaussmap::updateMap(bool isLast) {
     int i = 0;
     simpleMethodIndexes.clear();
     for(mapping::Point3D &point : cloud) {
-        //std::cout<<"Point size "<<point.position.x()<<" "<<point.position.y()<<" "<<point.position.z()<<std::endl;
         xCoor = xCoordinate(point.position.x());
         yCoor = yCoordinate(point.position.y());
         zCoor = zCoordinate(point.position.z());
-        //std::cout<<"Point size "<<xCoor<<yCoor<<zCoor<<std::endl;
         if(xCoor >= map.size() || yCoor >=map.size() || zCoor>= map.size()) {
             std::cout<<"Point out of bounds"<<std::endl;
         } else {
@@ -248,9 +261,11 @@ void Gaussmap::updateMap(bool isLast) {
 
     for( const auto& n : simpleMethodIndexes ) {
         Eigen::Vector3i index = n.second;
+        int x = index.x();
+        int y = index.y();
+        int z = index.z();
         map(index.x(), index.y(), index.z()).updateWithSimpleMethod();
     }
-    notify(map, res, indexes, isLast);
 }
 
 void Gaussmap::raytracePoint(mapping::Point3D point, int x, int y, int z) {
@@ -329,7 +344,6 @@ std::vector<std::string> Gaussmap::split(const std::string &s, char delim) {
     std::vector<std::string> elems;
     while (std::getline(ss, item, delim)) {
         elems.push_back(item);
-        // elems.push_back(std::move(item)); // if C++11 (based on comment from @mchiasson)
     }
     return elems;
 }

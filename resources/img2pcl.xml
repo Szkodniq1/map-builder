@@ -8,7 +8,7 @@
 <varianceDepth c3="-8.9997e-06" c2="3.069e-003" c1="3.6512e-006" c0="-0.0017512e-3"/>
 
 <!--ICL-NUIM-->
-<!--<Path>../../img/Living_Room_0/</Path>
+<Path>../../img/Living_Room_0/</Path>
 <DepthForm>%d.png</DepthForm>
 <RGBForm>%d.png</RGBForm>
 <stateFile>livingRoom0.gt.freiburg</stateFile>
@@ -16,10 +16,10 @@
 <fy>-480.0</fy>
 <cx>319.5</cx>
 <cy>239.5</cy>
-<factor>5000</factor>-->
+<factor>5000</factor>
 
 <!--PP-->
-<Path>../../img/tripodSquareRotVel0p35/</Path>
+<!--<Path>../../img/tripodSquareRotVel0p35/</Path>
 <DepthForm>depth_%05d.png</DepthForm>
 <RGBForm>rgb_%05d.png</RGBForm>
 <stateFile>groundtruth.txt</stateFile>
@@ -27,5 +27,5 @@
 <fy>539.06647</fy>
 <cx>312.08948</cx>
 <cy>234.75962</cy>
-<factor>1000</factor>
+<factor>1000</factor>-->
 

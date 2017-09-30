@@ -145,33 +145,12 @@ void Voxel::updateSimpleColor() {
 }
 
 Mat33 Voxel::prostuj(Mat33 R) {
-    Eigen::Vector3d tmp = R.col(2).cross(R.col(0));
-    double n = tmp.cross(R.col(1)).norm();
-    double d = tmp.dot(R.col(1));
-    double a = std::atan2(n, d) * 180/M_PI;
-    double absNorm = std::abs(a);
-
-    if(absNorm > 90) {
-        R.col(1) = -R.col(1);
-    }
-
-    if (R(0,0) < 0 && R(1,1) < 0 && R(2,2) < 0)
+    if(R(2,2) < 0)
         R = -R;
-
-    if (R(0,0) < 0 && R(1,1) < 0) {
+    if(R(0,0) < 0)
         R.col(0) = -R.col(0);
+    if(R.determinant() < 0)
         R.col(1) = -R.col(1);
-    }
-
-    if (R(0,0) < 0 && R(2,2) < 0) {
-        R.col(0) = -R.col(0);
-        R.col(2) = -R.col(2);
-    }
-
-    if (R(2,2) < 0 && R(1,1) < 0) {
-        R.col(1) = -R.col(1);
-        R.col(2) = -R.col(2);
-    }
 
     return R;
 }
@@ -260,8 +239,8 @@ Eigen::Vector3d Voxel::logmap(const Mat33& R) {
 Mat33 Voxel::skewSymetric(const Vec3& omega) {
     Mat33 R;
     R<< 0, -omega.z(), omega.y(),
-            omega.z(), 0, -omega.x(),
-            -omega.y(), omega.x(), 0;
+        omega.z(), 0, -omega.x(),
+        -omega.y(), omega.x(), 0;
     return R;
 }
 
@@ -334,23 +313,15 @@ void Voxel::updateBayesDistribution() {
         Eigen::Vector3d S = svdVar.singularValues();
         Eigen::Vector3d Sn = svdNewVar.singularValues();
 
-        U = prostuj(U);
-        Un = prostuj(Un);
         Mat33 U0 = U.inverse()*U;
         Mat33 Un0 = U.inverse()*Un;
-        Un0 = prostuj(Un0);
 
         Eigen::Vector3d u = logmap(U0);
-        if(u(2)<0)
-            u = u - u/(u.norm()*2*M_PI);
         Eigen::VectorXd x0(9);
         x0 << mean(0), mean(1), mean(2), S(0), S(1), S(2), u(0), u(1), u(2);
 
         Eigen::Vector3d un = logmap(Un0);
-        if(un(2)<0)
-            un = un - un/(un.norm()*2*M_PI);
         Eigen::VectorXd x0n(9);
-        x0n << newMean,Sn, un;
         x0n << newMean(0), newMean(1), newMean(2), Sn(0), Sn(1), Sn(2), un(0), un(1), un(2);
 
         Eigen::VectorXd xxx(9);
@@ -437,23 +408,15 @@ void Voxel::updateKalmanDistribution() {
         Eigen::Vector3d S = svdVar.singularValues();
         Eigen::Vector3d Sn = svdNewVar.singularValues();
 
-        U = prostuj(U);
-        Un = prostuj(Un);
         Mat33 U0 = U.inverse()*U;
         Mat33 Un0 = U.inverse()*Un;
-        Un0 = prostuj(Un0);
 
         Eigen::Vector3d u = logmap(U0);
-        if(u(2)<0)
-            u = u - u/(u.norm()*2*M_PI);
         Eigen::VectorXd x0(9);
         x0 << mean(0), mean(1), mean(2), S(0), S(1), S(2), u(0), u(1), u(2);
 
         Eigen::Vector3d un = logmap(Un0);
-        if(un(2)<0)
-            un = un - un/(un.norm()*2*M_PI);
         Eigen::VectorXd x0n(9);
-        x0n << newMean,Sn, un;
         x0n << newMean(0), newMean(1), newMean(2), Sn(0), Sn(1), Sn(2), un(0), un(1), un(2);
 
         Eigen::VectorXd xxx(9);
@@ -504,7 +467,7 @@ void Voxel::updateKalmanDistribution() {
                 P_values[9*i+j] = P_pre(i,j);
             }
         }
-        xp = postX;
+        xp = xxx;
 
         sampNumber += points.size();
 
@@ -564,7 +527,7 @@ void Voxel::updateNDTOM() {
             }
         }
 
-        varSum= varSum + newVarSum + (sampNumber/(points.size()*(points.size() + sampNumber)))*((points.size()/sampNumber)*meanSum - newMeanSum)*((points.size()/sampNumber)*meanSum - newMeanSum).transpose();
+        varSum = varSum + newVarSum + (sampNumber/(points.size()*(points.size() + sampNumber)))*((points.size()/sampNumber)*meanSum - newMeanSum)*((points.size()/sampNumber)*meanSum - newMeanSum).transpose();
         meanSum += newMeanSum;
         mean = meanSum / (sampNumber + points.size());
         var = 4*(varSum / (sampNumber + points.size() - 1));

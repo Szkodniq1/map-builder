@@ -34,6 +34,9 @@ private:
     double zmin, zmax;
 
     int prevX,prevY,prevZ = -1;
+    double timeSum = 0.0;
+    double sceneCounter = 0;
+    std::vector<double> times;
 
     void preinitVoxels();
     void raytracePoint(mapping::Point3D point, int x, int y, int z);

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<MapSize>2048</MapSize>
+<MapSize>512</MapSize>
 
-<MapRes>0.05</MapRes>
+<MapRes>0.1</MapRes>
 
 <RaytraceFactor>50.0</RaytraceFactor>
 
 <!-- 0 - Simple, 1 - Bayes, 2 - Kalman, 3 - NDT-OM-->
-<OccupancyMethod>3</OccupancyMethod>
+<OccupancyMethod>1</OccupancyMethod>
 
 <!-- 0 - Mapping, 1 - Read -->
 <MapMode>0</MapMode>
@@ -15,26 +15,30 @@
 <!-- 0 - Octo, 1 - Gauss -->
 <MapType>1</MapType>
 
-<ReadMapPath>/media/pgomola/DATA/MAPY/Living_Room_0/Simple/2/map</ReadMapPath>
+<ReadMapPath>/media/pgomola/DATA/MAPY/tripodSquareRotVel0p35/Bayes/co10/2017-09-27-01:21:29</ReadMapPath>
+
+<!--<ReadMapPath>2017-09-26-23:41:35</ReadMapPath>-->
 
 <!-- 0 - Not saving, 1 - Saving -->
-<SaveMap>1</SaveMap>
+<SaveMap>0</SaveMap>
 
-<CalculateEvery>400</CalculateEvery>
+<CalculateEvery>10</CalculateEvery>
 
-<CalculateUntil>0</CalculateUntil>
+<CalculateUntil>100</CalculateUntil>
 
-<LoadCamera>1</LoadCamera>
+<LoadCamera>0</LoadCamera>
 
-<CameraPath>tripodSquareRotVel0p35-2017-09-23-22:31:32</CameraPath>
+<CameraPath>/media/pgomola/DATA/MAPY/tripodSquareRotVel0p35/Living_Room_0-2017-09-24-19:24:20</CameraPath>
+
+<!--<CameraPath>Living_Room_0-2017-09-24-18:23:26</CameraPath>-->
 
 <!--ICL-NUIM-->
-<!--<TransformCameraScale>-1</TransformCameraScale>
-<TransformCamera>0</TransformCamera>-->
+<TransformCameraScale>-1</TransformCameraScale>
+<TransformCamera>0</TransformCamera>
 
 <!--PP-->
-<TransformCameraScale>1</TransformCameraScale>
-<TransformCamera>1</TransformCamera>
+<!--<TransformCameraScale>1</TransformCameraScale>
+<TransformCamera>1</TransformCamera>-->
 <TransformCameraMatrix>
     <a00>0.241761029007299</a00>
     <a01>-0.156482265388292</a01>
