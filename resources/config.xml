@@ -10,7 +10,7 @@
 <OccupancyMethod>1</OccupancyMethod>
 
 <!-- 0 - Mapping, 1 - Read -->
-<MapMode>0</MapMode>
+<MapMode>1</MapMode>
 
 <!-- 0 - Octo, 1 - Gauss -->
 <MapType>1</MapType>
@@ -26,9 +26,17 @@
 
 <CalculateUntil>100</CalculateUntil>
 
-<LoadCamera>0</LoadCamera>
+<LoadCamera>1</LoadCamera>
 
-<CameraPath>/media/pgomola/DATA/MAPY/tripodSquareRotVel0p35/Living_Room_0-2017-09-24-19:24:20</CameraPath>
+<CameraPath>/media/pgomola/DATA/MAPY/tripodSquareRotVel0p35/Living_Room_0-2017-09-24-19:16:43</CameraPath>
+
+<Animate>1</Animate>
+
+<CameraAnimPath1>/media/pgomola/DATA/MAPY/tripodSquareRotVel0p35/circle/Living_Room_0-2017-09-24-19:16:43</CameraAnimPath1>
+<CameraAnimPath2>/media/pgomola/DATA/MAPY/tripodSquareRotVel0p35/circle/Living_Room_0-2017-10-08-11:50:45</CameraAnimPath2>
+<CameraAnimPath3>/media/pgomola/DATA/MAPY/tripodSquareRotVel0p35/circle/Living_Room_0-2017-10-08-11:52:32</CameraAnimPath3>
+
+<AnimationYOffset>-80</AnimationYOffset>
 
 <!--<CameraPath>Living_Room_0-2017-09-24-18:23:26</CameraPath>-->
 
@@ -54,6 +62,6 @@
     <a23>-0.061252007077847</a23>
 </TransformCameraMatrix>
 
-<ProbabilityTreshold>10</ProbabilityTreshold>
+<ProbabilityTreshold>70</ProbabilityTreshold>
 
 <PointsTreshold>10</PointsTreshold>

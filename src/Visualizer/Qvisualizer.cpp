@@ -75,13 +75,13 @@ void QGLVisualizer::createMapDisplayList() {
     xmlDoc.FirstChildElement("ProbabilityTreshold")->QueryIntText(&probabilityTreshold);
     list = glGenLists(1);
     glNewList(list, GL_COMPILE);
-        for( const auto& n : updatedVoxels ) {
-            Eigen::Vector3i indexes = n.second;
-            Voxel v = map(indexes.x(), indexes.y(), indexes.z());
-            if(v.probability > probabilityTreshold) {
-                drawEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
-            }
+    for( const auto& n : updatedVoxels ) {
+        Eigen::Vector3i indexes = n.second;
+        Voxel v = map(indexes.x(), indexes.y(), indexes.z());
+        if(v.probability > probabilityTreshold) {
+            drawEllipsoid(Vec3(v.mean.x(), v.mean.y(), v.mean.z()), v.var, v.color);
         }
+    }
 
     /*for(int i = 28 ; i < 108;  i++) { //28 & 108
         for(int j = 48 ; j < 88;  j++) { //48 & 88
@@ -140,8 +140,35 @@ void QGLVisualizer::draw(){
 
 /// draw objects
 void QGLVisualizer::animate(){
+    if(shouldAnimate == 1) {
+        camera()->setPosition(qglviewer::Vec(animationCenter.x() + animationRay*cos((angle * M_PI)/180.0), animationCenter.y(), animationCenter.z() + animationRay*sin((angle * M_PI)/180.0)));
+        camera()->lookAt(qglviewer::Vec(animationCenter.x(), animationCenter.y()+(double)animationYOffset, animationCenter.z()));
+        angle += 0.5;
+        if(angle >= 360.0) {
+            angle -= 360.0;
+        }
+    }
 }
 
+
+class dPoint{
+public:
+    double x;
+    double y;
+
+    dPoint();
+};
+
+dPoint::dPoint(){
+    x = y = 0;
+}
+
+dPoint CircleCenter(double x1,double y1,double x2,double y2,double x3,double y3){
+    dPoint dp;
+    dp.x = 0.5 * ((x2 * x2 * y3 + y2 * y2 * y3 - x1 * x1 * y3 + x1 * x1 * y2 - y1 * y1 * y3 + y1 * y1 * y2 + y1 * x3 * x3 + y1 * y3 * y3 - y1 * x2 * x2 - y1 * y2 * y2 - y2 * x3 * x3 - y2 * y3 * y3) / (y1 * x3 - y1 * x2 - y2 * x3 - y3 * x1 + y3 * x2 + y2 * x1));
+    dp.y = 0.5 * ((-x1 * x3 * x3 - x1 * y3 * y3 + x1 * x2 * x2 + x1 * y2 * y2 + x2 * x3 * x3 + x2 * y3 * y3 - x2 * x2 * x3 - y2 * y2 * x3 + x1 * x1 * x3 - x1 * x1 * x2 + y1 * y1 * x3 - y1 * y1 * x2) / (y1 * x3 - y1 * x2 - y2 * x3 - y3 * x1 + y3 * x2 + y2 * x1));
+    return dp;
+}
 
 /// initialize visualizer
 void QGLVisualizer::init(){
@@ -181,6 +208,42 @@ void QGLVisualizer::init(){
     int shouldLoadCamera;
 
     configFile.FirstChildElement("LoadCamera")->QueryIntText(&shouldLoadCamera);
+    configFile.FirstChildElement("Animate")->QueryIntText(&shouldAnimate);
+
+    if(shouldAnimate == 1) {
+        int decimal;
+        configFile.FirstChildElement("AnimationYOffset")->QueryIntText(&decimal);
+        if(decimal != 0) {
+            animationYOffset = (float) decimal / 100.0;
+        }
+        tinyxml2::XMLDocument firstPoint, secondPoint, thirdPoint;
+        std::string path;
+        path = configFile.FirstChildElement( "CameraAnimPath1" )->GetText();
+        path += ".xml";
+        firstPoint.LoadFile(path.c_str());
+        path = configFile.FirstChildElement( "CameraAnimPath2" )->GetText();
+        path += ".xml";
+        secondPoint.LoadFile(path.c_str());
+        path = configFile.FirstChildElement( "CameraAnimPath3" )->GetText();
+        path += ".xml";
+        thirdPoint.LoadFile(path.c_str());
+
+        double x1,y1,z1,x2,z2,x3,z3;
+
+        x1 = firstPoint.FirstChildElement("Camera")->FirstChildElement("ManipulatedCameraFrame")->FirstChildElement("position")->DoubleAttribute("x");
+        y1 = firstPoint.FirstChildElement("Camera")->FirstChildElement("ManipulatedCameraFrame")->FirstChildElement("position")->DoubleAttribute("y");
+        z1 = firstPoint.FirstChildElement("Camera")->FirstChildElement("ManipulatedCameraFrame")->FirstChildElement("position")->DoubleAttribute("z");
+
+        x2 = secondPoint.FirstChildElement("Camera")->FirstChildElement("ManipulatedCameraFrame")->FirstChildElement("position")->DoubleAttribute("x");
+        z2 = secondPoint.FirstChildElement("Camera")->FirstChildElement("ManipulatedCameraFrame")->FirstChildElement("position")->DoubleAttribute("z");
+
+        x3 = thirdPoint.FirstChildElement("Camera")->FirstChildElement("ManipulatedCameraFrame")->FirstChildElement("position")->DoubleAttribute("x");
+        z3 = thirdPoint.FirstChildElement("Camera")->FirstChildElement("ManipulatedCameraFrame")->FirstChildElement("position")->DoubleAttribute("z");
+
+        dPoint point = CircleCenter(x1,z1,x2,z2,x3,z3);
+        this->animationCenter = Vec3(point.x, y1, point.y);
+        animationRay = sqrt(pow(x1-animationCenter.x(), 2.0) + pow(y1-animationCenter.y(), 2.0) + pow(z1-animationCenter.z(), 2.0));
+    }
 
     if(shouldLoadCamera == 1) {
         std::string path;
@@ -207,9 +270,9 @@ void QGLVisualizer::init(){
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Opens help window
+    // Opens help
     help();
-
+    setAnimationPeriod(1);
     startAnimation();
 }
 

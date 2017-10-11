@@ -138,6 +138,11 @@ private:
     Octree<mapping::Voxel> map;
     std::unordered_map<std::string, Eigen::Vector3i> updatedVoxels;
     std::vector<Mat33> uncertinatyErrors;
+    double angle = 0.0;
+    Vec3 animationCenter;
+    double animationRay;
+    int shouldAnimate;
+    float animationYOffset = 0.0;
 
     //pcl
     std::vector<mapping::PointCloud> pointClouds;
